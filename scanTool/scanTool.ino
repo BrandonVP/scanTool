@@ -38,6 +38,7 @@ SDCard sdCard;
 // BITMAP
 int dispx, dispy;
 
+//
 void bmpDraw(char *filename, int x, int y) {
   File     bmpFile;
   int      bmpWidth, bmpHeight;   // W+H in pixels
@@ -171,14 +172,12 @@ void bmpDraw(char *filename, int x, int y) {
 // These read 16- and 32-bit types from the SD card file.
 // BMP data is stored little-endian, Arduino is little-endian too.
 // May need to reverse subscript order if porting elsewhere.
-
 uint16_t read16(File f) {
     uint16_t result;
     ((uint8_t*)&result)[0] = f.read(); // LSB
     ((uint8_t*)&result)[1] = f.read(); // MSB
     return result;
 }
-
 uint32_t read32(File f) {
     uint32_t result;
     ((uint8_t*)&result)[0] = f.read(); // LSB
@@ -212,20 +211,33 @@ void print_icon(int x, int y, const unsigned char icon[]) {
     }
 }
 
-/***************************************************
-*  Draw Round/Square Button                        *
-*                                                  *
-*  Description:   Draws shapes with/without text   *
-*                                                  *
-*  Parameters: x start, y start, x stop, y stop    *
-*              String: Button text                 *
-*              Hex value: Background Color         *
-*              Hex value: Border of shape          *
-*              Hex value: Color of text            *
-*              int: Alignment of text #defined as  *
-*                   LEFT, CENTER, RIGHT            *
-*                                                  *
-***************************************************/
+void loadBar(int progress)
+{
+    if (progress == DONE)
+    {
+        myGLCD.setColor(menuBtnColor);
+        myGLCD.fillRect(200, 200, 400, 220);
+        return;
+    }
+    drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
+    myGLCD.setColor(menuBtnColor);
+    myGLCD.fillRect(200, 200, (200 + (progress * 40)), 220);
+}
+
+/*****************************************************
+*  Draw Round/Square Button                          *
+*                                                    *
+*  Description:   Draws shapes with/without text     *
+*                                                    *
+*  Parameters: int: x start, y start, x stop, y stop *
+*              String: Button text                   *
+*              Hex value: Background Color           *
+*              Hex value: Border of shape            *
+*              Hex value: Color of text              *
+*              int: Alignment of text #defined as    *
+*                   LEFT, CENTER, RIGHT              *
+*                                                    *
+*****************************************************/
 void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
     int size, temp, offset;
 
@@ -300,7 +312,7 @@ void drawPIDSCAN()
     drawSquareBtn(141, 80, 479, 100, "Scan supported PIDs", themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(141, 105, 479, 125, "to SD Card", themeBackground, themeBackground, menuBtnColor, CENTER);
     drawRoundBtn(200, 135, 400, 185, "Start Scan", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    return;
+        return;
 }
 
 // Buttons for PID scan page
@@ -333,30 +345,42 @@ void PIDSCAN()
 void startPIDSCAN()
 {
     byte test[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    byte test1[8] = { 0x02, 0x09, 0x02, 0x55, 0x55, 0x55, 0x55, 0x55 };
+    byte test2[8] = { 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    uint16_t txidVIN = 0x7E0;
     uint16_t txid = 0x7DF;
     uint16_t rxid = 0x7E8;
+
+    can1.sendFrame(txidVIN, test1);
+    delay(10);
+    can1.sendFrame(txidVIN, test2);
+    delay(10);
+    can1.findVIN(rxid);
+    int status = 1;
     bool waiting = true;
     bool hasNext = true;
-
+    sdCard.writeFileln(can1.getFullDir());
+    loadBar(status);
     while (hasNext)
     {
-        can1.sendData(txid, test);
+        can1.sendFrame(txid, test);
         waiting = true;
         while (waiting)
         {
-            waiting = can1.recordCAN(rxid);
-            Serial.println(waiting);
+            waiting = can1.getFrame(rxid);
+            //Serial.println(waiting);
         }
-
+        status++;
+        loadBar(status);
         delay(1000);
         test[2] = test[2] + 0x20;
         hasNext = can1.getNextPID();
-        Serial.print("Next Msg: ");
-        Serial.println(test[2]);
-        Serial.print("Bool Value: ");
-        Serial.println(hasNext);
+        //Serial.print("Next Msg: ");
+        //Serial.println(test[2]);
+        //Serial.print("Bool Value: ");
+        //Serial.println(hasNext);
     }
-
+    loadBar(DONE);
     test[2] = 0x00;
 }
 
@@ -396,6 +420,7 @@ void drawProgram(int scroll = 0)
     drawRoundBtn(150, 275, 400, 315, "Stream PID", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
+//
 void program()
 {
     static int scroll = 0;
@@ -465,43 +490,9 @@ void drawMenu()
     drawRoundBtn(10, 250, 130, 305, "TRAFFIC", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-    Serial.begin(115200);
-
-    can1.startCAN();
-    bool hasFailed = sdCard.startSD();
-    if (!hasFailed)
-    {
-        Serial.println("SD failed");
-    }
-    else if (hasFailed)
-    {
-        Serial.println("SD Running");
-    }
-
-    myGLCD.InitLCD();
-    myGLCD.clrScr();
-
-    myTouch.InitTouch();
-    myTouch.setPrecision(PREC_MEDIUM);
-
-    myGLCD.setFont(BigFont);
-    myGLCD.setBackColor(0, 0, 255);
-
-    dispx = myGLCD.getDisplayXSize();
-    dispy = myGLCD.getDisplayYSize();
-
-    drawMenu();
-    bmpDraw("HYPER.bmp", 0, 0);
-}
-
+//
 void pageControl(int page, bool value = false)
 {
-    byte test[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    uint16_t txid = 0x7DF;
-    uint16_t rxid = 0x7E8;
-    uint8_t hasNext = 0x01;
     bool waiting = true;
 
     static bool hasDrawn;
@@ -536,7 +527,7 @@ void pageControl(int page, bool value = false)
         case 3:
             if (!hasDrawn)
             {
-                drawProgram();
+                //drawProgram();
                 hasDrawn = true;
             }
             program();
@@ -544,6 +535,7 @@ void pageControl(int page, bool value = false)
         case 4:
             if (!hasDrawn)
             {
+
                 hasDrawn = true;
             }
             // Call buttons if any
@@ -552,7 +544,7 @@ void pageControl(int page, bool value = false)
         case 5:
             if (!hasDrawn)
             {
-                sdCard.readFile("PIDSCAN.txt");
+
                 hasDrawn = true;
             }
             // Call buttons if any
@@ -561,6 +553,7 @@ void pageControl(int page, bool value = false)
     }
 }
 
+//
 void menu()
 {
     while (true)
@@ -646,6 +639,41 @@ void menu()
         return;
     }
 }
+
+
+
+// the setup function runs once when you press reset or power the board
+void setup() {
+    Serial.begin(115200);
+
+    can1.startCAN();
+    bool hasFailed = sdCard.startSD();
+    if (!hasFailed)
+    {
+        Serial.println("SD failed");
+    }
+    else if (hasFailed)
+    {
+        Serial.println("SD Running");
+    }
+
+    myGLCD.InitLCD();
+    myGLCD.clrScr();
+
+    myTouch.InitTouch();
+    myTouch.setPrecision(PREC_MEDIUM);
+
+    myGLCD.setFont(BigFont);
+    myGLCD.setBackColor(0, 0, 255);
+
+    dispx = myGLCD.getDisplayXSize();
+    dispy = myGLCD.getDisplayYSize();
+
+    drawMenu();
+    bmpDraw("HYPER.bmp", 0, 0);
+}
+
+
 
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop() {

@@ -20,7 +20,7 @@ bool SDCard::startSD()
     return true;
 }
 
-void SDCard::writeFile(String filename, String incoming)
+void SDCard::writeFile(char* filename, String incoming)
 {
     // File created and opened for writing
     myFile = SD.open(filename, FILE_WRITE);
@@ -34,7 +34,7 @@ void SDCard::writeFile(String filename, String incoming)
     return;
 }
 
-void SDCard::writeFile(String filename, int incoming)
+void SDCard::writeFile(char* filename, int incoming, int base)
 {
     // File created and opened for writing
     myFile = SD.open(filename, FILE_WRITE);
@@ -42,13 +42,14 @@ void SDCard::writeFile(String filename, int incoming)
     // Check if file was sucsefully open
     if (myFile)      
     {
-        myFile.print(incoming);
+        myFile.print(incoming, base);
         myFile.close();
     }
     return;
 }
 
-void SDCard::writeFile(String filename, uint8_t incoming, int base)
+/*
+void SDCard::writeFile(char* filename, int incoming, int base)
 {
     // File created and opened for writing
     myFile = SD.open(filename, FILE_WRITE);
@@ -61,8 +62,9 @@ void SDCard::writeFile(String filename, uint8_t incoming, int base)
     }
     return;
 }
+*/
 
-void SDCard::writeFileln(String filename)
+void SDCard::writeFileln(char* filename)
 {
     // File created and opened for writing
     myFile = SD.open(filename, FILE_WRITE);
@@ -76,7 +78,7 @@ void SDCard::writeFileln(String filename)
     return;
 }
 
-void SDCard::deleteFile(String filename)
+void SDCard::deleteFile(char* filename)
 {
     //remove any existing file with this name
     SD.remove(filename); 
@@ -100,11 +102,15 @@ size_t SDCard::readField(File* file, char* str, size_t size, const char* delim) 
     return n;
 }
 
-
+void SDCard::createDRIVE(char* foldername)
+{
+    SD.mkdir(foldername);
+    Serial.println(foldername);
+}
 
 
 // Modified SdFat library code to read field in text file from sd
-void SDCard::readFile(String filename)
+void SDCard::readFile(char* filename)
 {
     // File created and opened for writing
     myFile = SD.open("PIDSCAN.txt", FILE_READ);
