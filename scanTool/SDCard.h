@@ -19,13 +19,12 @@ class SDCard
  public:
 	bool startSD();
 	void createDRIVE(char*);
-	void readFile(char*);
+	uint8_t* readFile(char* filename, uint8_t* arrayIn);
 	void writeFile(char*, int, int);
 	void writeFile(char*, String);
 	void writeFileln(char*);
 	void deleteFile(char*);
 	size_t readField(File*, char*, size_t, const char*);
 };
-
 #endif
 

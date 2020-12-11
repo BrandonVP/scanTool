@@ -17,7 +17,7 @@ private:
 	SDCard SDPrint;
 	typedef byte test[8];
 	bool hasNextPID;
-	uint16_t rxID = 0x00;
+	//uint16_t rxID = 0x00;
 	char VIN[18];
 	String vehicleVIN;
 	char fullDir[20];
@@ -41,16 +41,16 @@ private:
  public:
 
 	CANBus();
-	bool getFrame(uint16_t);
+	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
 	void getMessage(test&, int&);
 	void sendFrame(uint16_t, byte*);
 	void startCAN();
-	void findVIN(uint16_t);
+	void requestVIN(uint16_t, char*);
 	char* getFullDir();
+	void CANTraffic();
 	String getVIN();
-	uint16_t getrxID();
 };
 #endif
 

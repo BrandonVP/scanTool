@@ -21,9 +21,10 @@ UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
 //RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
 UTouch  myTouch(2, 6, 3, 4, 5);
 
-
 // For touch controls
 int x, y;
+
+uint8_t controlPage = 1;
 
 // External import for fonts
 // extern uint8_t SmallFont[];
@@ -35,9 +36,17 @@ CANBus can1;
 // Object to control SD Card Hardware
 SDCard sdCard;
 
-// BITMAP
+// BITMAP global for bmpDraw()
 int dispx, dispy;
 
+// Used for PID scroll function
+char currentDir[20];
+uint8_t arrayIn[100];
+bool hasPID = false;
+
+/*=========================================================
+    Framework Functions
+===========================================================*/
 //
 void bmpDraw(char *filename, int x, int y) {
   File     bmpFile;
@@ -211,9 +220,10 @@ void print_icon(int x, int y, const unsigned char icon[]) {
     }
 }
 
+// Function complete load bar
 void loadBar(int progress)
 {
-    if (progress == DONE)
+    if (progress >= DONE)
     {
         myGLCD.setColor(menuBtnColor);
         myGLCD.fillRect(200, 200, 400, 220);
@@ -221,7 +231,7 @@ void loadBar(int progress)
     }
     drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
     myGLCD.setColor(menuBtnColor);
-    myGLCD.fillRect(200, 200, (200 + (progress * 40)), 220);
+    myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
 }
 
 /*****************************************************
@@ -304,7 +314,20 @@ void waitForIt(int x1, int y1, int x2, int y2)
     myGLCD.setColor(menuBtnBorder);
     myGLCD.drawRoundRect(x1, y1, x2, y2);
 }
+void waitForItRect(int x1, int y1, int x2, int y2)
+{
+    myGLCD.setColor(themeBackground);
+    myGLCD.drawRect(x1, y1, x2, y2);
+    while (myTouch.dataAvailable())
+        myTouch.read();
+    myGLCD.setColor(menuBtnBorder);
+    myGLCD.drawRect(x1, y1, x2, y2);
+}
 
+
+/*=========================================================
+    PID Scan Functions
+===========================================================*/
 // Draw the PID scan page
 void drawPIDSCAN()
 {
@@ -344,70 +367,82 @@ void PIDSCAN()
 // Function starts the PID scan
 void startPIDSCAN()
 {
+    bool waiting = true;
+    bool hasNext = true;
+    uint8_t status = 1;
+    uint8_t bank = 0;
+    uint16_t txid = 0x7DF;
+    uint16_t rxid = 0x7E8;
     byte test[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     byte test1[8] = { 0x02, 0x09, 0x02, 0x55, 0x55, 0x55, 0x55, 0x55 };
     byte test2[8] = { 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    uint16_t txidVIN = 0x7E0;
-    uint16_t txid = 0x7DF;
-    uint16_t rxid = 0x7E8;
+    uint8_t range = 0x00;
 
-    can1.sendFrame(txidVIN, test1);
-    delay(10);
-    can1.sendFrame(txidVIN, test2);
-    delay(10);
-    can1.findVIN(rxid);
-    int status = 1;
-    bool waiting = true;
-    bool hasNext = true;
-    sdCard.writeFileln(can1.getFullDir());
     loadBar(status);
+    can1.requestVIN(rxid, currentDir);
+
+    //loadBar(status++);
+    //sdCard.writeFileln(can1.getFullDir());
+
+    loadBar(status++);
     while (hasNext)
     {
-        can1.sendFrame(txid, test);
-        waiting = true;
-        while (waiting)
-        {
-            waiting = can1.getFrame(rxid);
-            //Serial.println(waiting);
-        }
-        status++;
-        loadBar(status);
-        delay(1000);
-        test[2] = test[2] + 0x20;
+        can1.getPIDList(range, bank);
+        loadBar(status++);
+        delay(500);
+        range = range + 0x20;
+        bank++;
         hasNext = can1.getNextPID();
-        //Serial.print("Next Msg: ");
-        //Serial.println(test[2]);
-        //Serial.print("Bool Value: ");
-        //Serial.println(hasNext);
     }
     loadBar(DONE);
-    test[2] = 0x00;
+    hasPID = true;
+    return;
 }
 
+
+/*=========================================================
+    Home Functions
+===========================================================*/
 // Draw the view page
 void drawHome()
 {
-    drawSquareBtn(150, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawSquareBtn(150, 300, 479, 319, "Scan Tool Ver. 1.1", themeBackground, themeBackground, menuBtnColor, CENTER);
-    
-
-
 }
 
+
+/*=========================================================
+    PID Stream Functions
+===========================================================*/
 // Function to print and scroll an array list
 void drawProgramScroll(int scroll)
 {
+    // Temp to hold PIDS value before strcat
+    char temp[2];
+
     // Starting y location for list
     int y = 60;
+
+    // Draw the scroll window
     for (int i = 0; i < MAXSCROLL; i++)
     {
-        drawSquareBtn(150, y, 410, y + 35, PIDS[scroll], menuBackground, menuBtnBorder, menuBtnText, LEFT);
+        char intOut[4] = "0x";
+        itoa(arrayIn[scroll+1], temp, 16);
+        strcat(intOut, temp);
+        if (scroll < sizeof(arrayIn) && arrayIn[scroll+1] > 0)
+        {
+            drawSquareBtn(150, y, 410, y + 35, intOut, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+        }
+        else
+        {
+            drawSquareBtn(150, y, 410, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
+        }
         y = y + 35;
         scroll++;
     }
 }
 
-//
+// Draw the program page
 void drawProgram(int scroll = 0)
 {
     drawSquareBtn(141, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
@@ -420,61 +455,107 @@ void drawProgram(int scroll = 0)
     drawRoundBtn(150, 275, 400, 315, "Stream PID", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-//
+// Button function for the program page
 void program()
 {
-    static int scroll = 0;
-
-    while (true)
+static int scroll = 0;
+    // Touch screen controls
+    if (myTouch.dataAvailable())
     {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
 
-        // Touch screen controls
-        if (myTouch.dataAvailable())
+        if ((x >= 150) && (x <= 410))
         {
-            myTouch.read();
-            x = myTouch.getX();
-            y = myTouch.getY();
-
-            if ((x >= 420) && (x <= 470))
+            if ((y >= 60) && (y <= 95))
             {
-                if ((y >= 100) && (y <= 150))
-                {
-                    waitForIt(420, 100, 470, 150);
-                    if (scroll > 0)
-                    {
-                        scroll = scroll - 6;
-                        drawProgramScroll(scroll);
-                    }
-                }
+                waitForItRect(150, 60, 410, 95);
+                Serial.println(1 + scroll);
             }
-            if ((x >= 420) && (x <= 470))
+            if ((y >= 95) && (y <= 130))
             {
-                if ((y >= 150) && (y <= 200))
+                waitForItRect(150, 95, 410, 130);
+                Serial.println(2 + scroll);
+            }
+            if ((y >= 130) && (y <= 165))
+            {
+                waitForItRect(150, 130, 410, 165);
+                Serial.println(3 + scroll);
+            }
+            if ((y >= 165) && (y <= 200))
+            {
+                waitForItRect(150, 165, 410, 200);
+                Serial.println(4 + scroll);
+            }
+            if ((y >= 200) && (y <= 235))
+            {
+                waitForItRect(150, 200, 410, 235);
+                Serial.println(5 + scroll);
+            }
+            if ((y >= 235) && (y <= 270))
+            {
+                waitForItRect(150, 235, 410, 270);
+                Serial.println(6 + scroll);
+            }
+        }
+        if ((x >= 420) && (x <= 470))
+        {
+            if ((y >= 100) && (y <= 150))
+            {
+                waitForItRect(420, 100, 470, 150);
+                if (scroll > 0)
                 {
-                    waitForIt(420, 150, 470, 200);
-                    if (scroll < 89)
-                    {
-                        scroll = scroll + 6;
-                        drawProgramScroll(scroll);
-                    }
+                    scroll = scroll - 6;
+                    drawProgramScroll(scroll);
                 }
             }
         }
-        return;
+        if ((x >= 420) && (x <= 470))
+        {
+            if ((y >= 150) && (y <= 200))
+            {
+                waitForItRect(420, 150, 470, 200);
+                if (scroll < 100)
+                {
+                    scroll = scroll + 6;
+                    drawProgramScroll(scroll);
+                }
+            }
+        }
     }
+    return;
 }
 
-// Draw the config page
-void drawConfig()
-{
-    drawSquareBtn(141, 1, 478, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    print_icon(435, 5, robotarm);
 
-    drawRoundBtn(180, 60, 360, 100, "Settings", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+/*=========================================================
+    Monitor CAN traffic
+===========================================================*/
+// Draw the config page
+void drawTraffic()
+{
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 140, 479, 160, "View CAN on serial", themeBackground, themeBackground, menuBtnColor, CENTER);
+    return;
+}
+
+
+/*=========================================================
+    Unused function
+===========================================================*/
+// Draw the send message page
+void drawSendMSG()
+{
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    //drawSquareBtn(145, 140, 479, 160, "Spare function", themeBackground, themeBackground, menuBtnColor, CENTER);
 
     return;
 }
 
+
+/*=========================================================
+    Framework Functions
+===========================================================*/
 //Only called once at startup to draw the menu
 void drawMenu()
 {
@@ -490,9 +571,10 @@ void drawMenu()
     drawRoundBtn(10, 250, 130, 305, "TRAFFIC", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-//
-void pageControl(int page, bool value = false)
+//Manages the different App pages
+int pageControl(uint8_t page, bool value = false)
 {
+    
     bool waiting = true;
 
     static bool hasDrawn;
@@ -512,6 +594,7 @@ void pageControl(int page, bool value = false)
             {
                 drawHome();
                 hasDrawn = true;
+                controlPage = page;
             }
             // Call buttons if any
             break;
@@ -520,6 +603,7 @@ void pageControl(int page, bool value = false)
             {
                 drawPIDSCAN();
                 hasDrawn = true;
+                controlPage = page;
             }
             // Call buttons if any
             PIDSCAN();
@@ -527,16 +611,36 @@ void pageControl(int page, bool value = false)
         case 3:
             if (!hasDrawn)
             {
-                //drawProgram();
-                hasDrawn = true;
+                if (hasPID == true)
+                {
+                    sdCard.readFile(can1.getFullDir(), arrayIn);
+                    drawProgram();
+                    hasDrawn = true;
+                    controlPage = page;
+                }
+                else
+                {
+                    errorMSG("error", "Please Scan", "PIDS first");
+                    hasDrawn = true;
+                }
+                
             }
-            program();
+            // Call buttons if any
+            if (hasPID == true)
+            {
+                program();
+            }
+            else
+            {
+                errorMSGBtn(page);
+            }
             break;
         case 4:
             if (!hasDrawn)
             {
-
+                drawSendMSG();
                 hasDrawn = true;
+                controlPage = page;
             }
             // Call buttons if any
 
@@ -544,16 +648,48 @@ void pageControl(int page, bool value = false)
         case 5:
             if (!hasDrawn)
             {
-
+                drawTraffic();
                 hasDrawn = true;
+                controlPage = page;
             }
             // Call buttons if any
+            can1.CANTraffic();
             break;
         }
     }
 }
 
-//
+// Error Message function
+void errorMSG(String title, String eMessage1, String eMessage2)
+{
+    drawSquareBtn(170, 140, 450, 240, "", menuBackground, menuBtnColor, menuBtnColor, CENTER);
+    drawSquareBtn(170, 140, 450, 170, title, themeBackground, menuBtnColor, menuBtnBorder, LEFT);
+    drawSquareBtn(171, 171, 449, 204, eMessage1, menuBackground, menuBackground, menuBtnText, CENTER);
+    drawSquareBtn(171, 205, 449, 239, eMessage2, menuBackground, menuBackground, menuBtnText, CENTER);
+    drawRoundBtn(400, 140, 450, 170, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
+}
+
+uint8_t errorMSGBtn(uint8_t page)
+{
+    // Touch screen controls
+    if (myTouch.dataAvailable())
+    {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
+
+        if ((x >= 400) && (x <= 450))
+        {
+            if ((y >= 140) && (y <= 170))
+            {
+                waitForItRect(400, 140, 450, 170);
+                pageControl(controlPage);
+            }
+        }
+    }
+}
+
+// Button functions for main menu
 void menu()
 {
     while (true)
@@ -640,8 +776,6 @@ void menu()
     }
 }
 
-
-
 // the setup function runs once when you press reset or power the board
 void setup() {
     Serial.begin(115200);
@@ -657,6 +791,7 @@ void setup() {
         Serial.println("SD Running");
     }
 
+    // LCD  and touch screen settings
     myGLCD.InitLCD();
     myGLCD.clrScr();
 
@@ -669,15 +804,16 @@ void setup() {
     dispx = myGLCD.getDisplayXSize();
     dispy = myGLCD.getDisplayYSize();
 
+    // Draw the main menu
     drawMenu();
+
+    // Draw the Hypertech logo
     bmpDraw("HYPER.bmp", 0, 0);
 }
 
-
-
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop() {
-
-    pageControl(1);
+    
+    controlPage = pageControl(controlPage);
 
 }

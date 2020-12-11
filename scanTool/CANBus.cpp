@@ -3,28 +3,29 @@
 #include "CANBus.h"
 #include <due_can.h>
 #include "variant.h"
-//#include "definitions.h"
 
-// Checks single bit of binary number
+// Checks a single bit of binary number
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define PIDLIST "LOG.txt"
+#define VINLOG "LOG.txt"
 #define PIDS "PIDS.txt"
 
+// Constructor
 CANBus::CANBus()
 {
 
 }
 
+// Initialize CAN1 and set the proper baud rates here
 void CANBus::startCAN()
 {
-    // Initialize CAN1 and set the proper baud rates here
+    
     Can0.begin(CAN_BPS_500K);
     Can0.watchForRange(0x7E0, 0x7EF);
     return;
 }
 
-// CAN Bus send message
+// CAN Bus send message method
 void CANBus::sendFrame(uint16_t id, byte* frame)
 {
     // Create message object
@@ -49,120 +50,104 @@ void CANBus::sendFrame(uint16_t id, byte* frame)
     sending.data.byte[6] = frame[6];
     sending.data.byte[7] = frame[7];
 
-    // Send object out
-    /*
-    SDPrint.writeFile(PIDLIST, "TX ID: ");
-    SDPrint.writeFile(PIDLIST, sending.id);
-    SDPrint.writeFile(PIDLIST, " MSG: ");
-    for (int count = 0; count < sending.length; count++)
-    {
-        SDPrint.writeFile(PIDLIST, sending.data.bytes[count], HEX);
-        SDPrint.writeFile(PIDLIST, " ");
-    }
-    SDPrint.writeFileln(PIDLIST);
-    */
     Can0.sendFrame(sending);
     return;
 }
 
 // Method used for CAN recording
-bool CANBus::getFrame(uint16_t IDFilter)
+void CANBus::getPIDList(uint8_t range, uint8_t bank)
 {
     // Create object to save message
     CAN_FRAME incoming;
 
-    // If buffer inbox has a message
-    if (Can0.available() > 0) {
-        Can0.read(incoming);
-        if (incoming.id == IDFilter)
-        {   
-            rxID = incoming.id;
-            SDPrint.writeFile(fullDir, "RX ID: ");
-            SDPrint.writeFile(fullDir, incoming.id, HEX);
-            SDPrint.writeFile(fullDir, " MSG: ");
-            for (int count = 0; count < incoming.length; count++) 
-            {
-                SDPrint.writeFile(fullDir, incoming.data.bytes[count], HEX);
-                SDPrint.writeFile(fullDir, " ");
-            }
-            SDPrint.writeFileln(fullDir);
-            bool hasNext = CHECK_BIT(incoming.data.byte[6], 0);
-            setNextPID(hasNext);
-            int pos = 0;
-            int bank = 0;
-            for (int i = 3; i < 7; i++)
-            {
-                for (int j = 7; j >= 0; j--)
-                {
-                    if (CHECK_BIT(incoming.data.bytes[i], j))
-                    {
-                        SDPrint.writeFile(PIDDir, "0x");
-                        SDPrint.writeFile(PIDDir, PID_bank[bank][pos], HEX);
-                        SDPrint.writeFileln(PIDDir);
-                    }
-                    pos++;
-                }
-            }
-
-            return false;
-        }
-    }
-    return true;
-}
-
-//void CANBus::VIN()
-//{
-//
-//}
-
-void CANBus::findVIN(uint16_t IDFilter)
-{
-    // Create object to save message
-    CAN_FRAME incoming;
+    // Boolean to control recieve message while loop
     bool isWait = true;
-    memset(fullDir, 0, sizeof(fullDir));
 
-    // If buffer inbox has a message
-    if (Can0.available() > 0) {
-        Can0.read(incoming);
-        while(isWait)
-        { 
+    // Tx and Rx Ids
+    uint16_t txid = 0x7DF;
+    uint16_t IDFilter = 0x7E8;
+
+    // Message used to requrest range of PIDS
+    byte requestVIN[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    requestVIN[2] = range;
+
+    sendFrame(txid, requestVIN);
+    while (isWait)
+    {
+        if (Can0.available() > 0) {
+            Can0.read(incoming);
             if (incoming.id == IDFilter)
             {
-                rxID = incoming.id;
-                SDPrint.writeFile(PIDLIST, "RX ID: ");
-                SDPrint.writeFile(PIDLIST, incoming.id, HEX);
-                SDPrint.writeFile(PIDLIST, " MSG: ");
+                // End loop since message was recieved
+                isWait = false;
+
+                // Log PID message
+                SDPrint.writeFile(fullDir, "RX ID: ");
+                SDPrint.writeFile(fullDir, incoming.id, HEX);
+                SDPrint.writeFile(fullDir, " MSG: ");
                 for (int count = 0; count < incoming.length; count++)
                 {
-                    SDPrint.writeFile(PIDLIST, incoming.data.bytes[count], HEX);
-                    SDPrint.writeFile(PIDLIST, " ");
+                    SDPrint.writeFile(fullDir, incoming.data.bytes[count], HEX);
+                    SDPrint.writeFile(fullDir, " ");
                 }
-                SDPrint.writeFileln(PIDLIST);
+                SDPrint.writeFileln(fullDir);
+
+                // Check to see if the vehicle supports more PIDS
+                setNextPID(CHECK_BIT(incoming.data.byte[6], 0));
+
+                // Write the values from the bank if the Corresponding bit matches
+                int pos = 0;
+                for (int i = 3; i < 7; i++)
+                {
+                    for (int j = 7; j >= 0; j--)
+                    {
+                        if (CHECK_BIT(incoming.data.bytes[i], j))
+                        {
+                            SDPrint.writeFile(PIDDir, "0x");
+                            SDPrint.writeFile(PIDDir, PID_bank[bank][pos], HEX);
+                            SDPrint.writeFileln(PIDDir);
+                        }
+                        pos++;
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
+void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
+{
+    // Create object to save message
+    CAN_FRAME incoming;
+
+    // Frames to request VIN
+    unsigned char ReadVIN1st[8] = { 0x02, 0x09, 0x02, 0x55, 0x55, 0x55, 0x55, 0x55 };
+    unsigned char ReadVIN_2nd[8] = { 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    // Send ID
+    uint16_t txidVIN = 0x7E0;
+
+    // Waits to recieve all messages
+    bool isWait = true;
+
+    // Send first frame requesting VIN
+    sendFrame(txidVIN, ReadVIN1st);
+    while (isWait)
+    {
+        if (Can0.available() > 0) {
+            Can0.read(incoming);
+            if ((incoming.id == IDFilter) && (incoming.data.bytes[0] == 0x10))
+            {
                 VIN[0] = incoming.data.bytes[5];
                 VIN[1] = incoming.data.bytes[6];
                 VIN[2] = incoming.data.bytes[7];
-                isWait = false;
+
+                // Send second frame to continue VIN request
+                sendFrame(txidVIN, ReadVIN_2nd);
             }
-        }
-    }
-    isWait = true;
-    if (Can0.available() > 0) {
-        Can0.read(incoming);
-        while (isWait)
-        {
-            if (incoming.id == IDFilter)
+            if ((incoming.id == IDFilter) && (incoming.data.bytes[0] == 0x21))
             {
-                rxID = incoming.id;
-                SDPrint.writeFile(PIDLIST, "RX ID: ");
-                SDPrint.writeFile(PIDLIST, incoming.id, HEX);
-                SDPrint.writeFile(PIDLIST, " MSG: ");
-                for (int count = 0; count < incoming.length; count++)
-                {
-                    SDPrint.writeFile(PIDLIST, incoming.data.bytes[count], HEX);
-                    SDPrint.writeFile(PIDLIST, " ");
-                }
-                SDPrint.writeFileln(PIDLIST);
                 VIN[3] = incoming.data.bytes[1];
                 VIN[4] = incoming.data.bytes[2];
                 VIN[5] = incoming.data.bytes[3];
@@ -171,27 +156,8 @@ void CANBus::findVIN(uint16_t IDFilter)
                 VIN[8] = incoming.data.bytes[6];
                 VIN[9] = incoming.data.bytes[7];
             }
-            isWait = false;
-        }
-
-    }
-    isWait = true;
-    if (Can0.available() > 0) {
-        Can0.read(incoming);
-        while (isWait)
-        {
-            if (incoming.id == IDFilter)
+            if ((incoming.id == IDFilter) && (incoming.data.bytes[0] == 0x22))
             {
-                rxID = incoming.id;
-                SDPrint.writeFile(PIDLIST, "RX ID: ");
-                SDPrint.writeFile(PIDLIST, incoming.id, HEX);
-                SDPrint.writeFile(PIDLIST, " MSG: ");
-                for (int count = 0; count < incoming.length; count++)
-                {
-                    SDPrint.writeFile(PIDLIST, incoming.data.bytes[count], HEX);
-                    SDPrint.writeFile(PIDLIST, " ");
-                }
-                SDPrint.writeFileln(PIDLIST);
                 VIN[10] = incoming.data.bytes[1];
                 VIN[11] = incoming.data.bytes[2];
                 VIN[12] = incoming.data.bytes[3];
@@ -199,43 +165,46 @@ void CANBus::findVIN(uint16_t IDFilter)
                 VIN[14] = incoming.data.bytes[5];
                 VIN[15] = incoming.data.bytes[6];
                 VIN[16] = incoming.data.bytes[7];
-
+                isWait = false;
             }
-            isWait = false;
         }
+
     }
+
+    // Create directory paths
     uint8_t j = 0;
     for (uint8_t i = 9; i < 17; i++)
     {
-        fullDir[j] = VIN[i]; 
+        fullDir[j] = VIN[i];
         PIDDir[j] = VIN[i];
         j++;
     }
     fullDir[8] = '/';
     PIDDir[8] = '/';
+    Serial.println(fullDir);
     SDPrint.createDRIVE(fullDir);
     strcat(PIDDir, PIDS);
-    strcat(fullDir, PIDLIST); 
+    strcat(fullDir, VINLOG);
+
+    // Write VIN to log
     Serial.println(fullDir);
     SDPrint.writeFile(fullDir, "VIN: ");
     SDPrint.writeFile(fullDir, VIN);
-    SDPrint.writeFile(PIDDir, "VIN: ");
-    SDPrint.writeFile(PIDDir, VIN);
-    SDPrint.writeFileln(PIDDir);
-    SDPrint.writeFile(PIDDir, "Supported PIDS");
-    SDPrint.writeFileln(PIDDir);
-    return;
+    SDPrint.writeFileln(fullDir);
 }
 
+// Future function
 String CANBus::getVIN()
 {
     return vehicleVIN;
 }
 
+// Future function
 char* CANBus::getFullDir()
 {
-    return fullDir;
+    return PIDDir;
 }
+
 
 void CANBus::setNextPID(bool next)
 {
@@ -254,45 +223,25 @@ void CANBus::getMessage(test& a, int& b)
     if (Can0.available() > 0) {
         Can0.read(incoming);
         b = incoming.id;
-
         for (int count = 0; count < incoming.length; count++) {
             a[count] = incoming.data.bytes[count];
         }
-
     }
 }
 
-uint16_t CANBus::getrxID()
-{
-    return rxID;
-}
-//MOVE TO METHODS
-/*
-CAN_FRAME incoming;
-static unsigned long lastTime = 0;
-
-if (Can0.available() > 0) {
-    Can0.read(incoming);
-    test = incoming.data.byte[0];
-    sendData(test);
-
-
-    SD.begin(CSPIN);        //SD Card is initialized
-    //SD.remove("Test2.txt"); //remove any existing file with this name
-    myFile = SD.open("Test2.txt", FILE_WRITE);  //file created and opened for writing
-
-    if (myFile)        //file has really been opened
-    {
-        myFile.print("ID: ");
-        myFile.print(incoming.id);
-        myFile.print(" MSG:");
+void CANBus::CANTraffic() {
+    CAN_FRAME incoming;
+    if (Can0.available() > 0) {
+        Can0.read(incoming);
+        Serial.print("ID: 0x");
+        Serial.print(incoming.id, HEX);
+        Serial.print(" Len: ");
+        Serial.print(incoming.length);
+        Serial.print(" Data: 0x");
         for (int count = 0; count < incoming.length; count++) {
-            myFile.print(incoming.data.bytes[count], HEX);
-            myFile.print(" ");
+            Serial.print(incoming.data.bytes[count], HEX);
+            Serial.print(" ");
         }
-        myFile.println();
-        myFile.close();
-
+        Serial.print("\r\n");
     }
 }
-*/
