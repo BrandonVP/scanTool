@@ -20,8 +20,8 @@ private:
 	//uint16_t rxID = 0x00;
 	char VIN[18];
 	String vehicleVIN;
-	char fullDir[20];
-	char PIDDir[20];
+	char fullDir[17];
+	char PIDDir[17];
 	
 	uint8_t PID_bank[0x06][0x20] = {
 		{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
@@ -50,6 +50,7 @@ private:
 	void requestVIN(uint16_t, char*);
 	char* getFullDir();
 	void CANTraffic();
+	void PIDStream(uint16_t, uint8_t);
 	String getVIN();
 };
 #endif

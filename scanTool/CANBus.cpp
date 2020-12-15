@@ -3,12 +3,13 @@
 #include "CANBus.h"
 #include <due_can.h>
 #include "variant.h"
+#include "PIDS.h"
 
 // Checks a single bit of binary number
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-#define VINLOG "LOG.txt"
-#define PIDS "PIDS.txt"
+char VINLOG[7] = { 'L', 'O', 'G', '.', 't', 'x', 't' };
+char PID[7] = { 'P', 'I', 'D', '.', 't', 'x', 't' };
 
 // Constructor
 CANBus::CANBus()
@@ -70,7 +71,6 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
     // Message used to requrest range of PIDS
     byte requestVIN[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     requestVIN[2] = range;
-
     sendFrame(txid, requestVIN);
     while (isWait)
     {
@@ -116,14 +116,18 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
     return;
 }
 
+
 void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
 {
     // Create object to save message
     CAN_FRAME incoming;
 
+    // Dir temp
+    char temp[20];
+
     // Frames to request VIN
-    unsigned char ReadVIN1st[8] = { 0x02, 0x09, 0x02, 0x55, 0x55, 0x55, 0x55, 0x55 };
-    unsigned char ReadVIN_2nd[8] = { 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    uint8_t ReadVIN1st[8] = { 0x02, 0x09, 0x02, 0x55, 0x55, 0x55, 0x55, 0x55 };
+    uint8_t ReadVIN_2nd[8] = { 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
     // Send ID
     uint16_t txidVIN = 0x7E0;
@@ -170,7 +174,7 @@ void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
         }
 
     }
-
+    
     // Create directory paths
     uint8_t j = 0;
     for (uint8_t i = 9; i < 17; i++)
@@ -182,15 +186,29 @@ void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
     fullDir[8] = '/';
     PIDDir[8] = '/';
     Serial.println(fullDir);
+    Serial.println(PIDDir);
     SDPrint.createDRIVE(fullDir);
-    strcat(PIDDir, PIDS);
-    strcat(fullDir, VINLOG);
+    
+    j = 0;
+    for (uint8_t i = 9; i < 16; i++)
+    {
+        PIDDir[i] = PID[j];
+        j++;
+    }
+    Serial.println(PIDDir);
+    j = 0;
+    for (uint8_t i = 9; i < 16; i++)
+    {
+        fullDir[i] = VINLOG[j];
+        j++;
+    }
+    Serial.println(fullDir);
 
     // Write VIN to log
-    Serial.println(fullDir);
     SDPrint.writeFile(fullDir, "VIN: ");
     SDPrint.writeFile(fullDir, VIN);
     SDPrint.writeFileln(fullDir);
+    SDPrint.deleteFile(PIDDir);
 }
 
 // Future function
@@ -211,6 +229,7 @@ void CANBus::setNextPID(bool next)
     hasNextPID = next;
 }
 
+
 bool CANBus::getNextPID()
 {
     return hasNextPID;
@@ -229,6 +248,7 @@ void CANBus::getMessage(test& a, int& b)
     }
 }
 
+
 void CANBus::CANTraffic() {
     CAN_FRAME incoming;
     if (Can0.available() > 0) {
@@ -243,5 +263,85 @@ void CANBus::CANTraffic() {
             Serial.print(" ");
         }
         Serial.print("\r\n");
+    }
+}
+
+
+void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
+{
+    // Create object to save message
+    CAN_FRAME incoming;
+
+    // Frames to request VIN
+    uint8_t PIDRequest[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    PIDRequest[2] = PID;
+
+    // Waits to recieve all messages
+    bool isWait = true;
+
+    // Send first frame requesting VIN
+    for (int i = 0; i < 5; i++)
+    {
+        isWait = true;
+    sendFrame(sendID, PIDRequest);
+    delay(8);
+        if (Can0.available() > 0) {
+            Can0.read(incoming);
+            switch (PID)
+            {
+            case PID_ENGINE_RPM:
+                if (incoming.data.bytes[2] == PID_ENGINE_RPM) {
+                    uint16_t rpm;
+                    rpm = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 4; //formula 256*A+B/4
+                    Serial.print(F("Engine RPM: "));
+                    Serial.println(rpm, DEC);
+                    isWait = false;
+                }
+            case PID_FUEL_LEVEL:
+                if (incoming.data.bytes[2] == PID_FUEL_LEVEL) {
+                    uint16_t lev;
+                    lev = ((100 * incoming.data.bytes[1])) / 255; //formula 100*A/255
+                    Serial.print(F("Fuel Level (%): "));
+                    Serial.println(lev, DEC);
+                }
+                break;
+            case PID_THROTTLE_POSITION:
+                if (incoming.data.bytes[2] == PID_THROTTLE_POSITION) {
+                    uint16_t lev;
+                    lev = ((100 * incoming.data.bytes[3])) / 255; //formula 100*A/255
+                    Serial.print(F("Throttle (%): "));
+                    Serial.println(lev, DEC);
+                }
+            case PID_VEHICLE_SPEED:
+                if (incoming.data.bytes[2] == PID_VEHICLE_SPEED) {
+                    uint16_t lev;
+                    lev = ((100 * incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
+                    Serial.print(F("MPH: "));
+                    Serial.println(lev, DEC);
+                }
+                break;
+            case PID_MAF_FLOW:
+                if (incoming.data.bytes[2] == PID_MAF_FLOW) {
+                    uint16_t lev;
+                    lev = ((256 * incoming.data.bytes[3])+ incoming.data.bytes[4]) / 100; //formula 100*A/255
+                    Serial.print(F("MAF: (gram/s) "));
+                    Serial.println(lev, DEC);
+                }
+                break;
+            }
+            Serial.print("ID: 0x");
+            Serial.print(incoming.id, HEX);
+            Serial.print(" Len: ");
+            Serial.print(incoming.length);
+            Serial.print(" Data: 0x");
+            for (int count = 0; count < incoming.length; count++) {
+                Serial.print(incoming.data.bytes[count], HEX);
+                Serial.print(" ");
+            }
+            Serial.print("\r\n");
+            Serial.println("");
+        }
+    delay(1000);
     }
 }

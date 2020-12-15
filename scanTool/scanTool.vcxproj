@@ -119,6 +119,7 @@
     <ClInclude Include="CANBus.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="icons.h" />
+    <ClInclude Include="PIDS.h" />
     <ClInclude Include="SDCard.h" />
     <ClInclude Include="__vm\.scanTool.vsarduino.h" />
   </ItemGroup>

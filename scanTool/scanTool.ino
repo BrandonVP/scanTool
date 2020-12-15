@@ -367,22 +367,14 @@ void PIDSCAN()
 // Function starts the PID scan
 void startPIDSCAN()
 {
-    bool waiting = true;
     bool hasNext = true;
     uint8_t status = 1;
     uint8_t bank = 0;
-    uint16_t txid = 0x7DF;
     uint16_t rxid = 0x7E8;
-    byte test[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    byte test1[8] = { 0x02, 0x09, 0x02, 0x55, 0x55, 0x55, 0x55, 0x55 };
-    byte test2[8] = { 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     uint8_t range = 0x00;
 
     loadBar(status);
     can1.requestVIN(rxid, currentDir);
-
-    //loadBar(status++);
-    //sdCard.writeFileln(can1.getFullDir());
 
     loadBar(status++);
     while (hasNext)
@@ -458,6 +450,8 @@ void drawProgram(int scroll = 0)
 // Button function for the program page
 void program()
 {
+static uint8_t selected = 0;
+uint16_t CAN_PID_ID = 0x7DF;
 static int scroll = 0;
     // Touch screen controls
     if (myTouch.dataAvailable())
@@ -472,31 +466,37 @@ static int scroll = 0;
             {
                 waitForItRect(150, 60, 410, 95);
                 Serial.println(1 + scroll);
+                selected = 1 + scroll;
             }
             if ((y >= 95) && (y <= 130))
             {
                 waitForItRect(150, 95, 410, 130);
                 Serial.println(2 + scroll);
+                selected = 2 + scroll;
             }
             if ((y >= 130) && (y <= 165))
             {
                 waitForItRect(150, 130, 410, 165);
                 Serial.println(3 + scroll);
+                selected = 3 + scroll;
             }
             if ((y >= 165) && (y <= 200))
             {
                 waitForItRect(150, 165, 410, 200);
                 Serial.println(4 + scroll);
+                selected = 4 + scroll;
             }
             if ((y >= 200) && (y <= 235))
             {
                 waitForItRect(150, 200, 410, 235);
                 Serial.println(5 + scroll);
+                selected = 5 + scroll;
             }
             if ((y >= 235) && (y <= 270))
             {
                 waitForItRect(150, 235, 410, 270);
                 Serial.println(6 + scroll);
+                selected = 6 + scroll;
             }
         }
         if ((x >= 420) && (x <= 470))
@@ -520,6 +520,19 @@ static int scroll = 0;
                 {
                     scroll = scroll + 6;
                     drawProgramScroll(scroll);
+                }
+            }
+        }
+        if ((x >= 150) && (x <= 400))
+        {
+            if ((y >= 275) && (y <= 315))
+            {
+                if (selected != 0)
+                {
+                    waitForItRect(150, 275, 400, 315);
+                    Serial.print("Sending PID: ");
+                    Serial.println(arrayIn[selected+1]);
+                    can1.PIDStream(CAN_PID_ID, arrayIn[selected]);
                 }
             }
         }
@@ -548,7 +561,34 @@ void drawSendMSG()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     //drawSquareBtn(145, 140, 479, 160, "Spare function", themeBackground, themeBackground, menuBtnColor, CENTER);
+    myGLCD.setBackColor(menuBtnColor);
+    myGLCD.setColor(menuBtnColor);
+    myGLCD.fillCircle(300, 180, 100);
+    myGLCD.setBackColor(VGA_WHITE);
+    myGLCD.setColor(VGA_WHITE);
+    myGLCD.fillCircle(300, 180, 90);
+    myGLCD.setBackColor(menuBtnColor);
+    myGLCD.setColor(menuBtnColor);
 
+    float pi = 3.14159;
+    int r = 80;
+    float x = r * cos(pi / 2) + 300;
+    float y = r * sin(pi / 2) + 180;
+
+    for (double t = pi / 2; t <= 2 * pi; t+= 0.01) {
+        myGLCD.setBackColor(VGA_WHITE);
+        myGLCD.setColor(VGA_WHITE);
+        myGLCD.drawLine(300, 180, x, y);
+        x = r * cos(t) + 300;
+        y = r * sin(t) + 180;
+        myGLCD.setBackColor(menuBtnColor);
+        myGLCD.setColor(menuBtnColor);
+        myGLCD.drawLine(300, 180, x, y);
+        delay(10);
+    }
+
+
+    
     return;
 }
 
@@ -620,7 +660,7 @@ int pageControl(uint8_t page, bool value = false)
                 }
                 else
                 {
-                    errorMSG("error", "Please Scan", "PIDS first");
+                    errorMSG("Error", "Please Perform", "PIDSCAN First");
                     hasDrawn = true;
                 }
                 
@@ -808,7 +848,7 @@ void setup() {
     drawMenu();
 
     // Draw the Hypertech logo
-    bmpDraw("HYPER.bmp", 0, 0);
+    bmpDraw("System/HYPER.bmp", 0, 0);
 }
 
 // Calls pageControl with a value of 1 to set view page as the home page
