@@ -280,6 +280,8 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
     // Waits to recieve all messages
     bool isWait = true;
 
+    SDPrint.writeFileln(fullDir);
+
     // Send first frame requesting VIN
     for (int i = 0; i < 5; i++)
     {
@@ -296,6 +298,9 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
                     rpm = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 4; //formula 256*A+B/4
                     Serial.print(F("Engine RPM: "));
                     Serial.println(rpm, DEC);
+                    SDPrint.writeFile(fullDir, "Engine RPM: ");
+                    SDPrint.writeFile(fullDir, rpm, DEC);
+                    SDPrint.writeFileln(fullDir);
                     isWait = false;
                 }
             case PID_FUEL_LEVEL:
@@ -304,43 +309,64 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
                     lev = ((100 * incoming.data.bytes[1])) / 255; //formula 100*A/255
                     Serial.print(F("Fuel Level (%): "));
                     Serial.println(lev, DEC);
+                    SDPrint.writeFile(fullDir, "Fuel Level (%): ");
+                    SDPrint.writeFile(fullDir, lev, DEC);
+                    SDPrint.writeFileln(fullDir);
                 }
                 break;
             case PID_THROTTLE_POSITION:
                 if (incoming.data.bytes[2] == PID_THROTTLE_POSITION) {
-                    uint16_t lev;
-                    lev = ((100 * incoming.data.bytes[3])) / 255; //formula 100*A/255
+                    uint16_t pos;
+                    pos = ((100 * incoming.data.bytes[3])) / 255; //formula 100*A/255
                     Serial.print(F("Throttle (%): "));
-                    Serial.println(lev, DEC);
+                    Serial.println(pos, DEC);
+                    SDPrint.writeFile(fullDir, "Throttle (%): ");
+                    SDPrint.writeFile(fullDir, pos, DEC);
+                    SDPrint.writeFileln(fullDir);
+                    
                 }
             case PID_VEHICLE_SPEED:
                 if (incoming.data.bytes[2] == PID_VEHICLE_SPEED) {
-                    uint16_t lev;
-                    lev = ((100 * incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
+                    uint16_t spd;
+                    spd = ((100 * incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
                     Serial.print(F("MPH: "));
-                    Serial.println(lev, DEC);
+                    Serial.println(spd, DEC);
+                    SDPrint.writeFile(fullDir, "MPH: ");
+                    SDPrint.writeFile(fullDir, spd, DEC);
+                    SDPrint.writeFileln(fullDir);
                 }
                 break;
             case PID_MAF_FLOW:
                 if (incoming.data.bytes[2] == PID_MAF_FLOW) {
-                    uint16_t lev;
-                    lev = ((256 * incoming.data.bytes[3])+ incoming.data.bytes[4]) / 100; //formula 100*A/255
+                    uint16_t flow;
+                    flow = ((256 * incoming.data.bytes[3])+ incoming.data.bytes[4]) / 100; //formula 100*A/255
                     Serial.print(F("MAF: (gram/s) "));
-                    Serial.println(lev, DEC);
+                    Serial.println(flow, DEC);
+                    SDPrint.writeFile(fullDir, "MAF: ");
+                    SDPrint.writeFile(fullDir, flow, DEC);
+                    SDPrint.writeFileln(fullDir);
                 }
                 break;
             }
-            Serial.print("ID: 0x");
+            Serial.print(F("ID: 0x"));
+            SDPrint.writeFile(fullDir, "ID: 0x");
             Serial.print(incoming.id, HEX);
-            Serial.print(" Len: ");
+            SDPrint.writeFile(fullDir, incoming.id, HEX);
+            Serial.print(F(" Len: "));
+            SDPrint.writeFile(fullDir, " Len: ");
             Serial.print(incoming.length);
-            Serial.print(" Data: 0x");
+            SDPrint.writeFile(fullDir, incoming.length, HEX);
+            Serial.print(F(" Data: 0x"));
+            SDPrint.writeFile(fullDir, " Data: 0x");
             for (int count = 0; count < incoming.length; count++) {
                 Serial.print(incoming.data.bytes[count], HEX);
+                SDPrint.writeFile(fullDir, incoming.data.bytes[count], HEX);
                 Serial.print(" ");
+                SDPrint.writeFile(fullDir, " ");
             }
             Serial.print("\r\n");
             Serial.println("");
+            SDPrint.writeFileln(fullDir);
         }
     delay(1000);
     }
