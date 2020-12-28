@@ -451,7 +451,6 @@ void drawProgram(int scroll = 0)
 void program()
 {
 static uint8_t selected = 0;
-uint16_t CAN_PID_ID = 0x7DF;
 static int scroll = 0;
     // Touch screen controls
     if (myTouch.dataAvailable())
@@ -559,36 +558,134 @@ void drawTraffic()
 // Draw the send message page
 void drawSendMSG()
 {
+    bool isWait = true;
+
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     //drawSquareBtn(145, 140, 479, 160, "Spare function", themeBackground, themeBackground, menuBtnColor, CENTER);
     myGLCD.setBackColor(menuBtnColor);
     myGLCD.setColor(menuBtnColor);
-    myGLCD.fillCircle(300, 180, 100);
+    myGLCD.fillCircle(380, 250, 60);
+    myGLCD.fillCircle(380, 120, 60);
+    myGLCD.fillCircle(220, 250, 60);
+    myGLCD.fillCircle(220, 120, 60);
     myGLCD.setBackColor(VGA_WHITE);
     myGLCD.setColor(VGA_WHITE);
-    myGLCD.fillCircle(300, 180, 90);
-    myGLCD.setBackColor(menuBtnColor);
+    myGLCD.fillCircle(380, 250, 55);
+    myGLCD.fillCircle(380, 120, 55);
+    myGLCD.fillCircle(220, 250, 55);
+    myGLCD.fillCircle(220, 120, 55);
+    
+    myGLCD.setBackColor(VGA_WHITE);
     myGLCD.setColor(menuBtnColor);
+    myGLCD.print("Load", 188, 148); // 4
+    myGLCD.print("RPM", 358, 148);// C
+    myGLCD.print("TEMP", 188, 278); // 5
+    myGLCD.print("MPH", 358, 278); // D
+    myGLCD.setBackColor(menuBtnColor);
 
     float pi = 3.14159;
-    int r = 80;
-    float x = r * cos(pi / 2) + 300;
-    float y = r * sin(pi / 2) + 180;
+    int r = 50;
 
-    for (double t = pi / 2; t <= 2 * pi; t+= 0.01) {
+    float x1 = r * cos(pi / 2) + 220;
+    float y1 = r * sin(pi / 2) + 120;
+
+    float x2 = r * cos(pi / 2) + 380;
+    float y2 = r * sin(pi / 2) + 120;
+
+    float x3 = r * cos(pi / 2) + 220;
+    float y3 = r * sin(pi / 2) + 250;
+
+    float x4 = r * cos(pi / 2) + 380;
+    float y4 = r * sin(pi / 2) + 250;
+
+    /*
+    for (float t = pi / 2 + 1; t <= 2.5 * pi - 1; t+= 0.015)// 286 points 
+    {
         myGLCD.setBackColor(VGA_WHITE);
         myGLCD.setColor(VGA_WHITE);
-        myGLCD.drawLine(300, 180, x, y);
-        x = r * cos(t) + 300;
-        y = r * sin(t) + 180;
+        myGLCD.drawLine(380, 250, x, y);
+        x = r * cos(t) + 380;
+        y = r * sin(t) + 250;
         myGLCD.setBackColor(menuBtnColor);
         myGLCD.setColor(menuBtnColor);
-        myGLCD.drawLine(300, 180, x, y);
+        myGLCD.drawLine(380, 250, x, y);
         delay(10);
     }
+    */
+    float offset = (pi / 2) + 1;
+    float g1, g2, g3, g4;
+    while (isWait)
+    {
+        if (myTouch.dataAvailable())
+        {
+            myTouch.read();
+            x = myTouch.getX();
+            y = myTouch.getY();
 
+            if ((x >= 1) && (x <= 479))
+            {
+                if ((y >= 1) && (y <= 319))
+                {
+                    isWait = false;
+                }
+            }
+        }
+        g1 = can1.PIDStreamGauge(CAN_PID_ID, 0x4);
+        g2 = can1.PIDStreamGauge(CAN_PID_ID, 0xC);
+        g3 = can1.PIDStreamGauge(CAN_PID_ID, 0x5);
+        g4 = can1.PIDStreamGauge(CAN_PID_ID, 0xD);
 
-    
+        // gauge values 0-286
+
+        if (g1 >= 0)
+        {
+            g1 = offset + (g1 * 0.015);
+            myGLCD.setBackColor(VGA_WHITE);
+            myGLCD.setColor(VGA_WHITE);
+            myGLCD.drawLine(220, 120, x1, y1);
+            x1 = r * cos(g1) + 220;
+            y1 = r * sin(g1) + 120;
+            myGLCD.setBackColor(menuBtnColor);
+            myGLCD.setColor(menuBtnColor);
+            myGLCD.drawLine(220, 120, x1, y1);
+        }
+        if (g2 >= 0)
+        {
+            g2 = (offset + ((g2 * 0.0286) * 0.015));
+            myGLCD.setBackColor(VGA_WHITE);
+            myGLCD.setColor(VGA_WHITE);
+            myGLCD.drawLine(380, 120, x2, y2);
+            x2 = r * cos(g2) + 380;
+            y2 = r * sin(g2) + 120;
+            myGLCD.setBackColor(menuBtnColor);
+            myGLCD.setColor(menuBtnColor);
+            myGLCD.drawLine(380, 120, x2, y2);
+        }
+        if (g3 >= 0)
+        {
+            g3 = offset + (g3 * 0.015);
+            myGLCD.setBackColor(VGA_WHITE);
+            myGLCD.setColor(VGA_WHITE);
+            myGLCD.drawLine(220, 250, x3, y3);
+            x3 = r * cos(g3) + 220;
+            y3 = r * sin(g3) + 250;
+            myGLCD.setBackColor(menuBtnColor);
+            myGLCD.setColor(menuBtnColor);
+            myGLCD.drawLine(220, 250, x3, y3);
+        }
+        if (g4 >= 0)
+        {
+            g4 = offset + (g4 * 0.015);
+            myGLCD.setBackColor(VGA_WHITE);
+            myGLCD.setColor(VGA_WHITE);
+            myGLCD.drawLine(380, 250, x4, y4);
+            x4 = r * cos(g4) + 380;
+            y4 = r * sin(g4) + 250;
+            myGLCD.setBackColor(menuBtnColor);
+            myGLCD.setColor(menuBtnColor);
+            myGLCD.drawLine(380, 250, x4, y4);
+        }
+    }
     return;
 }
 
@@ -607,7 +704,7 @@ void drawMenu()
     drawRoundBtn(10, 10, 130, 65, "HOME", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(10, 70, 130, 125, "PIDSCAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(10, 130, 130, 185, "PIDSTRM", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 190, 130, 245, "SENDMSG", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 190, 130, 245, "EXTRAFN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(10, 250, 130, 305, "TRAFFIC", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 

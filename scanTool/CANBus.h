@@ -17,7 +17,7 @@ private:
 	SDCard SDPrint;
 	typedef byte test[8];
 	bool hasNextPID;
-	//uint16_t rxID = 0x00;
+	uint16_t rxID = 0x00;
 	char VIN[18];
 	String vehicleVIN;
 	char fullDir[17];
@@ -51,6 +51,7 @@ private:
 	char* getFullDir();
 	void CANTraffic();
 	void PIDStream(uint16_t, uint8_t);
+	int PIDStreamGauge(uint16_t, uint8_t);
 	String getVIN();
 };
 #endif

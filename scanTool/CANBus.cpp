@@ -281,13 +281,15 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
     bool isWait = true;
 
     SDPrint.writeFileln(fullDir);
-
+    SDPrint.writeFile(fullDir, "PID ID: ");
+    SDPrint.writeFile(fullDir, PID, HEX);
+    SDPrint.writeFileln(fullDir);
     // Send first frame requesting VIN
     for (int i = 0; i < 5; i++)
     {
         isWait = true;
     sendFrame(sendID, PIDRequest);
-    delay(8);
+    delay(10);
         if (Can0.available() > 0) {
             Can0.read(incoming);
             switch (PID)
@@ -328,7 +330,7 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
             case PID_VEHICLE_SPEED:
                 if (incoming.data.bytes[2] == PID_VEHICLE_SPEED) {
                     uint16_t spd;
-                    spd = ((100 * incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
+                    spd = ((incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
                     Serial.print(F("MPH: "));
                     Serial.println(spd, DEC);
                     SDPrint.writeFile(fullDir, "MPH: ");
@@ -356,8 +358,8 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
             SDPrint.writeFile(fullDir, " Len: ");
             Serial.print(incoming.length);
             SDPrint.writeFile(fullDir, incoming.length, HEX);
-            Serial.print(F(" Data: 0x"));
-            SDPrint.writeFile(fullDir, " Data: 0x");
+            Serial.print(F(" Data: "));
+            SDPrint.writeFile(fullDir, " Data: ");
             for (int count = 0; count < incoming.length; count++) {
                 Serial.print(incoming.data.bytes[count], HEX);
                 SDPrint.writeFile(fullDir, incoming.data.bytes[count], HEX);
@@ -370,4 +372,70 @@ void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
         }
     delay(1000);
     }
+}
+
+int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
+{
+    // Create object to save message
+    CAN_FRAME incoming;
+
+    // Frames to request VIN
+    uint8_t PIDRequest[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    
+    PIDRequest[2] = PID;
+
+    // Send first frame requesting VIN
+    for (int i = 0; i < 5; i++)
+    {
+        sendFrame(sendID, PIDRequest);
+        delay(10);
+        if (Can0.available() > 0) {
+            Can0.read(incoming);
+            switch (PID)
+            {
+            case PID_ENGINE_RPM:
+                if (incoming.data.bytes[2] == PID_ENGINE_RPM) {
+                    uint16_t rpm;
+                    rpm = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 4; //formula 256*A+B/4
+                    return rpm;
+                }
+            case PID_FUEL_LEVEL:
+                if (incoming.data.bytes[2] == PID_FUEL_LEVEL) {
+                    uint16_t level = ((100 * incoming.data.bytes[1])) / 255; //formula 100*A/255
+                    return level;
+                }
+                break;
+            case PID_THROTTLE_POSITION:
+                if (incoming.data.bytes[2] == PID_THROTTLE_POSITION) {
+                    uint16_t pos = ((100 * incoming.data.bytes[3])) / 255; //formula 100*A/255
+                    return pos;
+                }
+            case PID_VEHICLE_SPEED:
+                if (incoming.data.bytes[2] == PID_VEHICLE_SPEED) {
+                    uint16_t speed = ((incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
+                    return speed;
+                }
+                break;
+            case PID_MAF_FLOW:
+                if (incoming.data.bytes[2] == PID_MAF_FLOW) {
+                    uint16_t airFlow = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 100; //formula 100*A/255
+                    return airFlow;
+                }
+                break;
+            case PID_ENGINE_LOAD:
+                if (incoming.data.bytes[2] == PID_ENGINE_LOAD) {
+                    uint16_t engineLoad = (incoming.data.bytes[3]) / 2.55; //formula A/2.55
+                    return engineLoad;
+                }
+                break;
+            case PID_COOLANT_TEMP:
+                if (incoming.data.bytes[2] == PID_COOLANT_TEMP) {
+                    uint16_t coolantTemp = (((incoming.data.bytes[3]) - 40) * 1.8) + 32; //formula A - 40 for C, C * 1.8 + 32 = F
+                    return coolantTemp;
+                }
+                break;
+            }
+        }
+    }
+    return -1;
 }

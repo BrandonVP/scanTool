@@ -6,6 +6,9 @@
 #define menuBtnColor 0xFC00 // Orange
 #define menuBackground 0xC618 //Silver
 
+
+#define CAN_PID_ID 0x7DF
+
 // For the draw shape functions
 #define LEFT 1
 #define CENTER 2
