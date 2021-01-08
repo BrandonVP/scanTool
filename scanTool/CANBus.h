@@ -15,11 +15,14 @@ class CANBus
 {
 private:
 	SDCard SDPrint;
-	typedef byte test[8];
+
+	typedef byte buf[8];
 	bool hasNextPID;
+
 	uint16_t rxID = 0x00;
-	char VIN[18];
+	
 	String vehicleVIN;
+	char VIN[18];
 	char fullDir[17];
 	char PIDDir[17];
 	
@@ -41,10 +44,12 @@ private:
  public:
 
 	CANBus();
+	void watchALL();
+	void filterCAN();
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
-	void getMessage(test&, int&);
+	bool getMessage(buf&, uint16_t&);
 	void sendFrame(uint16_t, byte*);
 	void startCAN();
 	void requestVIN(uint16_t, char*);

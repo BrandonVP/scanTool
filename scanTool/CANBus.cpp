@@ -26,6 +26,16 @@ void CANBus::startCAN()
     return;
 }
 
+void CANBus::watchALL()
+{
+    Can0.watchForRange(0x000, 0xFFF);
+}
+
+void CANBus::filterCAN()
+{
+    Can0.watchForRange(0x7E0, 0x7EF);
+}
+
 // CAN Bus send message method
 void CANBus::sendFrame(uint16_t id, byte* frame)
 {
@@ -69,9 +79,9 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
     uint16_t IDFilter = 0x7E8;
 
     // Message used to requrest range of PIDS
-    byte requestVIN[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    requestVIN[2] = range;
-    sendFrame(txid, requestVIN);
+    byte frame[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    frame[2] = range;
+    sendFrame(txid, frame);
     while (isWait)
     {
         if (Can0.available() > 0) {
@@ -236,16 +246,18 @@ bool CANBus::getNextPID()
 }
 
 // Method used to manually get the ID and byte array
-void CANBus::getMessage(test& a, int& b)
+bool CANBus::getMessage(buf& msg, uint16_t& id)
 {
     CAN_FRAME incoming;
     if (Can0.available() > 0) {
         Can0.read(incoming);
-        b = incoming.id;
+        id = incoming.id;
         for (int count = 0; count < incoming.length; count++) {
-            a[count] = incoming.data.bytes[count];
+            msg[count] = incoming.data.bytes[count];
         }
+        return true;
     }
+    return false;
 }
 
 
@@ -384,56 +396,62 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
     
     PIDRequest[2] = PID;
 
+    bool isWait = true;
+    unsigned long timer = millis();
+
     // Send first frame requesting VIN
     for (int i = 0; i < 5; i++)
     {
         sendFrame(sendID, PIDRequest);
-        delay(10);
-        if (Can0.available() > 0) {
-            Can0.read(incoming);
-            switch (PID)
-            {
-            case PID_ENGINE_RPM:
-                if (incoming.data.bytes[2] == PID_ENGINE_RPM) {
-                    uint16_t rpm;
-                    rpm = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 4; //formula 256*A+B/4
-                    return rpm;
+        
+        while (millis() - timer < 100)
+        {
+            if (Can0.available() > 0) {
+                Can0.read(incoming);
+                switch (PID)
+                {
+                case PID_ENGINE_RPM:
+                    if (incoming.data.bytes[2] == PID_ENGINE_RPM) {
+                        uint16_t rpm;
+                        rpm = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 4; //formula 256*A+B/4
+                        return rpm;
+                    }
+                case PID_FUEL_LEVEL:
+                    if (incoming.data.bytes[2] == PID_FUEL_LEVEL) {
+                        uint16_t level = ((100 * incoming.data.bytes[1])) / 255; //formula 100*A/255
+                        return level;
+                    }
+                    break;
+                case PID_THROTTLE_POSITION:
+                    if (incoming.data.bytes[2] == PID_THROTTLE_POSITION) {
+                        uint16_t pos = ((100 * incoming.data.bytes[3])) / 255; //formula 100*A/255
+                        return pos;
+                    }
+                case PID_VEHICLE_SPEED:
+                    if (incoming.data.bytes[2] == PID_VEHICLE_SPEED) {
+                        uint16_t speed = ((incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
+                        return speed;
+                    }
+                    break;
+                case PID_MAF_FLOW:
+                    if (incoming.data.bytes[2] == PID_MAF_FLOW) {
+                        uint16_t airFlow = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 100; //formula 100*A/255
+                        return airFlow;
+                    }
+                    break;
+                case PID_ENGINE_LOAD:
+                    if (incoming.data.bytes[2] == PID_ENGINE_LOAD) {
+                        uint16_t engineLoad = (incoming.data.bytes[3]) / 2.55; //formula A/2.55
+                        return engineLoad;
+                    }
+                    break;
+                case PID_COOLANT_TEMP:
+                    if (incoming.data.bytes[2] == PID_COOLANT_TEMP) {
+                        uint16_t coolantTemp = (((incoming.data.bytes[3]) - 40) * 1.8) + 32; //formula A - 40 for C, C * 1.8 + 32 = F
+                        return coolantTemp;
+                    }
+                    break;
                 }
-            case PID_FUEL_LEVEL:
-                if (incoming.data.bytes[2] == PID_FUEL_LEVEL) {
-                    uint16_t level = ((100 * incoming.data.bytes[1])) / 255; //formula 100*A/255
-                    return level;
-                }
-                break;
-            case PID_THROTTLE_POSITION:
-                if (incoming.data.bytes[2] == PID_THROTTLE_POSITION) {
-                    uint16_t pos = ((100 * incoming.data.bytes[3])) / 255; //formula 100*A/255
-                    return pos;
-                }
-            case PID_VEHICLE_SPEED:
-                if (incoming.data.bytes[2] == PID_VEHICLE_SPEED) {
-                    uint16_t speed = ((incoming.data.bytes[3])) / 1.609344; //formula 100*A/255
-                    return speed;
-                }
-                break;
-            case PID_MAF_FLOW:
-                if (incoming.data.bytes[2] == PID_MAF_FLOW) {
-                    uint16_t airFlow = ((256 * incoming.data.bytes[3]) + incoming.data.bytes[4]) / 100; //formula 100*A/255
-                    return airFlow;
-                }
-                break;
-            case PID_ENGINE_LOAD:
-                if (incoming.data.bytes[2] == PID_ENGINE_LOAD) {
-                    uint16_t engineLoad = (incoming.data.bytes[3]) / 2.55; //formula A/2.55
-                    return engineLoad;
-                }
-                break;
-            case PID_COOLANT_TEMP:
-                if (incoming.data.bytes[2] == PID_COOLANT_TEMP) {
-                    uint16_t coolantTemp = (((incoming.data.bytes[3]) - 40) * 1.8) + 32; //formula A - 40 for C, C * 1.8 + 32 = F
-                    return coolantTemp;
-                }
-                break;
             }
         }
     }

@@ -48,4 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="oldCode.txt">
+      <Filter>Misc Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

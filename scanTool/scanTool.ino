@@ -20,6 +20,7 @@
 UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
 //RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
 UTouch  myTouch(2, 6, 3, 4, 5);
+uint8_t brightnessLevel = 0;
 
 // For touch controls
 int x, y;
@@ -27,7 +28,7 @@ int x, y;
 uint8_t controlPage = 1;
 
 // External import for fonts
-// extern uint8_t SmallFont[];
+extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
 
 // Object to control CAN Bus hardware
@@ -335,7 +336,6 @@ void drawPIDSCAN()
     drawSquareBtn(141, 80, 479, 100, "Scan supported PIDs", themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(141, 105, 479, 125, "to SD Card", themeBackground, themeBackground, menuBtnColor, CENTER);
     drawRoundBtn(200, 135, 400, 185, "Start Scan", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        return;
 }
 
 // Buttons for PID scan page
@@ -373,20 +373,35 @@ void startPIDSCAN()
     uint16_t rxid = 0x7E8;
     uint8_t range = 0x00;
 
+    // Print loading bar with current status
     loadBar(status);
+
+    // Get vehicle vin, will be saved in can1 object
     can1.requestVIN(rxid, currentDir);
 
+    // Update load bar
     loadBar(status++);
+
+    // Loop though all available banks of PIDS
     while (hasNext)
     {
+        // Get PID list with current range and bank
         can1.getPIDList(range, bank);
+
+        // Update load bar
         loadBar(status++);
-        delay(500);
+
+        delay(100);
         range = range + 0x20;
         bank++;
+
+        // Check last bit to see if there are more PIDs in the next bank
         hasNext = can1.getNextPID();
     }
+    // Complete load bar
     loadBar(DONE);
+
+    // Activate PIDSTRM page 
     hasPID = true;
     return;
 }
@@ -543,20 +558,129 @@ static int scroll = 0;
 /*=========================================================
     Monitor CAN traffic
 ===========================================================*/
-// Draw the config page
-void drawTraffic()
+// Read CAN to LCD
+void readInCANMsg()
 {
+    uint16_t index = 60;
+    bool isWait = true;
+    can1.watchALL();
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(145, 140, 479, 160, "View CAN on serial", themeBackground, themeBackground, menuBtnColor, CENTER);
-    return;
+    myGLCD.setBackColor(VGA_WHITE);
+    myGLCD.setFont(SmallFont);
+
+    while (isWait)
+    {
+        if (myTouch.dataAvailable())
+        {
+            myTouch.read();
+            x = myTouch.getX();
+            y = myTouch.getY();
+
+            if ((x >= 1) && (x <= 479))
+            {
+                if ((y >= 1) && (y <= 319))
+                {
+                    isWait = false;
+                }
+            }
+        }
+
+        uint8_t rxBuf[8];
+        uint16_t rxId;
+        if (can1.getMessage(rxBuf, rxId))                          // If CAN0_INT pin is low, read receive buffer
+        {
+            myGLCD.setColor(VGA_WHITE);
+            myGLCD.fillRect(150, (index - 5), 479, (index + 25));
+            myGLCD.setColor(VGA_BLACK);
+            myGLCD.print("ID:    MSG:", 150, index);
+            myGLCD.print(String(rxId, HEX), 175, index);
+            myGLCD.print(String(rxBuf[0], HEX), 240, index);
+            myGLCD.print(String(rxBuf[1], HEX), 270, index);
+            myGLCD.print(String(rxBuf[2], HEX), 300, index);
+            myGLCD.print(String(rxBuf[3], HEX), 330, index);
+            myGLCD.print(String(rxBuf[4], HEX), 360, index);
+            myGLCD.print(String(rxBuf[5], HEX), 390, index);
+            myGLCD.print(String(rxBuf[6], HEX), 420, index);
+            myGLCD.print(String(rxBuf[7], HEX), 450, index);
+
+            if (index < 300)
+            {
+                index += 15;
+            }
+            else
+            {
+                index = 60;
+            }
+        }
+    }
+    myGLCD.setFont(BigFont);
+    can1.filterCAN();
 }
 
 
 /*=========================================================
-    Unused function
+    Extra function
 ===========================================================*/
-// Draw the send message page
-void drawSendMSG()
+void drawExtra()
+{
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawRoundBtn(200, 80, 400, 130, "PID Gauges", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 135, 400, 185, "Serial CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 190, 400, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 245, 400, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
+
+// Buttons 
+void extraButtons()
+{
+    while (true)
+    {
+        // Touch screen controls
+        if (myTouch.dataAvailable())
+        {
+            myTouch.read();
+            x = myTouch.getX();
+            y = myTouch.getY();
+
+            // Start Scan
+            if ((x >= 200) && (x <= 400))
+            {
+                if ((y >= 80) && (y <= 130))
+                {
+                    waitForIt(200, 80, 400, 130);
+                    PIDGauges();
+                }
+            }
+            if ((x >= 200) && (x <= 400))
+            {
+                if ((y >= 135) && (y <= 185))
+                {
+                    waitForIt(200, 135, 400, 185);
+                    drawTraffic();
+                }
+            }
+            if ((x >= 200) && (x <= 400))
+            {
+                if ((y >= 190) && (y <= 240))
+                {
+                    waitForIt(200, 190, 400, 240);
+
+                }
+            }
+            if ((x >= 200) && (x <= 400))
+            {
+                if ((y >= 245) && (y <= 295))
+                {
+                    waitForIt(200, 245, 400, 295);
+                 
+                }
+            }
+        }
+        return;
+    }
+}
+
+void PIDGauges()
 {
     bool isWait = true;
 
@@ -613,7 +737,7 @@ void drawSendMSG()
     }
     */
     float offset = (pi / 2) + 1;
-    float g1, g2, g3, g4;
+    float g1, g2, g3, g4 = -1;
     while (isWait)
     {
         if (myTouch.dataAvailable())
@@ -634,12 +758,17 @@ void drawSendMSG()
         g2 = can1.PIDStreamGauge(CAN_PID_ID, 0xC);
         g3 = can1.PIDStreamGauge(CAN_PID_ID, 0x5);
         g4 = can1.PIDStreamGauge(CAN_PID_ID, 0xD);
+        myGLCD.setBackColor(VGA_WHITE);
+        myGLCD.printNumI(g1, 197, 128, 3, '0');
+        myGLCD.printNumI(g2, 343, 128, 5, '0');
+        myGLCD.printNumI(g3, 193, 258, 3, '0');
+        myGLCD.printNumI(g4, 358, 258, 3, '0');
 
         // gauge values 0-286
-
+        
         if (g1 >= 0)
         {
-            g1 = offset + (g1 * 0.015);
+            g1 = offset + (g1 * 0.042);
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
             myGLCD.drawLine(220, 120, x1, y1);
@@ -649,6 +778,7 @@ void drawSendMSG()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 120, x1, y1);
         }
+        
         if (g2 >= 0)
         {
             g2 = (offset + ((g2 * 0.0286) * 0.015));
@@ -661,9 +791,10 @@ void drawSendMSG()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(380, 120, x2, y2);
         }
+        
         if (g3 >= 0)
         {
-            g3 = offset + (g3 * 0.015);
+            g3 = offset + (g3 * 0.01);
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
             myGLCD.drawLine(220, 250, x3, y3);
@@ -673,9 +804,10 @@ void drawSendMSG()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 250, x3, y3);
         }
+        
         if (g4 >= 0)
         {
-            g4 = offset + (g4 * 0.015);
+            g4 = offset + (g4 * 0.027);
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
             myGLCD.drawLine(380, 250, x4, y4);
@@ -689,6 +821,33 @@ void drawSendMSG()
     return;
 }
 
+void drawTraffic()
+{
+    bool isWait = true;
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 140, 479, 160, "View CAN on serial", themeBackground, themeBackground, menuBtnColor, CENTER);
+
+    while (isWait)
+    {
+        if (myTouch.dataAvailable())
+        {
+            myTouch.read();
+            x = myTouch.getX();
+            y = myTouch.getY();
+
+            if ((x >= 1) && (x <= 479))
+            {
+                if ((y >= 1) && (y <= 319))
+                {
+                    isWait = false;
+                }
+            }
+        }
+        can1.CANTraffic();
+    }
+
+    return;
+}
 
 /*=========================================================
     Framework Functions
@@ -750,6 +909,10 @@ int pageControl(uint8_t page, bool value = false)
             {
                 if (hasPID == true)
                 {
+                    for (int i = 0; i < 100; i++)
+                    {
+                        arrayIn[i] = 0x00;
+                    }
                     sdCard.readFile(can1.getFullDir(), arrayIn);
                     drawProgram();
                     hasDrawn = true;
@@ -775,22 +938,21 @@ int pageControl(uint8_t page, bool value = false)
         case 4:
             if (!hasDrawn)
             {
-                drawSendMSG();
+                drawExtra();
                 hasDrawn = true;
                 controlPage = page;
             }
             // Call buttons if any
-
+            extraButtons();
             break;
         case 5:
             if (!hasDrawn)
             {
-                drawTraffic();
                 hasDrawn = true;
                 controlPage = page;
             }
             // Call buttons if any
-            can1.CANTraffic();
+            readInCANMsg();
             break;
         }
     }
