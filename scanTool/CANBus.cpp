@@ -26,9 +26,9 @@ void CANBus::startCAN()
     return;
 }
 
-void CANBus::watchALL()
+void CANBus::CANFilter(uint16_t start, uint16_t end)
 {
-    Can0.watchForRange(0x000, 0xFFF);
+    Can0.watchForRange(start, end);
 }
 
 void CANBus::filterCAN()

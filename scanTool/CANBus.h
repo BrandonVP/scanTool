@@ -44,7 +44,7 @@ private:
  public:
 
 	CANBus();
-	void watchALL();
+	void CANFilter(uint16_t, uint16_t);
 	void filterCAN();
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
