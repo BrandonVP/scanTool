@@ -44,14 +44,14 @@ private:
  public:
 
 	CANBus();
-	void CANFilter(uint16_t, uint16_t);
+	void setCANFilter(uint16_t, uint16_t);
 	void filterCAN();
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
 	bool getMessage(buf&, uint16_t&);
 	void sendFrame(uint16_t, byte*);
-	void startCAN();
+	void startCAN(uint16_t, uint16_t);
 	void requestVIN(uint16_t, char*);
 	char* getFullDir();
 	void CANTraffic();

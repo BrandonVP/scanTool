@@ -18,22 +18,10 @@ CANBus::CANBus()
 }
 
 // Initialize CAN1 and set the proper baud rates here
-void CANBus::startCAN()
+void CANBus::startCAN(uint16_t start, uint16_t end)
 {
-    
     Can0.begin(CAN_BPS_500K);
-    Can0.watchForRange(0x7E0, 0x7EF);
-    return;
-}
-
-void CANBus::CANFilter(uint16_t start, uint16_t end)
-{
     Can0.watchForRange(start, end);
-}
-
-void CANBus::filterCAN()
-{
-    Can0.watchForRange(0x7E0, 0x7EF);
 }
 
 // CAN Bus send message method
@@ -260,7 +248,7 @@ bool CANBus::getMessage(buf& msg, uint16_t& id)
     return false;
 }
 
-
+//
 void CANBus::CANTraffic() {
     CAN_FRAME incoming;
     if (Can0.available() > 0) {
@@ -278,7 +266,7 @@ void CANBus::CANTraffic() {
     }
 }
 
-
+//
 void CANBus::PIDStream(uint16_t sendID, uint8_t PID)
 {
     // Create object to save message
