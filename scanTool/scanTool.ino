@@ -25,6 +25,7 @@ uint8_t brightnessLevel = 0;
 // For touch controls
 int x, y;
 
+// Used for page control
 uint8_t controlPage = 1;
 
 // External import for fonts
@@ -42,13 +43,24 @@ int dispx, dispy;
 
 // Used for PID scroll function
 char currentDir[20];
+
 uint8_t arrayIn[100];
+
+// Performing a sucessful PID scan will change this to true
 bool hasPID = false;
+
+// Keeps track of current line when displaying CAN traffic on LCD
 uint16_t indexCANMsg = 60;
-int pageControl(uint8_t, bool);
+
+// 
 bool selectedRange = false;
+
+// Filter range at startup
 uint16_t rangeStart = 0x000;
 uint16_t rangeEnd = 0xFFF;
+
+int pageControl(uint8_t, bool);
+
 
 /*=========================================================
     Framework Functions
@@ -563,7 +575,7 @@ static int scroll = 0;
 /*=========================================================
     Monitor CAN traffic
 ===========================================================*/
-//
+// CAN sniffer menu
 void drawReadInCANMsg()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
@@ -573,20 +585,20 @@ void drawReadInCANMsg()
     drawRoundBtn(200, 245, 400, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-// can1.CANFilter(0x370, 0x3E9); // Watch for range
+// Draw CAN -> Serial out page
 void drawCANSerial()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawSquareBtn(145, 140, 479, 160, "View CAN on serial", themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
-//
+// Draw CAN -> LCD out page
 void drawreadInCANLCD()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
-//
+// Draw number pad to select custom filter range
 void drawNumpad()
 {
 
@@ -724,7 +736,7 @@ void readInCANMsg()
     myGLCD.setFont(BigFont);
 }
 
-//
+// Buttons for number pad
 int numpadButtons(uint16_t rangeStart, uint16_t rangeEnd)
 {
     // Touch screen controls
@@ -882,7 +894,7 @@ int numpadButtons(uint16_t rangeStart, uint16_t rangeEnd)
     return -1;
 }
 
-//
+// Buttons for sniffer menu
 void readInCANButtons()
 {
     // Touch screen controls
@@ -932,7 +944,7 @@ void readInCANButtons()
 /*=========================================================
     Extra function
 ===========================================================*/
-//
+// Another menu for extra functions
 void drawExtra()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
@@ -942,7 +954,7 @@ void drawExtra()
     drawRoundBtn(200, 245, 400, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-//
+// PID stream gauges
 void PIDGauges()
 {
     bool isWait = true;
@@ -1084,7 +1096,7 @@ void PIDGauges()
     return;
 }
 
-// Buttons 
+// Buttons for the extra menu
 void extraButtons()
 {
     // Touch screen controls
@@ -1294,6 +1306,7 @@ void errorMSG(String title, String eMessage1, String eMessage2)
     drawRoundBtn(400, 140, 450, 170, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 }
 
+// Error Message buttons
 uint8_t errorMSGBtn(uint8_t page)
 {
     // Touch screen controls
