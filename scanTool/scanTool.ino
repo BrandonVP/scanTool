@@ -238,20 +238,6 @@ void print_icon(int x, int y, const unsigned char icon[]) {
     }
 }
 
-// Function complete load bar
-void loadBar(int progress)
-{
-    if (progress >= DONE)
-    {
-        myGLCD.setColor(menuBtnColor);
-        myGLCD.fillRect(200, 200, 400, 220);
-        return;
-    }
-    drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
-    myGLCD.setColor(menuBtnColor);
-    myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
-}
-
 /*****************************************************
 *  Draw Round/Square Button                          *
 *                                                    *
@@ -320,6 +306,22 @@ void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String butt
     default:
         break;
     }
+}
+
+// Function complete load bar
+void loadBar(int progress)
+{
+    if (progress >= DONE)
+    {
+        drawSquareBtn(200, 200, 400, 220, "Finished", menuBtnColor,  menuBtnBorder, menuBtnText, CENTER);
+        //myGLCD.setColor(menuBtnColor);
+        //myGLCD.fillRect(200, 200, 400, 220);
+
+        return;
+    }
+    drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
+    myGLCD.setColor(menuBtnColor);
+    myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
 }
 
 // Function to highlight buttons when clicked
