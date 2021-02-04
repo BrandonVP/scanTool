@@ -578,13 +578,17 @@ static int scroll = 0;
     Monitor CAN traffic
 ===========================================================*/
 // CAN sniffer menu
-void drawReadInCANMsg()
+void drawTraffic()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(200, 80, 400, 130, "LCD CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 135, 400, 185, "Serial CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 190, 400, 240, "Set Range", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 245, 400, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 80, 308, 130, "LCD CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 80, 475, 130, "Serial CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 135, 308, 185, "TX CAN0", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 135, 475, 185, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 190, 308, 240, "Fltr CAN0", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 190, 475, 240, "Fltr CAN1", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 245, 308, 295, "Set Baud", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 245, 475, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // Draw CAN -> Serial out page
@@ -595,7 +599,7 @@ void drawCANSerial()
 }
 
 // Draw CAN -> LCD out page
-void drawreadInCANLCD()
+void drawReadInCANLCD()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
@@ -907,36 +911,48 @@ void readInCANButtons()
         y = myTouch.getY();
 
         // Start Scan
-        if ((x >= 200) && (x <= 400))
+        if ((x >= 145) && (x <= 308))
         {
             if ((y >= 80) && (y <= 130))
             {
-                waitForIt(200, 80, 400, 130);
+                waitForIt(145, 80, 308, 130);
+                // LCD CAN
                 pageControl(6, false);
             }
         }
-        if ((x >= 200) && (x <= 400))
+        if ((x >= 312) && (x <= 475))
         {
-            if ((y >= 135) && (y <= 185))
+            if ((y >= 80) && (y <= 130))
             {
-                waitForIt(200, 135, 400, 185);
+                waitForIt(312, 80, 475, 130);
+                // Serial CAN
                 pageControl(7, false);
             }
         }
-        if ((x >= 200) && (x <= 400))
+        if ((x >= 145) && (x <= 308))
         {
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(200, 190, 400, 240);
+                waitForIt(145, 190, 308, 240);
+                // Set Filter CAN0
                 pageControl(8, false);
             }
         }
-        if ((x >= 200) && (x <= 400))
+        if ((x >= 145) && (x <= 308))
         {
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(200, 245, 400, 295);
-                //can1.setCANFilter(0x600, 0x600);
+                waitForIt(145, 245, 308, 295);
+                // Toggle Baud
+                uint32_t temp = can1.getBaud();
+                if (temp == 500000)
+                {
+                    can1.setBaud(250000);
+                }
+                else if (temp == 250000)
+                {
+                    can1.setBaud(500000);
+                }
             }
         }
     }
@@ -952,8 +968,8 @@ void drawExtra()
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(200, 80, 400, 130, "PID Gauges", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(200, 135, 400, 185, "DTC Scan", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 190, 400, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 245, 400, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 190, 400, 240, "AFM1", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 245, 400, 295, "AFM2", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // PID stream gauges
@@ -1098,6 +1114,32 @@ void PIDGauges()
     return;
 }
 
+// Vehicle testing functions
+void autoStartStop()
+{
+    byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
+    can1.sendFrame(0x7E0, test1);
+    delay(20);
+    byte test2[8] = { 0x02, 0xEE, 0x10, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+    can1.sendFrame(0x7E8, test2);
+}
+void AFM1()
+{
+    byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
+    can1.sendFrame(0x7E0, test1);
+    delay(20);
+    byte test2[8] = { 0x02, 0xEE, 0x10, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+    can1.sendFrame(0x7E8, test2);
+}
+void AFM2()
+{
+    byte test1[8] = { 0x05, 0x7F, 0xAE, 0xE3, 0x04, 0x06, 0xAA, 0xAA };
+    can1.sendFrame(0x7E0, test1);
+    delay(120);
+    byte test2[8] = { 0x01, 0x60, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+    can1.sendFrame(0x7E8, test2);
+}
+
 // Buttons for the extra menu
 void extraButtons()
 {
@@ -1122,7 +1164,7 @@ void extraButtons()
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(200, 135, 400, 185);
-                    
+                    // DTC Scan
             }
         }
         if ((x >= 200) && (x <= 400))
@@ -1130,7 +1172,8 @@ void extraButtons()
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(200, 190, 400, 240);
-
+                //autoStartStop();
+                AFM1();
             }
         }
         if ((x >= 200) && (x <= 400))
@@ -1138,7 +1181,7 @@ void extraButtons()
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(200, 245, 400, 295);
-
+                AFM2();
             }
         }
     }
@@ -1166,7 +1209,6 @@ void drawMenu()
 //Manages the different App pages
 int pageControl(uint8_t page, bool value = false)
 {
-    
     bool waiting = true;
 
     static bool hasDrawn;
@@ -1248,7 +1290,7 @@ int pageControl(uint8_t page, bool value = false)
             {
                 hasDrawn = true;
                 controlPage = page;
-                drawReadInCANMsg();
+                drawTraffic();
             }
             // Call buttons if any
             readInCANButtons();
@@ -1258,7 +1300,7 @@ int pageControl(uint8_t page, bool value = false)
             {
                 hasDrawn = true;
                 // Draw Page
-                drawreadInCANLCD();
+                drawReadInCANLCD();
                 can1.startCAN(rangeStart, rangeEnd);
             }
             // Call buttons if any
@@ -1285,6 +1327,16 @@ int pageControl(uint8_t page, bool value = false)
             
             break;
         case 9:
+            if (!hasDrawn)
+            {
+                hasDrawn = true;
+                // Draw Page
+
+            }
+            // Call buttons if any
+
+            break;
+        case 10:
             if (!hasDrawn)
             {
                 hasDrawn = true;

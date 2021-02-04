@@ -20,8 +20,10 @@ CANBus::CANBus()
 // Initialize CAN1 and set the proper baud rates here
 void CANBus::startCAN(uint16_t start, uint16_t end)
 {
-    Can0.begin(CAN_BPS_500K);
+    Can0.begin(baud);
     Can0.watchForRange(start, end);
+    Can1.begin(baud);
+    Can1.watchForRange(start, end);
 }
 
 // CAN Bus send message method
@@ -221,12 +223,21 @@ char* CANBus::getFullDir()
     return PIDDir;
 }
 
-
+//
 void CANBus::setNextPID(bool next)
 {
     hasNextPID = next;
 }
 
+void CANBus::setBaud(uint32_t newBaud)
+{
+    baud = newBaud;
+}
+
+uint32_t CANBus::getBaud()
+{
+    return baud;
+}
 
 bool CANBus::getNextPID()
 {
@@ -444,4 +455,31 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
         }
     }
     return -1;
+}
+
+void CANBus::readCAN0TX()
+{
+    if (Can0.available() > 0)
+    {
+        CAN_FRAME incCAN0;
+        Can0.read(incCAN0);
+        Can1.sendFrame(incCAN0);
+        //Serial.println("CAN0->CAN1");
+    }
+    if (Can1.available() > 0)
+    {
+        CAN_FRAME incCAN1;
+        Can1.read(incCAN1);
+        Serial.print("ID: ");
+        Serial.print(incCAN1.id);
+        Serial.print(" MSG: ");
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            Serial.print(incCAN1.data.byte[i]);
+            Serial.print(" ");
+        }
+        Serial.println("");
+        Can0.sendFrame(incCAN1);
+        //Serial.println("CAN1->CAN0");
+    }
 }

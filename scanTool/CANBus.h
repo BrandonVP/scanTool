@@ -15,6 +15,7 @@ class CANBus
 {
 private:
 	SDCard SDPrint;
+	uint32_t baud = 500000;
 
 	typedef byte buf[8];
 	bool hasNextPID;
@@ -44,8 +45,6 @@ private:
  public:
 
 	CANBus();
-	void setCANFilter(uint16_t, uint16_t);
-	void filterCAN();
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
@@ -57,6 +56,9 @@ private:
 	void CANTraffic();
 	void PIDStream(uint16_t, uint8_t);
 	int PIDStreamGauge(uint16_t, uint8_t);
+	void setBaud(uint32_t);
+	void readCAN0TX();
+	uint32_t getBaud();
 	String getVIN();
 };
 #endif
