@@ -49,7 +49,7 @@ private:
 	void setNextPID(bool);
 	bool getNextPID();
 	bool getMessage(buf&, uint16_t&);
-	void sendFrame(uint16_t, byte*);
+	void sendFrame(uint32_t, byte*);
 	void startCAN(uint16_t, uint16_t);
 	void requestVIN(uint16_t, char*);
 	char* getFullDir();

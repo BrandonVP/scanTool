@@ -27,7 +27,7 @@ void CANBus::startCAN(uint16_t start, uint16_t end)
 }
 
 // CAN Bus send message method
-void CANBus::sendFrame(uint16_t id, byte* frame)
+void CANBus::sendFrame(uint32_t id, byte* frame)
 {
     // Create message object
     CAN_FRAME sending;
@@ -260,20 +260,24 @@ bool CANBus::getMessage(buf& msg, uint16_t& id)
 }
 
 //
-void CANBus::CANTraffic() {
+void CANBus::CANTraffic() 
+{
+    char hex_string[100];
     CAN_FRAME incoming;
     if (Can0.available() > 0) {
         Can0.read(incoming);
-        Serial.print("ID: 0x");
-        Serial.print(incoming.id, HEX);
-        Serial.print(" Len: ");
-        Serial.print(incoming.length);
-        Serial.print(" Data: 0x");
-        for (int count = 0; count < incoming.length; count++) {
-            Serial.print(incoming.data.bytes[count], HEX);
-            Serial.print(" ");
-        }
-        Serial.print("\r\n");
+        //Serial.print("ID: ");
+        //Serial.print(incoming.id, HEX);
+        //Serial.print(" Len: ");
+        //Serial.print(incoming.length);
+        sprintf(hex_string, "ID: %X  Data: %X %X %X %X %X %X %X %X \r\n", incoming.id, incoming.data.bytes[0], incoming.data.bytes[1], incoming.data.bytes[2], incoming.data.bytes[3], incoming.data.bytes[4], incoming.data.bytes[5], incoming.data.bytes[6], incoming.data.bytes[7] );
+        //msg = ID + hex_string + Data;
+        Serial.print(hex_string);
+        //for (int count = 0; count < incoming.length; count++) {
+       //     Serial.print(incoming.data.bytes[count], HEX);
+       //     Serial.print(" ");
+        //}
+        //Serial.print("\r\n");
     }
 }
 
@@ -459,6 +463,7 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
 
 void CANBus::readCAN0TX()
 {
+    char hex_string[100];
     if (Can0.available() > 0)
     {
         CAN_FRAME incCAN0;
@@ -470,15 +475,19 @@ void CANBus::readCAN0TX()
     {
         CAN_FRAME incCAN1;
         Can1.read(incCAN1);
+        sprintf(hex_string, "ID: %X  Data: %X %X %X %X %X %X %X %X \r\n", incCAN1.id, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+        Serial.print(hex_string);
+        /*
         Serial.print("ID: ");
-        Serial.print(incCAN1.id);
+        Serial.print(incCAN1.id, 16);
         Serial.print(" MSG: ");
         for (uint8_t i = 0; i < 8; i++)
         {
-            Serial.print(incCAN1.data.byte[i]);
+            Serial.print(incCAN1.data.byte[i], 16);
             Serial.print(" ");
         }
         Serial.println("");
+        */
         Can0.sendFrame(incCAN1);
         //Serial.println("CAN1->CAN0");
     }

@@ -61,138 +61,139 @@ uint16_t rangeEnd = 0xFFF;
 
 int pageControl(uint8_t, bool);
 
+bool msgUp = false;
 
 /*=========================================================
     Framework Functions
 ===========================================================*/
 //
-void bmpDraw(char *filename, int x, int y) {
-  File     bmpFile;
-  int      bmpWidth, bmpHeight;   // W+H in pixels
-  uint8_t  bmpDepth;              // Bit depth (currently must be 24)
-  uint32_t bmpImageoffset;        // Start of image data in file
-  uint32_t rowSize;               // Not always = bmpWidth; may have padding
-  uint8_t  sdbuffer[3*BUFFPIXEL]; // pixel in buffer (R+G+B per pixel)
-  uint16_t lcdbuffer[BUFFPIXEL];  // pixel out buffer (16-bit per pixel)
-  uint8_t  buffidx = sizeof(sdbuffer); // Current position in sdbuffer
-  boolean  goodBmp = false;       // Set to true on valid header parse
-  boolean  flip    = true;        // BMP is stored bottom-to-top
-  int      w, h, row, col;
-  uint8_t  r, g, b;
-  uint32_t pos = 0, startTime = millis();
-  uint8_t  lcdidx = 0;
-  boolean  first = true;
+void bmpDraw(char* filename, int x, int y) {
+    File     bmpFile;
+    int      bmpWidth, bmpHeight;   // W+H in pixels
+    uint8_t  bmpDepth;              // Bit depth (currently must be 24)
+    uint32_t bmpImageoffset;        // Start of image data in file
+    uint32_t rowSize;               // Not always = bmpWidth; may have padding
+    uint8_t  sdbuffer[3 * BUFFPIXEL]; // pixel in buffer (R+G+B per pixel)
+    uint16_t lcdbuffer[BUFFPIXEL];  // pixel out buffer (16-bit per pixel)
+    uint8_t  buffidx = sizeof(sdbuffer); // Current position in sdbuffer
+    boolean  goodBmp = false;       // Set to true on valid header parse
+    boolean  flip = true;        // BMP is stored bottom-to-top
+    int      w, h, row, col;
+    uint8_t  r, g, b;
+    uint32_t pos = 0, startTime = millis();
+    uint8_t  lcdidx = 0;
+    boolean  first = true;
 
-  if ((x >= dispx) || (y >= dispy)) return;
+    if ((x >= dispx) || (y >= dispy)) return;
 
-  Serial.println();
-  Serial.print(F("Loading image '"));
-  Serial.print(filename);
-  Serial.println('\'');
+    Serial.println();
+    Serial.print(F("Loading image '"));
+    Serial.print(filename);
+    Serial.println('\'');
 
-  // Open requested file on SD card
-  if ((bmpFile = SD.open(filename)) == NULL) {
-      Serial.println(F("File not found"));
-      return;
-  }
-
-
-  // Parse BMP header
-  if(read16(bmpFile) == 0x4D42) { // BMP signature
-
-    Serial.println(read32(bmpFile));
-    (void)read32(bmpFile); // Read & ignore creator bytes
-    bmpImageoffset = read32(bmpFile); // Start of image data
-    Serial.print(F("Image Offset: ")); 
-    Serial.println(bmpImageoffset, DEC);
-
-    // Read DIB header
-    Serial.print(F("Header size: ")); 
-    Serial.println(read32(bmpFile));
-    bmpWidth  = read32(bmpFile);
-    bmpHeight = read32(bmpFile);
-
-    if(read16(bmpFile) == 1) { // # planes -- must be '1'
-      bmpDepth = read16(bmpFile); // bits per pixel
-      Serial.print(F("Bit Depth: ")); 
-      Serial.println(bmpDepth);
-      if((bmpDepth == 24) && (read32(bmpFile) == 0)) { // 0 = uncompressed
-        goodBmp = true; // Supported BMP format -- proceed!
-        Serial.print(F("Image size: "));
-        Serial.print(bmpWidth);
-        Serial.print('x');
-        Serial.println(bmpHeight);
-
-        // BMP rows are padded (if needed) to 4-byte boundary
-        rowSize = (bmpWidth * 3 + 3) & ~3;
-
-        // If bmpHeight is negative, image is in top-down order.
-        // This is not canon but has been observed in the wild.
-        if(bmpHeight < 0) {
-          bmpHeight = -bmpHeight;
-          flip      = false;
-        }
-
-        // Crop area to be loaded
-        w = bmpWidth;
-        h = bmpHeight;
-        if((x+w-1) >= dispx)  w = dispx  - x;
-        if((y+h-1) >= dispy) h = dispy - y;
-
-        // Set TFT address window to clipped image bounds
-
-        for (row=0; row<h; row++) { // For each scanline...
-          // Seek to start of scan line.  It might seem labor-
-          // intensive to be doing this on every line, but this
-          // method covers a lot of gritty details like cropping
-          // and scanline padding.  Also, the seek only takes
-          // place if the file position actually needs to change
-          // (avoids a lot of cluster math in SD library).
-          if(flip) // Bitmap is stored bottom-to-top order (normal BMP)
-            pos = bmpImageoffset + (bmpHeight - 1 - row) * rowSize;
-          else     // Bitmap is stored top-to-bottom
-          pos = bmpImageoffset + row * rowSize;
-          if(bmpFile.position() != pos) { // Need seek?
-            bmpFile.seek(pos);
-            buffidx = sizeof(sdbuffer); // Force buffer reload
-          }
-
-          for (col=0; col<w; col++) { // For each column...
-            // Time to read more pixel data?
-            if (buffidx >= sizeof(sdbuffer)) { // Indeed
-              // Push LCD buffer to the display first
-              if(lcdidx > 0) {
-                myGLCD.setColor(lcdbuffer[lcdidx]);
-                myGLCD.drawPixel(col+155, row+1);
-                lcdidx = 0;
-                first  = false;
-              }
-
-              bmpFile.read(sdbuffer, sizeof(sdbuffer));
-              buffidx = 0; // Set index to beginning
-            }
-
-            // Convert pixel from BMP to TFT format
-            b = sdbuffer[buffidx++];
-            g = sdbuffer[buffidx++];
-            r = sdbuffer[buffidx++];
-            myGLCD.setColor(r,g,b);
-            myGLCD.drawPixel(col+155, row+1);
-          } // end pixel
-
-        } // end scanline
-
-        // Write any remaining data to LCD
-        if(lcdidx > 0) {
-           myGLCD.setColor(lcdbuffer[lcdidx]);
-          myGLCD.drawPixel(col+155, row+1);
-        } 
-      } // end goodBmp
+    // Open requested file on SD card
+    if ((bmpFile = SD.open(filename)) == NULL) {
+        Serial.println(F("File not found"));
+        return;
     }
-  }
 
-  bmpFile.close();
-  if(!goodBmp) Serial.println(F("BMP format not recognized."));
+
+    // Parse BMP header
+    if (read16(bmpFile) == 0x4D42) { // BMP signature
+
+        Serial.println(read32(bmpFile));
+        (void)read32(bmpFile); // Read & ignore creator bytes
+        bmpImageoffset = read32(bmpFile); // Start of image data
+        Serial.print(F("Image Offset: "));
+        Serial.println(bmpImageoffset, DEC);
+
+        // Read DIB header
+        Serial.print(F("Header size: "));
+        Serial.println(read32(bmpFile));
+        bmpWidth = read32(bmpFile);
+        bmpHeight = read32(bmpFile);
+
+        if (read16(bmpFile) == 1) { // # planes -- must be '1'
+            bmpDepth = read16(bmpFile); // bits per pixel
+            Serial.print(F("Bit Depth: "));
+            Serial.println(bmpDepth);
+            if ((bmpDepth == 24) && (read32(bmpFile) == 0)) { // 0 = uncompressed
+                goodBmp = true; // Supported BMP format -- proceed!
+                Serial.print(F("Image size: "));
+                Serial.print(bmpWidth);
+                Serial.print('x');
+                Serial.println(bmpHeight);
+
+                // BMP rows are padded (if needed) to 4-byte boundary
+                rowSize = (bmpWidth * 3 + 3) & ~3;
+
+                // If bmpHeight is negative, image is in top-down order.
+                // This is not canon but has been observed in the wild.
+                if (bmpHeight < 0) {
+                    bmpHeight = -bmpHeight;
+                    flip = false;
+                }
+
+                // Crop area to be loaded
+                w = bmpWidth;
+                h = bmpHeight;
+                if ((x + w - 1) >= dispx)  w = dispx - x;
+                if ((y + h - 1) >= dispy) h = dispy - y;
+
+                // Set TFT address window to clipped image bounds
+
+                for (row = 0; row < h; row++) { // For each scanline...
+                  // Seek to start of scan line.  It might seem labor-
+                  // intensive to be doing this on every line, but this
+                  // method covers a lot of gritty details like cropping
+                  // and scanline padding.  Also, the seek only takes
+                  // place if the file position actually needs to change
+                  // (avoids a lot of cluster math in SD library).
+                    if (flip) // Bitmap is stored bottom-to-top order (normal BMP)
+                        pos = bmpImageoffset + (bmpHeight - 1 - row) * rowSize;
+                    else     // Bitmap is stored top-to-bottom
+                        pos = bmpImageoffset + row * rowSize;
+                    if (bmpFile.position() != pos) { // Need seek?
+                        bmpFile.seek(pos);
+                        buffidx = sizeof(sdbuffer); // Force buffer reload
+                    }
+
+                    for (col = 0; col < w; col++) { // For each column...
+                      // Time to read more pixel data?
+                        if (buffidx >= sizeof(sdbuffer)) { // Indeed
+                          // Push LCD buffer to the display first
+                            if (lcdidx > 0) {
+                                myGLCD.setColor(lcdbuffer[lcdidx]);
+                                myGLCD.drawPixel(col + 155, row + 1);
+                                lcdidx = 0;
+                                first = false;
+                            }
+
+                            bmpFile.read(sdbuffer, sizeof(sdbuffer));
+                            buffidx = 0; // Set index to beginning
+                        }
+
+                        // Convert pixel from BMP to TFT format
+                        b = sdbuffer[buffidx++];
+                        g = sdbuffer[buffidx++];
+                        r = sdbuffer[buffidx++];
+                        myGLCD.setColor(r, g, b);
+                        myGLCD.drawPixel(col + 155, row + 1);
+                    } // end pixel
+
+                } // end scanline
+
+                // Write any remaining data to LCD
+                if (lcdidx > 0) {
+                    myGLCD.setColor(lcdbuffer[lcdidx]);
+                    myGLCD.drawPixel(col + 155, row + 1);
+                }
+            } // end goodBmp
+        }
+    }
+
+    bmpFile.close();
+    if (!goodBmp) Serial.println(F("BMP format not recognized."));
 
 }
 
@@ -313,7 +314,7 @@ void loadBar(int progress)
 {
     if (progress >= DONE)
     {
-        drawSquareBtn(200, 200, 400, 220, "Finished", menuBtnColor,  menuBtnBorder, menuBtnText, CENTER);
+        drawSquareBtn(200, 200, 400, 220, "Finished", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         //myGLCD.setColor(menuBtnColor);
         //myGLCD.fillRect(200, 200, 400, 220);
 
@@ -453,9 +454,9 @@ void drawProgramScroll(int scroll)
     for (int i = 0; i < MAXSCROLL; i++)
     {
         char intOut[4] = "0x";
-        itoa(arrayIn[scroll+1], temp, 16);
+        itoa(arrayIn[scroll + 1], temp, 16);
         strcat(intOut, temp);
-        if (scroll < sizeof(arrayIn) && arrayIn[scroll+1] > 0)
+        if (scroll < sizeof(arrayIn) && arrayIn[scroll + 1] > 0)
         {
             drawSquareBtn(150, y, 410, y + 35, intOut, menuBackground, menuBtnBorder, menuBtnText, LEFT);
         }
@@ -484,8 +485,8 @@ void drawProgram(int scroll = 0)
 // Button function for the program page
 void program()
 {
-static uint8_t selected = 0;
-static int scroll = 0;
+    static uint8_t selected = 0;
+    static int scroll = 0;
     // Touch screen controls
     if (myTouch.dataAvailable())
     {
@@ -564,7 +565,7 @@ static int scroll = 0;
                 {
                     waitForItRect(150, 275, 400, 315);
                     Serial.print("Sending PID: ");
-                    Serial.println(arrayIn[selected+1]);
+                    Serial.println(arrayIn[selected + 1]);
                     can1.PIDStream(CAN_PID_ID, arrayIn[selected]);
                 }
             }
@@ -583,7 +584,7 @@ void drawTraffic()
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, "LCD CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, "Serial CAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 135, 308, 185, "TX CAN0", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 135, 308, 185, "TX CAN1", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 135, 475, 185, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 190, 308, 240, "Fltr CAN0", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 190, 475, 240, "Fltr CAN1", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -610,8 +611,8 @@ void drawNumpad()
 
     uint8_t startPos = 0;
     uint8_t endPos = 0;
-    uint8_t startArray[3] = { 0, 0, 0 };
-    uint8_t endArray[3] = { 0, 0, 0 };
+    uint8_t startArray[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    uint8_t endArray[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     int rValue = -1;
     // Clear background
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
@@ -639,8 +640,8 @@ void drawNumpad()
     }
     drawRoundBtn(365, 170, 470, 210, "Delete", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 
-    drawRoundBtn(145, 220, 305, 260, "Start:" + String(rangeStart, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-    drawRoundBtn(315, 220, 470, 260, "End:" + String(rangeEnd, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+    drawRoundBtn(145, 220, 305, 260, "S:" + String(rangeStart, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+    drawRoundBtn(315, 220, 470, 260, "E:" + String(rangeEnd, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 
     drawRoundBtn(145, 270, 305, 310, "Accept", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(315, 270, 470, 310, "Cancel", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -655,19 +656,19 @@ void drawNumpad()
             switch (selectedRange)
             {
             case false:
-                if (startPos < 3)
+                if (startPos < 8)
                 {
                     startArray[startPos] = rValue;
-                    drawRoundBtn(145, 220, 305, 260, "Start:" + String(startArray[0], 16) + String(startArray[1], 16) + String(startArray[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+                    drawRoundBtn(145, 220, 305, 260, "S:" + String(startArray[0], 16) + String(startArray[1], 16) + String(startArray[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
                     rValue = -1;
                     startPos++;
                 }
                 break;
             case true:
-                if (endPos < 3)
+                if (endPos < 8)
                 {
                     endArray[endPos] = rValue;
-                    drawRoundBtn(315, 220, 470, 260, "End:" + String(endArray[0], 16) + String(endArray[1], 16) + String(endArray[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+                    drawRoundBtn(315, 220, 470, 260, "E:" + String(endArray[0], 16) + String(endArray[1], 16) + String(endArray[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
                     rValue = -1;
                     endPos++;
                 }
@@ -698,7 +699,7 @@ void drawNumpad()
         }
         if (rValue == 0x11)
         {
-            rangeStart = (startArray[0] * 256) + (startArray[1]* 16) + (startArray[2]);
+            rangeStart = (startArray[0] * 256) + (startArray[1] * 16) + (startArray[2]);
             rangeEnd = (endArray[0] * 256) + (endArray[1] * 16) + (endArray[2]);
             Serial.println(rangeStart, HEX);
             Serial.println(rangeEnd, HEX);
@@ -714,7 +715,7 @@ void readInCANMsg()
     myGLCD.setFont(SmallFont);
     uint8_t rxBuf[8];
     uint16_t rxId;
-    if (can1.getMessage(rxBuf, rxId))                        
+    if (can1.getMessage(rxBuf, rxId))
     {
         myGLCD.setColor(VGA_WHITE);
         myGLCD.fillRect(150, (indexCANMsg - 5), 479, (indexCANMsg + 25));
@@ -796,7 +797,7 @@ int numpadButtons(uint16_t rangeStart, uint16_t rangeEnd)
             // 6
             if ((x >= 145) && (x <= 195))
             {
-                waitForIt(145, 125, 195, 165); 
+                waitForIt(145, 125, 195, 165);
                 return 0x06;
             }
             // 7
@@ -892,8 +893,7 @@ int numpadButtons(uint16_t rangeStart, uint16_t rangeEnd)
             if ((x >= 315) && (x <= 470))
             {
                 waitForIt(315, 270, 470, 310);
-
-
+                pageControl(5, true);
             }
         }
     }
@@ -903,6 +903,7 @@ int numpadButtons(uint16_t rangeStart, uint16_t rangeEnd)
 // Buttons for sniffer menu
 void readInCANButtons()
 {
+    static int testfn = 0;
     // Touch screen controls
     if (myTouch.dataAvailable())
     {
@@ -919,6 +920,36 @@ void readInCANButtons()
                 // LCD CAN
                 pageControl(6, false);
             }
+            if ((y >= 135) && (y <= 185))
+            {
+                waitForIt(145, 135, 308, 185);
+                // TX CAN0
+                pageControl(9, false);
+            }
+            if ((y >= 190) && (y <= 240))
+            {
+                waitForIt(145, 190, 308, 240);
+                // Filter CAN0
+                pageControl(8, false);
+            }
+            if ((y >= 245) && (y <= 295))
+            {
+                waitForIt(145, 245, 308, 295);
+                // Set Baud
+                uint32_t temp = can1.getBaud();
+                if (temp == 500000)
+                {
+                    can1.setBaud(250000);
+                    errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+                    msgUp = true;
+                }
+                else if (temp == 250000)
+                {
+                    can1.setBaud(500000);
+                    errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+                    msgUp = true;
+                }
+            }
         }
         if ((x >= 312) && (x <= 475))
         {
@@ -928,30 +959,78 @@ void readInCANButtons()
                 // Serial CAN
                 pageControl(7, false);
             }
-        }
-        if ((x >= 145) && (x <= 308))
-        {
+            if ((y >= 135) && (y <= 185))
+            {
+                waitForIt(312, 135, 475, 185);
+                // Unused
+                //pageControl(,);
+                testfn = 0;
+            }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(145, 190, 308, 240);
-                // Set Filter CAN0
-                pageControl(8, false);
+                waitForIt(312, 190, 475, 240);
+                // Filter CAN1
+                //pageControl(7, false);
             }
-        }
-        if ((x >= 145) && (x <= 308))
-        {
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(145, 245, 308, 295);
-                // Toggle Baud
-                uint32_t temp = can1.getBaud();
-                if (temp == 500000)
+                waitForIt(312, 245, 475, 295);
+                // Unused
+                Serial.println("Button Pressed");
+                Serial.println(testfn);
+                uint8_t letsgo1[8] = { 0x0A, 0x3E, 0x00, 0x09, 0x09, 0xCA, 0xFE, 0x00 };
+                uint8_t letsgo2[8] = { 0x01, 0x40, 0xFF, 0x5B, 0x00, 0x04, 0x01, 0x1D };
+                uint8_t letsgo3[8] = { 0x02, 0x00, 0x04, 0x01, 0x2F, 0x04, 0x05, 0x01 };
+                uint8_t letsgo4[8] = { 0x03, 0x54, 0xF0, 0xE2, 0x01, 0x33, 0x00, 0x04 };
+                uint8_t letsgo5[8] = { 0x04, 0x01, 0x06, 0xF0, 0xE4, 0x01, 0x43, 0x05 };
+                uint8_t letsgo6[8] = { 0x05, 0x05, 0x01, 0x30, 0xF1, 0xE5, 0x01, 0x10 };
+                uint8_t letsgo7[8] = { 0x06, 0xF0, 0xE5, 0x01, 0x95, 0xF0, 0xE5, 0x01 };
+                uint8_t letsgo8[8] = { 0x07, 0x6E, 0x00, 0x03, 0x01, 0x6C, 0x00, 0x04 };
+                uint8_t letsgo9[8] = { 0x08, 0x01, 0x66, 0x00, 0x04, 0x01, 0x67, 0x04 };
+                uint8_t letsgo0[8] = { 0x09, 0x04, 0x01, 0x6E, 0x00, 0x10, 0x7F, 0xFF };
+
+                switch (testfn)
                 {
-                    can1.setBaud(250000);
-                }
-                else if (temp == 250000)
-                {
-                    can1.setBaud(500000);
+                case 0:
+                    can1.sendFrame(0x1CEBF900, letsgo1);
+                    testfn++;
+                    break;
+                case 1:
+                    can1.sendFrame(0x1CEBF900, letsgo2);
+                    testfn++;
+                    break;
+                case 2:
+                    can1.sendFrame(0x1CEBF900, letsgo3);
+                    testfn++;
+                    break;
+                case 3:
+                    can1.sendFrame(0x1CEBF900, letsgo4);
+                    testfn++;
+                    break;
+                case 4:
+                    can1.sendFrame(0x1CEBF900, letsgo5);
+                    testfn++;
+                    break;
+                case 5:
+                    can1.sendFrame(0x1CEBF900, letsgo6);
+                    testfn++;
+                    break;
+                case 6:
+                    can1.sendFrame(0x1CEBF900, letsgo7);
+                    testfn++;
+                    break;
+                case 7:
+                    can1.sendFrame(0x1CEBF900, letsgo8);
+                    testfn++;
+                    break;
+                case 8:
+                    can1.sendFrame(0x1CEBF900, letsgo9);
+                    testfn++;
+                    break;
+                case 9:
+                    can1.sendFrame(0x1CEBF900, letsgo0);
+                    testfn++;
+                    break;
                 }
             }
         }
@@ -967,9 +1046,9 @@ void drawExtra()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(200, 80, 400, 130, "PID Gauges", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 135, 400, 185, "DTC Scan", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 190, 400, 240, "AFM1", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(200, 245, 400, 295, "AFM2", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 135, 400, 185, "Scan DTCs", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 190, 400, 240, "Clear DTCs", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(200, 245, 400, 295, "Stop AFM", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // PID stream gauges
@@ -991,7 +1070,7 @@ void PIDGauges()
     myGLCD.fillCircle(380, 120, 55);
     myGLCD.fillCircle(220, 250, 55);
     myGLCD.fillCircle(220, 120, 55);
-    
+
     myGLCD.setBackColor(VGA_WHITE);
     myGLCD.setColor(menuBtnColor);
     myGLCD.print("Load", 188, 148); // 4
@@ -1016,7 +1095,7 @@ void PIDGauges()
     float y4 = r * sin(pi / 2) + 250;
 
     /*
-    for (float t = pi / 2 + 1; t <= 2.5 * pi - 1; t+= 0.015)// 286 points 
+    for (float t = pi / 2 + 1; t <= 2.5 * pi - 1; t+= 0.015)// 286 points
     {
         myGLCD.setBackColor(VGA_WHITE);
         myGLCD.setColor(VGA_WHITE);
@@ -1058,7 +1137,7 @@ void PIDGauges()
         myGLCD.printNumI(g4, 358, 258, 3, '0');
 
         // gauge values 0-286
-        
+
         if (g1 >= 0)
         {
             g1 = offset + (g1 * 0.042);
@@ -1071,7 +1150,7 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 120, x1, y1);
         }
-        
+
         if (g2 >= 0)
         {
             g2 = (offset + ((g2 * 0.0286) * 0.015));
@@ -1084,7 +1163,7 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(380, 120, x2, y2);
         }
-        
+
         if (g3 >= 0)
         {
             g3 = offset + (g3 * 0.01);
@@ -1097,7 +1176,7 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 250, x3, y3);
         }
-        
+
         if (g4 >= 0)
         {
             g4 = offset + (g4 * 0.027);
@@ -1127,17 +1206,18 @@ void AFM1()
 {
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
     can1.sendFrame(0x7E0, test1);
-    delay(20);
-    byte test2[8] = { 0x02, 0xEE, 0x10, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
-    can1.sendFrame(0x7E8, test2);
 }
 void AFM2()
 {
-    byte test1[8] = { 0x05, 0x7F, 0xAE, 0xE3, 0x04, 0x06, 0xAA, 0xAA };
-    can1.sendFrame(0x7E0, test1);
-    delay(120);
-    byte test2[8] = { 0x01, 0x60, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
-    can1.sendFrame(0x7E8, test2);
+    byte test1[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    can1.sendFrame(0x101, test1);
+}
+void clearDTC()
+{
+    byte test1[8] = { 0x02, 0x10, 0x92, 0x55, 0x55, 0x55, 0x55, 0x55 };
+    byte test2[8] = { 0x02, 0x10, 0x03, 0x55, 0x55, 0x55, 0x55, 0x55 };
+    can1.sendFrame(0x7E1, test1);
+    can1.sendFrame(0x7E1, test2);
 }
 
 // Buttons for the extra menu
@@ -1164,7 +1244,7 @@ void extraButtons()
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(200, 135, 400, 185);
-                    // DTC Scan
+                // Scan DTCs
             }
         }
         if ((x >= 200) && (x <= 400))
@@ -1172,8 +1252,8 @@ void extraButtons()
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(200, 190, 400, 240);
-                //autoStartStop();
-                AFM1();
+                // Clear DTCs
+                clearDTC();
             }
         }
         if ((x >= 200) && (x <= 400))
@@ -1181,7 +1261,8 @@ void extraButtons()
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(200, 245, 400, 295);
-                AFM2();
+                //autoStartStop();
+                AFM1();
             }
         }
     }
@@ -1263,7 +1344,7 @@ int pageControl(uint8_t page, bool value = false)
                     errorMSG("Error", "Please Perform", "PIDSCAN First");
                     hasDrawn = true;
                 }
-                
+
             }
             // Call buttons if any
             if (hasPID == true)
@@ -1291,6 +1372,10 @@ int pageControl(uint8_t page, bool value = false)
                 hasDrawn = true;
                 controlPage = page;
                 drawTraffic();
+            }
+            if (msgUp)
+            {
+                errorMSGBtn(5);
             }
             // Call buttons if any
             readInCANButtons();
@@ -1324,17 +1409,17 @@ int pageControl(uint8_t page, bool value = false)
                 drawNumpad();
             }
             // Call buttons if any
-            
+
             break;
         case 9:
             if (!hasDrawn)
             {
                 hasDrawn = true;
                 // Draw Page
-
+                drawCANSerial();
             }
             // Call buttons if any
-
+            can1.readCAN0TX();
             break;
         case 10:
             if (!hasDrawn)
@@ -1375,6 +1460,7 @@ uint8_t errorMSGBtn(uint8_t page)
             if ((y >= 140) && (y <= 170))
             {
                 waitForItRect(400, 140, 450, 170);
+                msgUp = false;
                 pageControl(controlPage);
             }
         }
@@ -1504,8 +1590,7 @@ void setup() {
 }
 
 // Calls pageControl with a value of 1 to set view page as the home page
-void loop() {
-    
+void loop() 
+{
     controlPage = pageControl(controlPage);
-
 }
