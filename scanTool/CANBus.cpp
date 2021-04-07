@@ -18,10 +18,18 @@ CANBus::CANBus()
 }
 
 // Initialize CAN1 and set the proper baud rates here
-void CANBus::startCAN(uint16_t start, uint16_t end)
+void CANBus::startCAN(uint32_t start, uint32_t end)
 {
+    //Can0.setRXFilter(start, end, true);
     Can0.begin(baud);
     Can0.watchForRange(start, end);
+    Can1.begin(baud);
+    Can1.watchForRange(start, end);
+}
+
+// Initialize CAN1 and set the proper baud rates here
+void CANBus::startCAN2(uint32_t start, uint32_t end)
+{
     Can1.begin(baud);
     Can1.watchForRange(start, end);
 }
@@ -245,7 +253,7 @@ bool CANBus::getNextPID()
 }
 
 // Method used to manually get the ID and byte array
-bool CANBus::getMessage(buf& msg, uint16_t& id)
+bool CANBus::getMessage(buf& msg, uint32_t& id)
 {
     CAN_FRAME incoming;
     if (Can0.available() > 0) {
@@ -262,7 +270,7 @@ bool CANBus::getMessage(buf& msg, uint16_t& id)
 //
 void CANBus::CANTraffic() 
 {
-    char hex_string[100];
+    char hex_string[50];
     CAN_FRAME incoming;
     if (Can0.available() > 0) {
         Can0.read(incoming);
@@ -270,7 +278,7 @@ void CANBus::CANTraffic()
         //Serial.print(incoming.id, HEX);
         //Serial.print(" Len: ");
         //Serial.print(incoming.length);
-        sprintf(hex_string, "ID: %X  Data: %X %X %X %X %X %X %X %X \r\n", incoming.id, incoming.data.bytes[0], incoming.data.bytes[1], incoming.data.bytes[2], incoming.data.bytes[3], incoming.data.bytes[4], incoming.data.bytes[5], incoming.data.bytes[6], incoming.data.bytes[7] );
+        sprintf(hex_string, "ID: %X D: %X %X %X %X %X %X %X %X\r\n", incoming.id, incoming.data.bytes[0], incoming.data.bytes[1], incoming.data.bytes[2], incoming.data.bytes[3], incoming.data.bytes[4], incoming.data.bytes[5], incoming.data.bytes[6], incoming.data.bytes[7] );
         //msg = ID + hex_string + Data;
         Serial.print(hex_string);
         //for (int count = 0; count < incoming.length; count++) {
@@ -463,7 +471,7 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
 
 void CANBus::readCAN0TX()
 {
-    char hex_string[100];
+    char hex_string[50];
     if (Can0.available() > 0)
     {
         CAN_FRAME incCAN0;
@@ -475,7 +483,7 @@ void CANBus::readCAN0TX()
     {
         CAN_FRAME incCAN1;
         Can1.read(incCAN1);
-        sprintf(hex_string, "ID: %X  Data: %X %X %X %X %X %X %X %X \r\n", incCAN1.id, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+        sprintf(hex_string, "ID: %X D: %X %X %X %X %X %X %X %X\r\n", incCAN1.id, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
         Serial.print(hex_string);
         /*
         Serial.print("ID: ");

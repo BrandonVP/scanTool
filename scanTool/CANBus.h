@@ -48,9 +48,10 @@ private:
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
-	bool getMessage(buf&, uint16_t&);
+	bool getMessage(buf&, uint32_t&);
 	void sendFrame(uint32_t, byte*);
-	void startCAN(uint16_t, uint16_t);
+	void startCAN(uint32_t, uint32_t);
+	void startCAN2(uint32_t, uint32_t);
 	void requestVIN(uint16_t, char*);
 	char* getFullDir();
 	void CANTraffic();
