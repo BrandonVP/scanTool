@@ -48,7 +48,7 @@ private:
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
-	bool getMessage(buf&, uint32_t&);
+	bool getMessage(buf&, uint32_t&, uint8_t);
 	void sendFrame(uint32_t, byte*);
 	void startCAN(uint32_t, uint32_t);
 	void startCAN2(uint32_t, uint32_t);

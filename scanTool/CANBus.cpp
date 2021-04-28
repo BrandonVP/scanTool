@@ -80,7 +80,12 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
     byte frame[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     frame[2] = range;
     sendFrame(txid, frame);
-    while (isWait)
+
+    // Get run time
+    unsigned long timer = millis();
+
+
+    while (isWait && (millis() - timer < 10000))
     {
         if (Can0.available() > 0) {
             Can0.read(incoming);
@@ -143,9 +148,13 @@ void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
     // Waits to recieve all messages
     bool isWait = true;
 
+
+    // Get run time
+    unsigned long timer = millis();
+
     // Send first frame requesting VIN
     sendFrame(txidVIN, ReadVIN1st);
-    while (isWait)
+    while (isWait && (millis() - timer < 20000))
     {
         if (Can0.available() > 0) {
             Can0.read(incoming);
@@ -182,7 +191,12 @@ void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
         }
 
     }
-    
+
+    if (millis() - timer > 20000)
+    {
+        return;
+    }
+
     // Create directory paths
     uint8_t j = 0;
     for (uint8_t i = 9; i < 17; i++)
@@ -196,7 +210,7 @@ void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
     Serial.println(fullDir);
     Serial.println(PIDDir);
     SDPrint.createDRIVE(fullDir);
-    
+
     j = 0;
     for (uint8_t i = 9; i < 16; i++)
     {
@@ -253,16 +267,37 @@ bool CANBus::getNextPID()
 }
 
 // Method used to manually get the ID and byte array
-bool CANBus::getMessage(buf& msg, uint32_t& id)
+bool CANBus::getMessage(buf& msg, uint32_t& id, uint8_t channel)
 {
     CAN_FRAME incoming;
-    if (Can0.available() > 0) {
-        Can0.read(incoming);
-        id = incoming.id;
-        for (int count = 0; count < incoming.length; count++) {
-            msg[count] = incoming.data.bytes[count];
+    if (channel == 0)
+    {
+        if (Can0.available() > 0) {
+            Can0.read(incoming);
+            id = incoming.id;
+            for (int count = 0; count < incoming.length; count++) {
+                msg[count] = incoming.data.bytes[count];
+            }
+            return true;
         }
-        return true;
+    }
+    else if (channel == 1)
+    {
+        if (Can0.available() > 0)
+        {
+            CAN_FRAME incCAN0;
+            Can0.read(incCAN0);
+            Can1.sendFrame(incCAN0);
+        }
+        if (Can1.available() > 0) {
+            CAN_FRAME incCAN1;
+            Can1.read(incCAN1);
+            for (int count = 0; count < incCAN1.length; count++) {
+                msg[count] = incCAN1.data.bytes[count];
+            }
+            Can0.sendFrame(incCAN1);
+            return true;
+        }
     }
     return false;
 }

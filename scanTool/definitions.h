@@ -9,6 +9,9 @@
 
 #define CAN_PID_ID 0x7DF
 
+#define CAN1 1
+#define CAN0 0
+
 // For the draw shape functions
 #define LEFT 1
 #define CENTER 2
