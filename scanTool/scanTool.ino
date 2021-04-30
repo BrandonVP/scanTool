@@ -18,11 +18,11 @@ CLEAN up globals!!! (too many)
     End Todo List
 =========================================================*/
 
+#include <UTFT.h>
 #include <SD.h>
 #include <UTouchCD.h>
 #include <memorysaver.h>
 #include <SPI.h>
-#include <UTFT.h>
 #include <UTouch.h>
 #include "CANBus.h"
 #include "definitions.h"
@@ -517,7 +517,7 @@ void drawVehicleTools()
     drawRoundBtn(145, 80, 308, 130, "PIDSCAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, "PIDSTRM", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, "PID Guages", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 135, 475, 185, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 135, 475, 185, "VIN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 190, 308, 240, "DTC Scan", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 190, 475, 240, "DTC Clear", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -577,10 +577,10 @@ void VehicleToolButtons()
             }
             if ((y >= 135) && (y <= 185))
             {
-                //waitForIt(312, 135, 475, 185);
-                // Unused
-                //page = 13;
-                //hasDrawn = false;
+                waitForIt(312, 135, 475, 185);
+                // VIN
+                page = 13;
+                hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -645,7 +645,7 @@ void startPIDSCAN()
     // Print loading bar with current status
     loadBar(status);
     // Get vehicle vin, will be saved in can1 object
-    can1.requestVIN(rxid, currentDir);
+    can1.requestVIN(rxid, currentDir, true);
 
     // Update load bar
     loadBar(status++);
@@ -957,9 +957,34 @@ void PIDGauges()
     return;
 }
 
+/*================ Draw Vin ================*/
+void drawVIN()
+{   
+    uint16_t rxid = 0x7E8;
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    can1.requestVIN(rxid, currentDir, false);
+    drawSquareBtn(150, 150, 479, 170, "VIN", themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(150, 180, 479, 200, can1.getVIN(), themeBackground, themeBackground, menuBtnColor, CENTER);
+}
 /*============== DTC SCAN ==============*/
 // Draw
 // Function
+void clearDTC()
+{
+    uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
+    byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
+    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(150, 150, 479, 170, "Clearing DTCS...", themeBackground, themeBackground, menuBtnColor, CENTER);
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            can1.sendFrame(IDc[i], MSGc);
+            delay(400);
+        }
+    }
+    drawSquareBtn(150, 150, 479, 170, "All DTCS Cleared", themeBackground, themeBackground, menuBtnColor, CENTER);
+}
 // Buttons
 
 /*============== DTC CLEAR ==============*/
@@ -1184,6 +1209,7 @@ void AFM2()
     byte test1[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
     can1.sendFrame(0x101, test1);
 }
+/*
 void clearDTC()
 {
     byte test1[8] = { 0x02, 0x10, 0x92, 0x55, 0x55, 0x55, 0x55, 0x55 };
@@ -1191,7 +1217,7 @@ void clearDTC()
     can1.sendFrame(0x7E1, test1);
     can1.sendFrame(0x7E1, test2);
 }
-
+*/
 
 /*=========================================================
     Settings
@@ -1304,10 +1330,10 @@ void drawNumpad()
     int posY = 80;
     uint8_t numPad = 0x00;
 
-    for (uint i = 0; i < 3; i++)
+    for (uint8_t i = 0; i < 3; i++)
     {
         int posX = 145;
-        for (uint j = 0; j < 6; j++)
+        for (uint8_t j = 0; j < 6; j++)
         {
             if (numPad < 0x10)
             {
@@ -1785,6 +1811,7 @@ int pageControl()
             {
                 hasDrawn = true;
                 // Draw Page
+                drawVIN();
             }
             // Call buttons if any
             break;
@@ -1988,8 +2015,10 @@ int pageControl()
             {
                 hasDrawn = true;
                 // Draw Page
+                drawNumpad();
             }
             // Call buttons if any
+            numpadButtons(startRange, endRange);
             break;
         case 38:
             if (!hasDrawn)

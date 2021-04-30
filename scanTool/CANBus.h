@@ -52,7 +52,7 @@ private:
 	void sendFrame(uint32_t, byte*);
 	void startCAN(uint32_t, uint32_t);
 	void startCAN2(uint32_t, uint32_t);
-	void requestVIN(uint16_t, char*);
+	void requestVIN(uint16_t, char*, bool);
 	char* getFullDir();
 	void CANTraffic();
 	void PIDStream(uint16_t, uint8_t);

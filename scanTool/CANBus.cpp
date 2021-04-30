@@ -130,7 +130,7 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
 }
 
 
-void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
+void CANBus::requestVIN(uint16_t IDFilter, char* currentDir, bool saveSD)
 {
     // Create object to save message
     CAN_FRAME incoming;
@@ -189,48 +189,51 @@ void CANBus::requestVIN(uint16_t IDFilter, char* currentDir)
                 isWait = false;
             }
         }
-
     }
 
+    vehicleVIN = String(VIN);
+    
     if (millis() - timer > 20000)
     {
         return;
     }
-
-    // Create directory paths
-    uint8_t j = 0;
-    for (uint8_t i = 9; i < 17; i++)
+    if (saveSD)
     {
-        fullDir[j] = VIN[i];
-        PIDDir[j] = VIN[i];
-        j++;
-    }
-    fullDir[8] = '/';
-    PIDDir[8] = '/';
-    Serial.println(fullDir);
-    Serial.println(PIDDir);
-    SDPrint.createDRIVE(fullDir);
+        // Create directory paths
+        uint8_t j = 0;
+        for (uint8_t i = 9; i < 17; i++)
+        {
+            fullDir[j] = VIN[i];
+            PIDDir[j] = VIN[i];
+            j++;
+        }
+        fullDir[8] = '/';
+        PIDDir[8] = '/';
+        Serial.println(fullDir);
+        Serial.println(PIDDir);
+        SDPrint.createDRIVE(fullDir);
 
-    j = 0;
-    for (uint8_t i = 9; i < 16; i++)
-    {
-        PIDDir[i] = PID[j];
-        j++;
-    }
-    Serial.println(PIDDir);
-    j = 0;
-    for (uint8_t i = 9; i < 16; i++)
-    {
-        fullDir[i] = VINLOG[j];
-        j++;
-    }
-    Serial.println(fullDir);
+        j = 0;
+        for (uint8_t i = 9; i < 16; i++)
+        {
+            PIDDir[i] = PID[j];
+            j++;
+        }
+        Serial.println(PIDDir);
+        j = 0;
+        for (uint8_t i = 9; i < 16; i++)
+        {
+            fullDir[i] = VINLOG[j];
+            j++;
+        }
+        Serial.println(fullDir);
 
-    // Write VIN to log
-    SDPrint.writeFile(fullDir, "VIN: ");
-    SDPrint.writeFile(fullDir, VIN);
-    SDPrint.writeFileln(fullDir);
-    SDPrint.deleteFile(PIDDir);
+        // Write VIN to log
+        SDPrint.writeFile(fullDir, "VIN: ");
+        SDPrint.writeFile(fullDir, VIN);
+        SDPrint.writeFileln(fullDir);
+        SDPrint.deleteFile(PIDDir);
+    }
 }
 
 // Future function
