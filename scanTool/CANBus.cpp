@@ -18,20 +18,32 @@ CANBus::CANBus()
 }
 
 // Initialize CAN1 and set the proper baud rates here
-void CANBus::startCAN(uint32_t start, uint32_t end)
+void CANBus::startCAN0(uint32_t start, uint32_t end)
 {
     //Can0.setRXFilter(start, end, true);
     Can0.begin(baud);
     Can0.watchForRange(start, end);
+}
+
+// Initialize CAN1 and set the proper baud rates here
+void CANBus::startCAN1(uint32_t start, uint32_t end)
+{
     Can1.begin(baud);
     Can1.watchForRange(start, end);
 }
 
-// Initialize CAN1 and set the proper baud rates here
-void CANBus::startCAN2(uint32_t start, uint32_t end)
+// 
+void CANBus::setFilterMask0(uint32_t id, uint32_t mask)
+{
+    Can0.begin(baud);
+    Can0.watchFor(id, mask);
+}
+
+// 
+void CANBus::setFilterMask1(uint32_t id, uint32_t mask)
 {
     Can1.begin(baud);
-    Can1.watchForRange(start, end);
+    Can1.watchFor(id, mask);
 }
 
 // CAN Bus send message method
@@ -257,6 +269,8 @@ void CANBus::setNextPID(bool next)
 void CANBus::setBaud(uint32_t newBaud)
 {
     baud = newBaud;
+    Can0.set_baudrate(baud);
+    Can1.set_baudrate(baud);
 }
 
 uint32_t CANBus::getBaud()

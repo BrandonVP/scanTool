@@ -119,13 +119,17 @@
     <ClInclude Include="CANBus.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="icons.h" />
+    <ClInclude Include="LCD.h" />
     <ClInclude Include="PIDS.h" />
     <ClInclude Include="SDCard.h" />
+    <ClInclude Include="st_Framework.h" />
     <ClInclude Include="__vm\.scanTool.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CANBus.cpp" />
+    <ClCompile Include="LCD.cpp" />
     <ClCompile Include="SDCard.cpp" />
+    <ClCompile Include="st_Framework.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="oldCode.txt" />

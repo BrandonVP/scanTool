@@ -50,8 +50,10 @@ private:
 	bool getNextPID();
 	bool getMessage(buf&, uint32_t&, uint8_t);
 	void sendFrame(uint32_t, byte*);
-	void startCAN(uint32_t, uint32_t);
-	void startCAN2(uint32_t, uint32_t);
+	void startCAN0(uint32_t, uint32_t);
+	void startCAN1(uint32_t, uint32_t);
+	void setFilterMask0(uint32_t, uint32_t);
+	void setFilterMask1(uint32_t, uint32_t);
 	void requestVIN(uint16_t, char*, bool);
 	char* getFullDir();
 	void CANTraffic();
