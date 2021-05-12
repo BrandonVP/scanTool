@@ -141,7 +141,7 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
     return;
 }
 
-
+//
 void CANBus::requestVIN(uint16_t IDFilter, char* currentDir, bool saveSD)
 {
     // Create object to save message

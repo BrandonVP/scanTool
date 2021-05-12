@@ -8,9 +8,7 @@
     Todo List
 ===========================================================
 Read DTCs
-Clear DTCs
 Send custom message
-Finish filtering
 -Export functions to free up main
 -
 CLEAN up globals!!! (too many)
@@ -43,7 +41,6 @@ int x, y;
 uint8_t controlPage = 0;
 uint8_t page = 0;
 bool hasDrawn = false;
-bool isExecute;
 
 // External import for fonts
 extern uint8_t SmallFont[];
@@ -75,7 +72,6 @@ uint32_t endRange = 0xFFF;
 
 int pageControl();
 
-bool msgUp = false;
 
 /*=========================================================
     Framework Functions
@@ -374,7 +370,7 @@ void drawCANBus()
     //drawRoundBtn(312, 190, 475, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, "Scan Tool Ver. 2.0", themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
 void CANBusButtons()
@@ -519,7 +515,7 @@ void drawVehicleTools()
     drawRoundBtn(312, 190, 475, 240, "DTC Clear", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, "Scan Tool Ver. 2.0", themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
 void VehicleToolButtons()
@@ -956,7 +952,7 @@ void PIDGauges()
 
 /*================ Draw Vin ================*/
 void drawVIN()
-{   
+{
     uint16_t rxid = 0x7E8;
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     can1.requestVIN(rxid, currentDir, false);
@@ -1004,7 +1000,7 @@ void drawRZRTOOL()
     //drawRoundBtn(312, 190, 475, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, "Scan Tool Ver. 2.0", themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
 void RZRToolButtons()
@@ -1108,7 +1104,7 @@ void drawExtraFN()
     //drawRoundBtn(312, 190, 475, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, "Scan Tool Ver. 2.0", themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
 void extraFNButtons()
@@ -1239,8 +1235,8 @@ void AFM()
             timer1 = millis();
         }
     }
-    
-   
+
+
 }
 
 /*
@@ -1267,6 +1263,7 @@ void drawSettings()
     //drawRoundBtn(312, 190, 475, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
 void settingsButtons()
@@ -1297,14 +1294,14 @@ void settingsButtons()
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(145, 190, 308, 240);
+                //waitForIt(145, 190, 308, 240);
                 // Unused
                 //page = 41;
                 //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(145, 245, 308, 295);
+                //waitForIt(145, 245, 308, 295);
                 // Unused
                 //page = 43;
                 //hasDrawn = false;
@@ -1328,18 +1325,18 @@ void settingsButtons()
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(312, 190, 475, 240);
+                //waitForIt(312, 190, 475, 240);
                 // Unused
                 //page = 42;
                 //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(312, 245, 475, 295);
+                //waitForIt(312, 245, 475, 295);
                 // Unused
                 //page = 44;
                 //hasDrawn = false;
-                
+
             }
         }
     }
@@ -1810,7 +1807,7 @@ int pageControl()
             // Call buttons if any
             break;
 
-        case 9: /*========== VEHTOOL ==========*/ 
+        case 9: /*========== VEHTOOL ==========*/
             if (!hasDrawn)
             {
                 hasDrawn = true;
@@ -1859,10 +1856,10 @@ int pageControl()
             }
             else
             {
-                errorMSGBtn();
+                errorMSGButton(9);
             }
             break;
-        
+
         case 12:
             if (!hasDrawn)
             {
@@ -2108,17 +2105,16 @@ int pageControl()
                     can1.setBaud(250000);
                     //can1.startCAN0(startRange, endRange);
                     errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                    msgUp = true;
                 }
                 else if (temp == 250000)
                 {
                     can1.setBaud(500000);
                     //can1.startCAN0(startRange, endRange);
                     errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                    msgUp = true;
                 }
             }
             // Call buttons if any
+            errorMSGButton(36);
             break;
         case 40:
             if (!hasDrawn)
@@ -2131,17 +2127,16 @@ int pageControl()
                     can1.setBaud(250000);
                     //can1.startCAN0(startRange, endRange);
                     errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                    msgUp = true;
                 }
                 else if (temp == 250000)
                 {
                     can1.setBaud(500000);
                     //can1.startCAN0(startRange, endRange);
                     errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                    msgUp = true;
                 }
             }
             // Call buttons if any
+            errorMSGButton(36);
             break;
         case 41:
             if (!hasDrawn)
@@ -2180,22 +2175,6 @@ int pageControl()
     }
 }
 
-
-/*
-        case 8:
-            if (!hasDrawn)
-            {
-                //hasDrawn = true;
-                // Draw Page
-                drawNumpad();
-                can1.startCAN(startRange, endRange);
-                page = 5;
-            }
-            // Call buttons if any
-            break;
-
-*/
-
 // Error Message function
 void errorMSG(String title, String eMessage1, String eMessage2)
 {
@@ -2207,7 +2186,7 @@ void errorMSG(String title, String eMessage1, String eMessage2)
 }
 
 // Error Message buttons
-uint8_t errorMSGBtn()
+uint8_t errorMSGButton(uint8_t returnPage)
 {
     // Touch screen controls
     if (myTouch.dataAvailable())
@@ -2220,9 +2199,8 @@ uint8_t errorMSGBtn()
         {
             if ((y >= 140) && (y <= 170))
             {
-                waitForItRect(400, 140, 450, 170);
-                msgUp = false;
-                page = controlPage;
+                waitForItRect(398, 138, 452, 172);
+                page = returnPage;
                 hasDrawn = false;
             }
         }
@@ -2324,7 +2302,8 @@ void setup() {
 }
 
 // Calls pageControl with a value of 1 to set view page as the home page
-void loop() 
+void loop()
 {
     controlPage = pageControl();
 }
+
