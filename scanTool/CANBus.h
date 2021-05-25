@@ -1,4 +1,5 @@
 // CANBus.h
+#pragma once
 #include "SDCard.h"
 
 #ifndef _CANBus_h
@@ -9,19 +10,23 @@
 #else
 	#include "WProgram.h"
 #endif
+
+// Checks a single bit of binary number
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+
 class SDCard;
 
 class CANBus
 {
-private:
+public:
+	// Allows CAN Bus function to write to SD Card
 	SDCard SDPrint;
+
+	// Def for getMSG()
+	typedef byte buff[8];
 	uint32_t baud = 500000;
-
-	typedef byte buf[8];
+	//uint16_t rxID = 0x00;
 	bool hasNextPID;
-
-	uint16_t rxID = 0x00;
-	
 	String vehicleVIN;
 	char VIN[18];
 	char fullDir[17];
@@ -44,11 +49,10 @@ private:
 	
  public:
 
-	CANBus();
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
-	bool getMessage(buf&, uint32_t&, uint8_t);
+	bool getMessage(buff&, uint32_t&, uint8_t);
 	void sendFrame(uint32_t, byte*);
 	void startCAN0(uint32_t, uint32_t);
 	void startCAN1(uint32_t, uint32_t);

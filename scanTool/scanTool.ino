@@ -7,11 +7,12 @@
 /*=========================================================
     Todo List
 ===========================================================
-Read DTCs
+Read Vehicle DTCs
+Read / Clear RZR DTCs
 Send custom message
--Export functions to free up main
--
-CLEAN up globals!!! (too many)
+Clean up memory usage
+Clean up / merge functions in CANBus.cpp
+Convert Code to Non-Blocking
 ===========================================================
     End Todo List
 =========================================================*/
@@ -52,9 +53,6 @@ CANBus can1;
 // Object to control SD Card Hardware
 SDCard sdCard;
 
-// BITMAP global for bmpDraw()
-int dispx, dispy;
-
 // Used for PID scroll function
 char currentDir[20];
 
@@ -70,7 +68,11 @@ uint16_t indexCANMsg = 60;
 uint32_t startRange = 0x000;
 uint32_t endRange = 0xFFF;
 
-int pageControl();
+// General use variable to hold time
+uint32_t timer1 = 0;
+uint32_t timer2 = 0;
+
+void pageControl();
 
 
 /*=========================================================
@@ -93,6 +95,9 @@ void bmpDraw(char* filename, int x, int y) {
     uint32_t pos = 0, startTime = millis();
     uint8_t  lcdidx = 0;
     boolean  first = true;
+
+    int dispx = myGLCD.getDisplayXSize();
+    int dispy = myGLCD.getDisplayYSize();
 
     if ((x >= dispx) || (y >= dispy)) return;
 
@@ -482,7 +487,6 @@ void readInCANMsg(uint8_t channel)
     myGLCD.setFont(BigFont);
 }
 
-
 /*============== CAN: Serial ==============*/
 void drawCANSerial()
 {
@@ -604,26 +608,22 @@ void drawPIDSCAN()
 
 void PIDSCAN()
 {
-    while (true)
+    // Touch screen controls
+    if (myTouch.dataAvailable())
     {
-        // Touch screen controls
-        if (myTouch.dataAvailable())
-        {
-            myTouch.read();
-            x = myTouch.getX();
-            y = myTouch.getY();
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
 
-            // Start Scan
-            if ((x >= 200) && (x <= 400))
+        // Start Scan
+        if ((x >= 200) && (x <= 400))
+        {
+            if ((y >= 135) && (y <= 185))
             {
-                if ((y >= 135) && (y <= 185))
-                {
-                    waitForIt(200, 135, 400, 185);
-                    startPIDSCAN();
-                }
+                waitForIt(200, 135, 400, 185);
+                startPIDSCAN();
             }
         }
-        return;
     }
 }
 
@@ -674,6 +674,50 @@ void startPIDSCAN()
     }
 
     return;
+    
+    // Non-blocking code in progress
+    /*
+    bool hasNext = true;
+    uint8_t status = 1;
+    uint8_t bank = 0;
+    uint16_t rxid = 0x7E8;
+    uint8_t range = 0x00;
+
+    // Print loading bar with current status
+    loadBar(status);
+
+    // ------requestVIN() IS BLOCKING!!!------
+    // Get vehicle vin, will be saved in can0 object
+    can1.requestVIN(rxid, currentDir, true);
+
+    // Update load bar
+    loadBar(status++);
+
+    timer1 = millis();
+    timer2 = millis();
+
+    switch (hasNext)
+    {
+    case true:
+
+        // Get PID list with current range and bank
+        can1.getPIDList(range, bank);
+
+        // Update load bar
+        loadBar(status++);
+
+        delay(100);
+        range = range + 0x20;
+        bank++;
+
+        // Check last bit to see if there are more PIDs in the next bank
+        hasNext = can1.getNextPID();
+        break;
+    case false:
+
+        break;
+    }
+    */
 }
 
 /*========== PID Stream Functions ==========*/
@@ -1098,8 +1142,8 @@ void drawExtraFN()
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, "AFM", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, "StartStop", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 135, 308, 185, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 135, 475, 185, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 135, 308, 185, "CAN Log In", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 135, 475, 185, "PCAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 190, 308, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 190, 475, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1128,10 +1172,10 @@ void extraFNButtons()
             }
             if ((y >= 135) && (y <= 185))
             {
-                //waitForIt(145, 135, 308, 185);
-                // Unused
-                // page = 30;
-                // hasDrawn = false;
+                waitForIt(145, 135, 308, 185);
+                 // Read in CAN Log
+                 page = 30;
+                 hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -1159,10 +1203,10 @@ void extraFNButtons()
             }
             if ((y >= 135) && (y <= 185))
             {
-                //waitForIt(312, 135, 475, 185);
+                waitForIt(312, 135, 475, 185);
                 // Unused
-                //page = 31;
-                //hasDrawn = false;
+                page = 31;
+                hasDrawn = false;
 
             }
             if ((y >= 190) && (y <= 240))
@@ -1214,7 +1258,7 @@ void autoStartStop()
 
 }
 
-
+//
 void AFM()
 {
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
@@ -1239,15 +1283,6 @@ void AFM()
 
 }
 
-/*
-void clearDTC()
-{
-    byte test1[8] = { 0x02, 0x10, 0x92, 0x55, 0x55, 0x55, 0x55, 0x55 };
-    byte test2[8] = { 0x02, 0x10, 0x03, 0x55, 0x55, 0x55, 0x55, 0x55 };
-    can1.sendFrame(0x7E1, test1);
-    can1.sendFrame(0x7E1, test2);
-}
-*/
 
 /*=========================================================
     Settings
@@ -1685,10 +1720,6 @@ void canFilter(bool CAN)
     }
 }
 
-// Set Baud
-// Filter CAN0
-// Filter CAN1
-
 
 /*=========================================================
     Framework Functions
@@ -1701,13 +1732,6 @@ void drawMenu()
     drawSquareBtn(1, 1, 140, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
 
     // Draw Menu Buttons
-      /*
-    drawRoundBtn(10, 10, 130, 65, "HOME", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 70, 130, 125, "PIDSCAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 130, 130, 185, "PIDSTRM", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 190, 130, 245, "EXTRAFN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 250, 130, 305, "TRAFFIC", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-  */
     drawRoundBtn(10, 10, 130, 65, "CANBUS", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(10, 70, 130, 125, "VEHTOOL", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(10, 130, 130, 185, "RZRTOOL", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1716,462 +1740,470 @@ void drawMenu()
 }
 
 //Manages the different App pages
-int pageControl()
+void pageControl()
 {
-    while (true)
+    // Check menu buttons for input
+    menuButtons();
+    switch (page)
     {
-        // Check menu buttons for input
-        menuButtons();
-        switch (page)
+    case 0: /*========== CANBUS ==========*/
+        if (!hasDrawn)
         {
-        case 0: /*========== CANBUS ==========*/
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawCANBus();
-            }
-            // Call buttons if any
-            CANBusButtons();
-            break;
-        case 1:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawReadInCANLCD();
-            }
-            // Call buttons if any
-            readInCANMsg(CAN0);
-            break;
-        case 2:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawCANSerial();
-            }
-            // Call buttons if any
-            can1.CANTraffic();
-            break;
-        case 3:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawReadInCANLCD();
-            }
-            // Call buttons if any
-            readInCANMsg(CAN1);
-            break;
-        case 4:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawCANSerial();
-            }
-            // Call buttons if any
-            can1.readCAN0TX();
-            break;
-        case 5:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 6:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 7:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 8:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
+            hasDrawn = true;
+            // Draw Page
+            drawCANBus();
+        }
+        // Call buttons if any
+        CANBusButtons();
+        break;
+    case 1:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawReadInCANLCD();
+        }
+        // Call buttons if any
+        readInCANMsg(CAN0);
+        break;
+    case 2:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawCANSerial();
+        }
+        // Call buttons if any
+        can1.CANTraffic();
+        break;
+    case 3:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawReadInCANLCD();
+        }
+        // Call buttons if any
+        readInCANMsg(CAN1);
+        break;
+    case 4:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawCANSerial();
+        }
+        // Call buttons if any
+        can1.readCAN0TX();
+        break;
+    case 5:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 6:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 7:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 8:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
 
-        case 9: /*========== VEHTOOL ==========*/
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawVehicleTools();
-            }
-            // Call buttons if any
-            VehicleToolButtons();
-            break;
-        case 10: // PIDSCAN
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                can1.startCAN0(0x7E0, 0x7EF);
-                drawPIDSCAN();
-            }
-            // Call buttons if any
-            PIDSCAN();
-            break;
-        case 11: // PIDSTRM
-            if (!hasDrawn)
-            {
-                if (hasPID == true)
-                {
-                    can1.startCAN0(0x7E0, 0x7EF);
-                    for (int i = 0; i < 100; i++)
-                    {
-                        arrayIn[i] = 0x00;
-                    }
-                    sdCard.readFile(can1.getFullDir(), arrayIn);
-                    drawPIDStream();
-                    hasDrawn = true;
-                }
-                else
-                {
-                    controlPage = 9;
-                    errorMSG("Error", "Please Perform", "PIDSCAN First");
-                    hasDrawn = true;
-                }
-            }
-            // Call buttons if any
+    case 9: /*========== VEHTOOL ==========*/
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawVehicleTools();
+        }
+        // Call buttons if any
+        VehicleToolButtons();
+        break;
+    case 10: // PIDSCAN
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            can1.startCAN0(0x7E0, 0x7EF);
+            drawPIDSCAN();
+        }
+        // Call buttons if any
+        PIDSCAN();
+        break;
+    case 11: // PIDSTRM
+        if (!hasDrawn)
+        {
             if (hasPID == true)
             {
-                PIDStreamButtons();
+                can1.startCAN0(0x7E0, 0x7EF);
+                for (int i = 0; i < 100; i++)
+                {
+                    arrayIn[i] = 0x00;
+                }
+                sdCard.readFile(can1.getFullDir(), arrayIn);
+                drawPIDStream();
+                hasDrawn = true;
             }
             else
             {
-                errorMSGButton(9);
-            }
-            break;
-
-        case 12:
-            if (!hasDrawn)
-            {
+                controlPage = 9;
+                errorMSG("Error", "Please Perform", "PIDSCAN First");
                 hasDrawn = true;
-                // Draw Page
             }
-            // Call buttons if any
-            PIDGauges();
-            break;
-        case 13:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawVIN();
-            }
-            // Call buttons if any
-            break;
-        case 14: // 
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 15:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                clearDTC();
-                page = 9;
-            }
-            // Call buttons if any
-            break;
-        case 16:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 17:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-
-        case 18: /*========== RZRTOOL ==========*/
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawRZRTOOL();
-            }
-            // Call buttons if any
-            RZRToolButtons();
-            break;
-        case 19:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 20:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 21:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 22:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 23:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 24:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 25:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 26:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-
-        case 27: /*========== EXTRAFN ==========*/
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawExtraFN();
-            }
-            // Call buttons if any
-            extraFNButtons();
-            break;
-        case 28:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                AFM();
-            }
-            // Call buttons if any
-            break;
-        case 29:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                autoStartStop();
-            }
-            // Call buttons if any
-            break;
-        case 30:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 31:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 32:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 33:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 34:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 35:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-
-        case 36: /*========== SETTINGS ==========*/
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawSettings();
-            }
-            // Call buttons if any
-            settingsButtons();
-            break;
-        case 37:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawNumpad();
-            }
-            canFilter(true);
-            break;
-        case 38:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                drawNumpad();
-            }
-            // Call buttons if any
-            canFilter(false);
-            break;
-        case 39:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                uint32_t temp = can1.getBaud();
-                if (temp == 500000)
-                {
-                    can1.setBaud(250000);
-                    //can1.startCAN0(startRange, endRange);
-                    errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                }
-                else if (temp == 250000)
-                {
-                    can1.setBaud(500000);
-                    //can1.startCAN0(startRange, endRange);
-                    errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                }
-            }
-            // Call buttons if any
-            errorMSGButton(36);
-            break;
-        case 40:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-                uint32_t temp = can1.getBaud();
-                if (temp == 500000)
-                {
-                    can1.setBaud(250000);
-                    //can1.startCAN0(startRange, endRange);
-                    errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                }
-                else if (temp == 250000)
-                {
-                    can1.setBaud(500000);
-                    //can1.startCAN0(startRange, endRange);
-                    errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
-                }
-            }
-            // Call buttons if any
-            errorMSGButton(36);
-            break;
-        case 41:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 42:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
-        case 43:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-
-            break;
-        case 44:
-            if (!hasDrawn)
-            {
-                hasDrawn = true;
-                // Draw Page
-            }
-            // Call buttons if any
-            break;
         }
+        // Call buttons if any
+        if (hasPID == true)
+        {
+            PIDStreamButtons();
+        }
+        else
+        {
+            errorMSGButton(9);
+        }
+        break;
+
+    case 12:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        PIDGauges();
+        break;
+    case 13:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawVIN();
+        }
+        // Call buttons if any
+        break;
+    case 14: // 
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 15:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            clearDTC();
+            page = 9;
+        }
+        // Call buttons if any
+        break;
+    case 16:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 17:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+
+    case 18: /*========== RZRTOOL ==========*/
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawRZRTOOL();
+        }
+        // Call buttons if any
+        RZRToolButtons();
+        break;
+    case 19:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 20:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 21:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 22:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 23:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 24:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 25:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 26:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+
+    case 27: /*========== EXTRAFN ==========*/
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawExtraFN();
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 28:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            AFM();
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 29:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            autoStartStop();
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 30:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            sdCard.readLogFile();
+        }
+        // Call buttons if any
+        extraFNButtons();
+
+        break;
+    case 31:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            sdCard.readLogFile2();
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 32:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 33:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 34:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+    case 35:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        extraFNButtons();
+        break;
+
+    case 36: /*========== SETTINGS ==========*/
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawSettings();
+        }
+        // Call buttons if any
+        settingsButtons();
+        break;
+    case 37:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawNumpad();
+        }
+        canFilter(true);
+        break;
+    case 38:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            drawNumpad();
+        }
+        // Call buttons if any
+        canFilter(false);
+        break;
+    case 39:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            uint32_t temp = can1.getBaud();
+            if (temp == 500000)
+            {
+                can1.setBaud(250000);
+                //can1.startCAN0(startRange, endRange);
+                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+            }
+            else if (temp == 250000)
+            {
+                can1.setBaud(500000);
+                //can1.startCAN0(startRange, endRange);
+                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+            }
+        }
+        // Call buttons if any
+        errorMSGButton(36);
+        break;
+    case 40:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+            uint32_t temp = can1.getBaud();
+            if (temp == 500000)
+            {
+                can1.setBaud(250000);
+                //can1.startCAN0(startRange, endRange);
+                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+            }
+            else if (temp == 250000)
+            {
+                can1.setBaud(500000);
+                //can1.startCAN0(startRange, endRange);
+                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+            }
+        }
+        // Call buttons if any
+        errorMSGButton(36);
+        break;
+    case 41:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 42:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
+    case 43:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+
+        break;
+    case 44:
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+        }
+        // Call buttons if any
+        break;
     }
 }
 
@@ -2291,8 +2323,7 @@ void setup() {
     myGLCD.setFont(BigFont);
     myGLCD.setBackColor(0, 0, 255);
 
-    dispx = myGLCD.getDisplayXSize();
-    dispy = myGLCD.getDisplayYSize();
+
 
     // Draw the main menu
     drawMenu();
@@ -2304,6 +2335,9 @@ void setup() {
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
-    controlPage = pageControl();
+    // GUI
+    pageControl();
+
+    // Background Processes
 }
 
