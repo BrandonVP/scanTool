@@ -10,6 +10,10 @@
 #else
 	#include "WProgram.h"
 #endif
+
+#define SD_CARD_CS 8
+#define ROW_DIM 100
+
 class CANBus;
 
 class SDCard
