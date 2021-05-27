@@ -2,12 +2,7 @@
 
 #include "SDCard.h"
 
-#define SD_CARD_CS 8
-#define ROW_DIM 100
-
-// File object
 File myFile;
-
 CANBus can;
 
 // Called at setup to initialize the SD Card
