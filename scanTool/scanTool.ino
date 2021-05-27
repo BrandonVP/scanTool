@@ -47,15 +47,12 @@ bool hasDrawn = false;
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
 
-// Object to control CAN Bus hardware
+// Harware Objects
 CANBus can1;
-
-// Object to control SD Card Hardware
 SDCard sdCard;
 
-// Used for PID scroll function
+// Used PID functions
 char currentDir[20];
-
 uint8_t arrayIn[100];
 
 // Performing a sucessful PID scan will change this to true
@@ -64,11 +61,19 @@ bool hasPID = false;
 // Keeps track of current line when displaying CAN traffic on LCD
 uint16_t indexCANMsg = 60;
 
-// Filter range at startup
+// Filter range / Filter Mask
 uint32_t startRange = 0x000;
 uint32_t endRange = 0xFFF;
 
-// General use variable to hold time
+// General use variables for state machines
+// Any function can use
+// Ensure state machine is assigned to a page in page control to prevent competing use 
+// Initialize to 0 before use
+bool nextState = false;
+bool isFinished = false;
+uint8_t state = 0;
+uint8_t counter1 = 0;
+uint8_t var1 = 0;
 uint32_t timer1 = 0;
 uint32_t timer2 = 0;
 
@@ -295,7 +300,6 @@ void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String butto
     default:
         break;
     }
-
 }
 void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
     int size, temp, offset;
@@ -540,6 +544,12 @@ void VehicleToolButtons()
                 // PIDSCAN
                 page = 10;
                 hasDrawn = false;
+                state = 0;
+                isFinished = false;
+                nextState = true;
+                timer1 = 0;
+                counter1 = 0;
+                var1 = 0;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -585,6 +595,12 @@ void VehicleToolButtons()
                 // DTC Clear
                 page = 15;
                 hasDrawn = false;
+
+                // Initialize state machine variables to 0
+                state = 0;
+                counter1 = 0;
+                timer1 = 0;
+                isFinished = false;
             }
             if ((y >= 245) && (y <= 295))
             {
@@ -601,123 +617,51 @@ void VehicleToolButtons()
 void drawPIDSCAN()
 {
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(141, 80, 479, 100, "Scan supported PIDs", themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawSquareBtn(141, 105, 479, 125, "to SD Card", themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawRoundBtn(200, 135, 400, 185, "Start Scan", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-}
-
-void PIDSCAN()
-{
-    // Touch screen controls
-    if (myTouch.dataAvailable())
-    {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
-        // Start Scan
-        if ((x >= 200) && (x <= 400))
-        {
-            if ((y >= 135) && (y <= 185))
-            {
-                waitForIt(200, 135, 400, 185);
-                startPIDSCAN();
-            }
-        }
-    }
+    drawSquareBtn(141, 90, 479, 110, "Scan supported PIDs", themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(141, 115, 479, 135, "to SD Card", themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
 void startPIDSCAN()
 {
-    bool hasNext = true;
-    uint8_t status = 1;
-    uint8_t bank = 0;
-    uint16_t rxid = 0x7E8;
-    uint8_t range = 0x00;
-
-    // Print loading bar with current status
-    loadBar(status);
-    // Get vehicle vin, will be saved in can1 object
-    can1.requestVIN(rxid, currentDir, true);
-
-    // Update load bar
-    loadBar(status++);
-
-    // Get run time
-    unsigned long timer = millis();
-
-    // Loop though all available banks of PIDS
-    while (hasNext && (millis() - timer < 30000))
-        //while (hasNext && (millis() - timer < 2000))
+    // Run once at start
+    if (( millis() - timer1  > 200 ) && !isFinished )
     {
-        // Get PID list with current range and bank
-        can1.getPIDList(range, bank);
+        loadBar(state);
 
-        // Update load bar
-        loadBar(status++);
+        // Get vehicle vin, will be saved in can1 object
+        uint16_t rxid = 0x7E8;
+        can1.requestVIN(rxid, currentDir, true);
 
-        delay(100);
-        range = range + 0x20;
-        bank++;
-
-        // Check last bit to see if there are more PIDs in the next bank
-        hasNext = can1.getNextPID();
+        loadBar(state++);
     }
 
-    if (millis() - timer < 30000)
+    // Loop though all available banks of PIDS
+    if (nextState && ( millis() - timer1 >= 100 ))
+    {
+        // Get PID list with current range and bank
+        can1.getPIDList(var1, counter1);
+        var1 = var1 + 0x20;
+        counter1++;
+
+        loadBar(state++);
+
+        // Check last bit to see if there are more PIDs in the next bank
+        nextState = can1.getNextPID();
+
+        timer1 = millis();
+    }
+
+    // Finished
+    if (!nextState && !isFinished)
     {
         // Complete load bar
         loadBar(DONE);
 
         // Activate PIDSTRM page 
         hasPID = true;
+
+        isFinished = true;
     }
-
-    return;
-    
-    // Non-blocking code in progress
-    /*
-    bool hasNext = true;
-    uint8_t status = 1;
-    uint8_t bank = 0;
-    uint16_t rxid = 0x7E8;
-    uint8_t range = 0x00;
-
-    // Print loading bar with current status
-    loadBar(status);
-
-    // ------requestVIN() IS BLOCKING!!!------
-    // Get vehicle vin, will be saved in can0 object
-    can1.requestVIN(rxid, currentDir, true);
-
-    // Update load bar
-    loadBar(status++);
-
-    timer1 = millis();
-    timer2 = millis();
-
-    switch (hasNext)
-    {
-    case true:
-
-        // Get PID list with current range and bank
-        can1.getPIDList(range, bank);
-
-        // Update load bar
-        loadBar(status++);
-
-        delay(100);
-        range = range + 0x20;
-        bank++;
-
-        // Check last bit to see if there are more PIDs in the next bank
-        hasNext = can1.getNextPID();
-        break;
-    case false:
-
-        break;
-    }
-    */
 }
 
 /*========== PID Stream Functions ==========*/
@@ -858,7 +802,7 @@ void PIDGauges()
     bool isWait = true;
 
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    //drawSquareBtn(145, 140, 479, 160, "Spare function", themeBackground, themeBackground, menuBtnColor, CENTER);
+
     myGLCD.setBackColor(menuBtnColor);
     myGLCD.setColor(menuBtnColor);
     myGLCD.fillCircle(380, 250, 60);
@@ -885,13 +829,10 @@ void PIDGauges()
 
     float x1 = r * cos(pi / 2) + 220;
     float y1 = r * sin(pi / 2) + 120;
-
     float x2 = r * cos(pi / 2) + 380;
     float y2 = r * sin(pi / 2) + 120;
-
     float x3 = r * cos(pi / 2) + 220;
     float y3 = r * sin(pi / 2) + 250;
-
     float x4 = r * cos(pi / 2) + 380;
     float y4 = r * sin(pi / 2) + 250;
 
@@ -951,7 +892,6 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 120, x1, y1);
         }
-
         if (g2 >= 0)
         {
             g2 = (offset + ((g2 * 0.0286) * 0.015));
@@ -964,7 +904,6 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(380, 120, x2, y2);
         }
-
         if (g3 >= 0)
         {
             g3 = offset + (g3 * 0.01);
@@ -977,7 +916,6 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 250, x3, y3);
         }
-
         if (g4 >= 0)
         {
             g4 = offset + (g4 * 0.027);
@@ -1003,32 +941,50 @@ void drawVIN()
     drawSquareBtn(150, 150, 479, 170, "VIN", themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(150, 180, 479, 200, can1.getVIN(), themeBackground, themeBackground, menuBtnColor, CENTER);
 }
+
 /*============== DTC SCAN ==============*/
 // Draw
 // Function
-void clearDTC()
-{
-    uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
-    byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(150, 150, 479, 170, "Clearing DTCS...", themeBackground, themeBackground, menuBtnColor, CENTER);
-    for (int i = 0; i < 7; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            can1.sendFrame(IDc[i], MSGc);
-            delay(400);
-        }
-    }
-    drawSquareBtn(150, 150, 479, 170, "All DTCS Cleared", themeBackground, themeBackground, menuBtnColor, CENTER);
-}
+
 // Buttons
 
 /*============== DTC CLEAR ==============*/
-// Draw
-// Function
-// Buttons
+void clearDTC()
+{
+    // Run once at start
+    if (millis() - timer1 > 500 && !isFinished)
+    {
+        drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(150, 150, 479, 170, "Clearing DTCS...", themeBackground, themeBackground, menuBtnColor, CENTER);
+    }
 
+    // Cycle through clear messages
+    if (state < 7)
+    {
+        if (millis() - timer1 >= 400)
+        {
+            uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
+            byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
+
+            can1.sendFrame(IDc[state], MSGc);
+            counter1++;
+            timer1 = millis();
+        }
+        if (counter1 == 3)
+        {
+            counter1 = 0;
+            loadBar(state++);
+        }
+    }
+
+    // Finished
+    if (state > 6 && !isFinished)
+    {
+        drawSquareBtn(150, 150, 479, 170, "All DTCS Cleared", themeBackground, themeBackground, menuBtnColor, CENTER);
+        isFinished = true;
+        loadBar(DONE);
+    }
+}
 
 /*=========================================================
     Polaris Tools
@@ -1103,7 +1059,6 @@ void RZRToolButtons()
                 // Unused
                 //page = 22;
                 //hasDrawn = false;
-
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -1142,8 +1097,8 @@ void drawExtraFN()
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, "AFM", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, "StartStop", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 135, 308, 185, "CAN Log In", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 135, 475, 185, "PCAN", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 135, 308, 185, "CAN Log", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 135, 475, 185, "PCAN Log", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 190, 308, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 190, 475, 240, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, "Unused", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1207,7 +1162,6 @@ void extraFNButtons()
                 // Unused
                 page = 31;
                 hasDrawn = false;
-
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -1253,9 +1207,7 @@ void autoStartStop()
             can1.sendFrame(0x101, test2);
             timer2 = millis();
         }
-
     }
-
 }
 
 //
@@ -1263,7 +1215,6 @@ void AFM()
 {
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
     byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
     can1.sendFrame(0x7E0, test1);
     delay(2);
 
@@ -1279,8 +1230,6 @@ void AFM()
             timer1 = millis();
         }
     }
-
-
 }
 
 
@@ -1371,7 +1320,6 @@ void settingsButtons()
                 // Unused
                 //page = 44;
                 //hasDrawn = false;
-
             }
         }
     }
@@ -1380,13 +1328,9 @@ void settingsButtons()
 // Draw hex number pad
 void drawNumpad()
 {
-    // Clear background
     drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-
-    // Print page title
     drawSquareBtn(180, 57, 460, 77, "CAN Filter Range", themeBackground, themeBackground, menuBtnColor, CENTER);
 
-    //
     int posY = 80;
     uint8_t numPad = 0x00;
 
@@ -1405,10 +1349,8 @@ void drawNumpad()
         posY += 45;
     }
     drawRoundBtn(365, 170, 470, 210, "Clear", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
     drawRoundBtn(145, 220, 305, 260, String(startRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
     drawRoundBtn(310, 220, 470, 260, String(endRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-
     drawRoundBtn(145, 270, 305, 310, "Accept", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(315, 270, 470, 310, "Cancel", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
@@ -1848,7 +1790,7 @@ void pageControl()
             drawPIDSCAN();
         }
         // Call buttons if any
-        PIDSCAN();
+        startPIDSCAN();
         break;
     case 11: // PIDSTRM
         if (!hasDrawn)
@@ -1913,9 +1855,9 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-            clearDTC();
-            page = 9;
+            
         }
+        clearDTC();
         // Call buttons if any
         break;
     case 16:
@@ -2249,49 +2191,44 @@ void menuButtons()
         x = myTouch.getX();
         y = myTouch.getY();
 
-        // Menu
-        if ((x >= 10) && (x <= 130))  // Button: 1
+        if ((x >= 10) && (x <= 130)) 
         {
-            if ((y >= 10) && (y <= 65))  // Upper row
+            if ((y >= 10) && (y <= 65)) 
             {
+                // CANBUS
                 waitForIt(10, 10, 130, 65);
                 page = 0;
                 hasDrawn = false;
             }
-            if ((y >= 70) && (y <= 125))  // Upper row
+            if ((y >= 70) && (y <= 125))  
             {
-
-                // X_Start, Y_Start, X_Stop, Y_Stop
+                // VEHTOOL
                 waitForIt(10, 70, 130, 125);
                 page = 9;
                 hasDrawn = false;
 
             }
-            if ((y >= 130) && (y <= 185))  // Upper row
+            if ((y >= 130) && (y <= 185))
             {
-                // X_Start, Y_Start, X_Stop, Y_Stop
+                // RZRTOOL
                 waitForIt(10, 130, 130, 185);
                 page = 18;
                 hasDrawn = false;
             }
-            // Settings touch button
             if ((y >= 190) && (y <= 245))
             {
-
-                // X_Start, Y_Start, X_Stop, Y_Stop
+                // EXTRAFN
                 waitForIt(10, 190, 130, 245);
                 page = 27;
                 hasDrawn = false;
             }
             if ((y >= 250) && (y <= 305))
             {
-
-                // X_Start, Y_Start, X_Stop, Y_Stop
+                // SETTING
                 waitForIt(10, 250, 130, 305);
                 page = 36;
                 hasDrawn = false;
             }
-
         }
     }
     return;
@@ -2323,9 +2260,6 @@ void setup() {
     myGLCD.setFont(BigFont);
     myGLCD.setBackColor(0, 0, 255);
 
-
-
-    // Draw the main menu
     drawMenu();
 
     // Draw the Hypertech logo
@@ -2339,5 +2273,5 @@ void loop()
     pageControl();
 
     // Background Processes
-}
 
+}
