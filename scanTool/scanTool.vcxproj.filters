@@ -39,12 +39,24 @@
     <ClInclude Include="PIDS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="st_Framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LCD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SDCard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CANBus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="st_Framework.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LCD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

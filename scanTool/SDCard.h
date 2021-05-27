@@ -1,5 +1,6 @@
 // SDCard.h
 #include <SD.h>
+#include "CANBus.h"
 
 #ifndef _SDCard_h
 #define _SDCard_h
@@ -14,7 +15,7 @@ class CANBus;
 class SDCard
 {
  protected:
-
+	 
 
  public:
 	bool startSD();
@@ -24,7 +25,9 @@ class SDCard
 	void writeFile(char*, String);
 	void writeFileln(char*);
 	void deleteFile(char*);
-	size_t readField(File*, char*, size_t, const char*);
+	void readLogFile();
+	void readLogFile2();
+	//size_t readField(File*, char*, size_t, const char*);
 };
 #endif
 

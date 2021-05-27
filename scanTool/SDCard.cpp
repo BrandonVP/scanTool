@@ -8,6 +8,8 @@
 // File object
 File myFile;
 
+CANBus can;
+
 // Called at setup to initialize the SD Card
 bool SDCard::startSD()
 {
@@ -76,7 +78,9 @@ void SDCard::deleteFile(char* filename)
     SD.remove(filename); 
 }
 
-
+/*=========================================================
+    Read File Methods
+===========================================================*/
 void SDCard::readFile(char* filename, uint8_t* arrayIn)
 {
     Serial.println("in");
@@ -95,6 +99,89 @@ void SDCard::readFile(char* filename, uint8_t* arrayIn)
     myFile.close();
 }
 
+void SDCard::readLogFile()
+{
+    Serial.println("in");
+    // File created and opened for writing
+    myFile = SD.open("readcan.txt", FILE_READ);
+    int i = 0;
+    uint16_t ID = 0;
+    uint8_t data[8];
+    String tempStr;
+    char c[20];
+    while (myFile.available())
+    {
+        tempStr = (myFile.readStringUntil(' '));
+        strcpy(c, tempStr.c_str());
+        if (i == 1)
+        {
+            ID = strtol(c, NULL, 16);
+            //Serial.print(ID, HEX);
+            //Serial.print(" ");
+        }
+        if (i > 2 && i < 11)
+        {
+            data[i - 3] = strtol(c, NULL, 16);
+            //Serial.print(data[i - 3], HEX);
+            //Serial.print(" ");
+        }
+
+        i++;
+        if (i == 11)
+        {
+            i = 0;
+            //Serial.println(" ");
+            can.sendFrame(ID, data);
+            delay(20);
+        }
+    }
+    
+    myFile.close();
+}
+
+void SDCard::readLogFile2()
+{
+    Serial.println("in");
+    // File created and opened for writing
+    myFile = SD.open("readcan2.txt", FILE_READ);
+    int i = 0;
+    uint16_t ID = 0;
+    uint8_t data[8];
+    String tempStr;
+    char c[20];
+    while (myFile.available())
+    {
+        tempStr = (myFile.readStringUntil(' '));
+        strcpy(c, tempStr.c_str());
+        ID = strtol(c, NULL, 16);
+        Serial.println(ID, HEX);
+        /*
+        if (i == 1)
+        {
+            ID = strtol(c, NULL, 16);
+            //Serial.print(ID, HEX);
+            //Serial.print(" ");
+        }
+        if (i > 2 && i < 11)
+        {
+            data[i - 3] = strtol(c, NULL, 16);
+            //Serial.print(data[i - 3], HEX);
+            //Serial.print(" ");
+        }
+
+        i++;
+        if (i == 11)
+        {
+            i = 0;
+            //Serial.println(" ");
+            can.sendFrame(ID, data);
+            delay(20);
+        }
+        */
+    }
+
+    myFile.close();
+}
 
 /*=========================================================
     Create File Methods
