@@ -10,8 +10,6 @@
 Read Vehicle DTCs
 Read / Clear RZR DTCs
 Send custom message
-Clean up memory usage
-Clean up / merge functions in CANBus.cpp
 Convert Code to Non-Blocking
 ===========================================================
     End Todo List
@@ -25,7 +23,6 @@ Convert Code to Non-Blocking
 #include <UTouch.h>
 #include "CANBus.h"
 #include "definitions.h"
-#include "icons.h"
 #include "SDCard.h"
 
 // Initialize display
@@ -33,7 +30,6 @@ Convert Code to Non-Blocking
 UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
 //RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
 UTouch  myTouch(2, 6, 3, 4, 5);
-uint8_t brightnessLevel = 0;
 
 // For touch controls
 int x, y;
@@ -75,7 +71,7 @@ uint8_t state = 0;
 uint8_t counter1 = 0;
 uint8_t var1 = 0;
 uint32_t timer1 = 0;
-uint32_t timer2 = 0;
+//uint32_t timer2 = 0;
 
 void pageControl();
 
@@ -544,6 +540,8 @@ void VehicleToolButtons()
                 // PIDSCAN
                 page = 10;
                 hasDrawn = false;
+
+                // Initialize state machine variables to 0
                 state = 0;
                 isFinished = false;
                 nextState = true;
@@ -581,6 +579,8 @@ void VehicleToolButtons()
                 // PIDSTRM
                 page = 11;
                 hasDrawn = false;
+                state = 0;
+                var1 = 0;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -635,7 +635,7 @@ void startPIDSCAN()
         loadBar(state++);
     }
 
-    // Loop though all available banks of PIDS
+    // Cycle though all available banks of PIDS
     if (nextState && ( millis() - timer1 >= 100 ))
     {
         // Get PID list with current range and bank
@@ -654,10 +654,9 @@ void startPIDSCAN()
     // Finished
     if (!nextState && !isFinished)
     {
-        // Complete load bar
         loadBar(DONE);
 
-        // Activate PIDSTRM page 
+        // Activate the PIDSTRM page 
         hasPID = true;
 
         isFinished = true;
@@ -665,13 +664,13 @@ void startPIDSCAN()
 }
 
 /*========== PID Stream Functions ==========*/
-void drawPIDStreamScroll(int scroll)
+void drawPIDStreamScroll(uint8_t scroll)
 {
     // Temp to hold PIDS value before strcat
     char temp[2];
 
     // Starting y location for list
-    int y = 60;
+    uint16_t y = 60;
 
     // Draw the scroll window
     for (int i = 0; i < MAXSCROLL; i++)
@@ -692,23 +691,22 @@ void drawPIDStreamScroll(int scroll)
     }
 }
 
-void drawPIDStream(int scroll = 0)
+void drawPIDStream(uint8_t scroll = 0)
 {
     drawSquareBtn(141, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    int k = scroll;
     myGLCD.setColor(menuBtnColor);
     myGLCD.setBackColor(themeBackground);
-    drawSquareBtn(420, 100, 470, 150, "/\\", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(420, 150, 470, 200, "\\/", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(420, 80, 470, 160, "/\\", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(420, 160, 470, 240, "\\/", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawPIDStreamScroll(scroll);
-    drawRoundBtn(150, 275, 400, 315, "Stream PID", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(150, 275, 410, 315, "Stream PID", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // Button function for the program page
 void PIDStreamButtons()
 {
-    static uint8_t selected = 0;
-    static int scroll = 0;
+    static uint8_t scroll = 0;
+
     // Touch screen controls
     if (myTouch.dataAvailable())
     {
@@ -722,44 +720,44 @@ void PIDStreamButtons()
             {
                 waitForItRect(150, 60, 410, 95);
                 Serial.println(1 + scroll);
-                selected = 1 + scroll;
+                var1 = 1 + scroll;
             }
             if ((y >= 95) && (y <= 130))
             {
                 waitForItRect(150, 95, 410, 130);
                 Serial.println(2 + scroll);
-                selected = 2 + scroll;
+                var1 = 2 + scroll;
             }
             if ((y >= 130) && (y <= 165))
             {
                 waitForItRect(150, 130, 410, 165);
                 Serial.println(3 + scroll);
-                selected = 3 + scroll;
+                var1 = 3 + scroll;
             }
             if ((y >= 165) && (y <= 200))
             {
                 waitForItRect(150, 165, 410, 200);
                 Serial.println(4 + scroll);
-                selected = 4 + scroll;
+                var1 = 4 + scroll;
             }
             if ((y >= 200) && (y <= 235))
             {
                 waitForItRect(150, 200, 410, 235);
                 Serial.println(5 + scroll);
-                selected = 5 + scroll;
+                var1 = 5 + scroll;
             }
             if ((y >= 235) && (y <= 270))
             {
                 waitForItRect(150, 235, 410, 270);
                 Serial.println(6 + scroll);
-                selected = 6 + scroll;
+                var1 = 6 + scroll;
             }
         }
         if ((x >= 420) && (x <= 470))
         {
-            if ((y >= 100) && (y <= 150))
+            if ((y >= 80) && (y <= 160))
             {
-                waitForItRect(420, 100, 470, 150);
+                waitForItRect(420, 80, 470, 160);
                 if (scroll > 0)
                 {
                     scroll = scroll - 6;
@@ -769,9 +767,9 @@ void PIDStreamButtons()
         }
         if ((x >= 420) && (x <= 470))
         {
-            if ((y >= 150) && (y <= 200))
+            if ((y >= 160) && (y <= 240))
             {
-                waitForItRect(420, 150, 470, 200);
+                waitForItRect(420, 160, 470, 240);
                 if (scroll < 100)
                 {
                     scroll = scroll + 6;
@@ -779,21 +777,22 @@ void PIDStreamButtons()
                 }
             }
         }
-        if ((x >= 150) && (x <= 400))
+        if ((x >= 150) && (x <= 410))
         {
             if ((y >= 275) && (y <= 315))
             {
-                if (selected != 0)
+                if (var1 != 0)
                 {
-                    waitForItRect(150, 275, 400, 315);
+                    waitForItRect(150, 275, 410, 315);
                     Serial.print("Sending PID: ");
-                    Serial.println(arrayIn[selected + 1]);
-                    can1.PIDStream(CAN_PID_ID, arrayIn[selected]);
+                    Serial.println(arrayIn[var1 + 1]);
+                    state = 1;
+                    counter1 = 0;
+                    timer1 = 0;
                 }
             }
         }
     }
-    return;
 }
 
 /*============== PID Stream Guages ==============*/
@@ -973,7 +972,7 @@ void clearDTC()
         if (counter1 == 3)
         {
             counter1 = 0;
-            loadBar(state++);
+            loadBar(1 + state++);
         }
     }
 
@@ -1822,6 +1821,18 @@ void pageControl()
         {
             errorMSGButton(9);
         }
+        if (( state == 1 ) && ( counter1 < PIDSAMPLES ) && ( millis() - timer1 > 1000 ))
+        {
+            can1.PIDStream(CAN_PID_ID, arrayIn[var1]);
+            counter1++;
+            errorMSG("Samples", String(counter1), "Saved to SD");
+            timer1 = millis();
+        }
+        if (( counter1 == PIDSAMPLES ) && ( state == 1 ) && ( millis() - timer1 > 2000 ))
+        {
+            state = 0;
+            drawPIDStream();
+        }
         break;
 
     case 12:
@@ -2206,7 +2217,6 @@ void menuButtons()
                 waitForIt(10, 70, 130, 125);
                 page = 9;
                 hasDrawn = false;
-
             }
             if ((y >= 130) && (y <= 185))
             {
