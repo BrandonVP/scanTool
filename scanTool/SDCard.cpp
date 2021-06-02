@@ -139,42 +139,97 @@ void SDCard::readLogFile2()
     Serial.println("in");
     // File created and opened for writing
     myFile = SD.open("readcan2.txt", FILE_READ);
-    int i = 0;
+    uint8_t i = 0;
+    uint8_t counter = 0;
+    uint16_t temp = 0;
     uint16_t ID = 0;
     uint8_t data[8];
+    uint8_t bytes = 0;
     String tempStr;
+
     char c[20];
     while (myFile.available())
     {
         tempStr = (myFile.readStringUntil(' '));
         strcpy(c, tempStr.c_str());
-        ID = strtol(c, NULL, 16);
-        Serial.println(ID, HEX);
-        /*
-        if (i == 1)
-        {
-            ID = strtol(c, NULL, 16);
-            //Serial.print(ID, HEX);
-            //Serial.print(" ");
-        }
-        if (i > 2 && i < 11)
-        {
-            data[i - 3] = strtol(c, NULL, 16);
-            //Serial.print(data[i - 3], HEX);
-            //Serial.print(" ");
-        }
+        temp = strtol(c, NULL, 16);
 
-        i++;
-        if (i == 11)
+        // The most hacked code I have ever written but it works...
+        switch (i)
         {
-            i = 0;
-            //Serial.println(" ");
-            can.sendFrame(ID, data);
-            delay(20);
+        case 0:
+            if (temp < 1)
+            {
+                break;
+            }
+            if (temp > 0)
+            {
+                counter++;
+            }
+            if (counter > 2)
+            {
+                i = 1;
+            }
+        case 1:
+                ID = temp;
+                i = 2;
+                counter = 0;
+            break;
+        case 2:
+            if (counter == 2)
+            {
+                bytes = temp;
+                counter = 0;
+                i = 3;
+            }
+            else
+            {
+                counter++;
+            }
+            break;
+        case 3:
+            if (counter == 2)
+            {
+                counter = 0;
+                i = 4;
+            }
+            else
+            {
+                counter++;
+            }
+            break;
+        case 4:
+            if (counter < bytes)
+            {
+                data[counter] = temp;
+                counter++;
+            }
+            else
+            {
+                counter = 0;
+                i = 0;
+                bytes = 0;
+            }
+            if (counter == bytes && bytes > 0)
+            {
+                can.sendFrame(ID, data);
+                delay(25);
+                /*
+                Serial.print("ID: ");
+                Serial.print(ID, HEX);
+                Serial.print(" MSG: ");
+                for (uint8_t k = 0; k < 8; k++)
+                {
+                    Serial.print(data[k], HEX);
+                    Serial.print(" ");
+
+                }
+                Serial.println(" ");
+                */
+            }
+            break;
         }
-        */
     }
-
     myFile.close();
 }
 
