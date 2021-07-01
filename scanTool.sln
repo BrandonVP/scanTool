@@ -5,7 +5,30 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scanTool", "scanTool\scanTool.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wire-1.0", "scanTool\Libraries\Wire\1.0\Wire\Wire-1.0.vcxitems", "{CB980475-0C1A-4DBF-89E5-A84305CABCEF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SdFat-2.0.7", "scanTool\Libraries\SdFat\2.0.7\SdFat\SdFat-2.0.7.vcxitems", "{43513B35-571E-4D49-9BA2-42016D603902}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SPI-1.0", "scanTool\Libraries\SPI\1.0\SPI\SPI-1.0.vcxitems", "{CB100A39-4444-4083-B0CE-91C7CF1768D3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTCDue-1.1.0", "scanTool\Libraries\RTCDue\1.1.0\RTCDue\RTCDue-1.1.0.vcxitems", "{EEB46727-85F1-40D9-A6AF-A77B9CC23DCE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "107-Arduino-MCP2515-1.2.0", "scanTool\Libraries\107-Arduino-MCP2515\1.2.0\107-Arduino-MCP2515\107-Arduino-MCP2515-1.2.0.vcxitems", "{D9F5C3BD-7677-4EC2-8847-F777A3D9D42C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DS3231-0.0.0", "scanTool\Libraries\DS3231\0.0.0\DS3231\DS3231-0.0.0.vcxitems", "{A84E6EBC-2AC8-4634-A9CD-8A16E2564DFB}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		scanTool\Libraries\SdFat\2.0.7\SdFat\SdFat-2.0.7.vcxitems*{43513b35-571e-4d49-9ba2-42016d603902}*SharedItemsImports = 9
+		scanTool\Libraries\DS3231\0.0.0\DS3231\DS3231-0.0.0.vcxitems*{a84e6ebc-2ac8-4634-a9cd-8a16e2564dfb}*SharedItemsImports = 9
+		scanTool\Libraries\DS3231\0.0.0\DS3231\DS3231-0.0.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		scanTool\Libraries\RTCDue\1.1.0\RTCDue\RTCDue-1.1.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		scanTool\Libraries\SPI\1.0\SPI\SPI-1.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		scanTool\Libraries\SPI\1.0\SPI\SPI-1.0.vcxitems*{cb100a39-4444-4083-b0ce-91c7cf1768d3}*SharedItemsImports = 9
+		scanTool\Libraries\Wire\1.0\Wire\Wire-1.0.vcxitems*{cb980475-0c1a-4dbf-89e5-a84305cabcef}*SharedItemsImports = 9
+		scanTool\Libraries\107-Arduino-MCP2515\1.2.0\107-Arduino-MCP2515\107-Arduino-MCP2515-1.2.0.vcxitems*{d9f5c3bd-7677-4ec2-8847-f777a3d9d42c}*SharedItemsImports = 9
+		scanTool\Libraries\RTCDue\1.1.0\RTCDue\RTCDue-1.1.0.vcxitems*{eeb46727-85f1-40d9-a6af-a77b9cc23dce}*SharedItemsImports = 9
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
 		Release|x86 = Release|x86
@@ -20,7 +43,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		VisualSVNWorkingCopyRoot = .
 		SolutionGuid = {F21BAFB0-049D-4A62-B35B-793225608253}
+		VisualSVNWorkingCopyRoot = .
 	EndGlobalSection
 EndGlobal

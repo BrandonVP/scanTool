@@ -15,6 +15,9 @@
 
 #define PIDSAMPLES 5
 
+#define SDA 20
+#define SCL 21
+
 // For the draw shape functions
 #define LEFT 1
 #define CENTER 2
@@ -38,7 +41,7 @@
 //
 #define PIDLIST "PIDScan.txt"
 
-#define VERSION "Scan Tool Ver. 2.4"
+#define VERSION "Scan Tool Ver. 2.5"
 
 /*
 uint8_t PIDS[193] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 

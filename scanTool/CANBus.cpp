@@ -307,7 +307,7 @@ void CANBus::CANTraffic()
         Can0.read(incCAN0);
         uint32_t temp = millis();
         sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7] );
-        Serial.print(buffer);
+        SerialUSB.print(buffer);
     }
 }
 
@@ -498,7 +498,7 @@ void CANBus::readCAN0TX()
         Can1.read(incCAN1);
         uint32_t temp = millis();
         sprintf(hex_string, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
-        Serial.print(hex_string);
+        SerialUSB.print(hex_string);
         Can0.sendFrame(incCAN1);
     }
 }

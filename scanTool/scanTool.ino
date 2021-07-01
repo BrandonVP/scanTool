@@ -15,6 +15,8 @@ Convert Code to Non-Blocking
     End Todo List
 =========================================================*/
 
+#include <DS3231.h>
+#include <RTCDue.h>
 #include <UTFT.h>
 #include <SD.h>
 #include <UTouchCD.h>
@@ -46,6 +48,8 @@ extern uint8_t BigFont[];
 // Harware Objects
 CANBus can1;
 SDCard sdCard;
+DS3231 rtc(SDA, SCL);
+//RTCDue rtc(XTAL);
 
 // Used PID functions
 char currentDir[20];
@@ -71,7 +75,7 @@ uint8_t state = 0;
 uint8_t counter1 = 0;
 uint8_t var1 = 0;
 uint32_t timer1 = 0;
-//uint32_t timer2 = 0;
+uint32_t timer2 = 0;
 
 void pageControl();
 
@@ -1699,11 +1703,11 @@ void drawMenu()
     drawSquareBtn(1, 1, 140, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
 
     // Draw Menu Buttons
-    drawRoundBtn(10, 10, 130, 65, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 70, 130, 125, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 130, 130, 185, F("RZRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 190, 130, 245, F("EXTRAFN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 250, 130, 305, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 5, 130, 60, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 65, 130, 120, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 125, 130, 180, F("RZRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 185, 130, 240, F("EXTRAFN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 245, 130, 300, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 //Manages the different App pages
@@ -2274,6 +2278,7 @@ void menuButtons()
 // the setup function runs once when you press reset or power the board
 void setup() {
     Serial.begin(115200);
+    SerialUSB.begin(CAN_BPS_500K);
 
     can1.startCAN0(0x000, 0x800);
     can1.startCAN1(0x000, 0x800);
@@ -2286,6 +2291,32 @@ void setup() {
     {
         Serial.println("SD Running");
     }
+
+    /*
+    char str[] = __TIME__;
+    char* pt;
+    uint8_t t[3];
+    uint8_t i = 0;
+    pt = strtok(str, ":");
+    while (pt != NULL) 
+    {
+        t[i] = atoi(pt);
+        pt = strtok(NULL, ":");
+        i++;
+    }
+
+    SerialUSB.println("");
+    SerialUSB.println(t[0]);
+    SerialUSB.println(t[1]);
+    SerialUSB.println(t[2]);
+    */
+
+    // Initialize the rtc object
+    rtc.begin();
+    rtc.setDOW(THURSDAY);
+    rtc.setTime(__TIME__);
+    //rtc.setTime(t[0], t[1], t[2]);
+    rtc.setDate(1, 1, 2014);
 
     // LCD  and touch screen settings
     myGLCD.InitLCD();
@@ -2303,6 +2334,17 @@ void setup() {
     bmpDraw("System/HYPER.bmp", 0, 0);
 }
 
+void updateTime()
+{
+    if (millis() - timer2 > 1000)
+    {
+        char time[40];
+        //sprintf(time, "%02d:%02d:%02d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+        drawRoundBtn(10, 301, 130, 320, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
+        timer2 = millis();
+    }
+}
+
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
@@ -2311,4 +2353,5 @@ void loop()
 
     
     // Background Processes
+    updateTime();
 }
