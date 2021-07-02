@@ -20,6 +20,7 @@
   examples and tools supplied with the library.
 */
 #include "DS3231.h"
+#include <string.h>
 
 // Include hardware-specific functions for the correct MCU
 #if defined(__AVR__)
@@ -95,7 +96,7 @@ void DS3231::setTime(char str[])
 	}
 
 	uint8_t hour = t[0];
-	uint8_t min = t[1]; 
+	uint8_t min = t[1] + 1; 
 	uint8_t sec = t[2];
 
 	if (((hour>=0) && (hour<24)) && ((min>=0) && (min<60)) && ((sec>=0) && (sec<60)))
@@ -106,8 +107,26 @@ void DS3231::setTime(char str[])
 	}
 }
 
-void DS3231::setDate(uint8_t date, uint8_t mon, uint16_t year)
+void DS3231::setDate(char str[])
 {
+	char month[20];
+	int date, year, mon;
+	
+	sscanf(str, "%s %d  %d", month, &date, &year);
+
+	if (strcmp(month, "Jan") == 0) { mon = 1; }
+	if (strcmp(month, "Feb") == 0) { mon = 2; }
+	if (strcmp(month, "Mar") == 0) { mon = 3; }
+	if (strcmp(month, "Apr") == 0) { mon = 4; }
+	if (strcmp(month, "May") == 0) { mon = 5; }
+	if (strcmp(month, "Jun") == 0) { mon = 6; }
+	if (strcmp(month, "Jul") == 0) { mon = 7; }
+	if (strcmp(month, "Aug") == 0) { mon = 8; }
+	if (strcmp(month, "Sep") == 0) { mon = 9; }
+	if (strcmp(month, "Oct") == 0) { mon = 10; }
+	if (strcmp(month, "Nov") == 0) { mon = 11; }
+	if (strcmp(month, "Dec") == 0) { mon = 12; }
+	
 	if (((date>0) && (date<=31)) && ((mon>0) && (mon<=12)) && ((year>=2000) && (year<3000)))
 	{
 		year -= 2000;

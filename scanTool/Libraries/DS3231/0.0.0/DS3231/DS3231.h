@@ -81,7 +81,7 @@ class DS3231
 		void	begin();
 		Time	getTime();
 		void	setTime(char str[]);
-		void	setDate(uint8_t date, uint8_t mon, uint16_t year);
+		void	setDate(char str[]);
 		void	setDOW();
 		void	setDOW(uint8_t dow);
 

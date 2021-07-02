@@ -26,6 +26,7 @@ Convert Code to Non-Blocking
 #include "CANBus.h"
 #include "definitions.h"
 #include "SDCard.h"
+#include <string.h>
 
 // Initialize display
 //(byte model, int RS, int WR, int CS, int RST, int SER)
@@ -1703,11 +1704,11 @@ void drawMenu()
     drawSquareBtn(1, 1, 140, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
 
     // Draw Menu Buttons
-    drawRoundBtn(10, 5, 130, 60, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 65, 130, 120, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 125, 130, 180, F("RZRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 185, 130, 240, F("EXTRAFN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 245, 130, 300, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 32, 130, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 88, 130, 140, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 145, 130, 197, F("RZRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 202, 130, 254, F("EXTRAFN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(10, 259, 130, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 //Manages the different App pages
@@ -2236,38 +2237,38 @@ void menuButtons()
         
         if ((x >= 10) && (x <= 130)) 
         {
-            if ((y >= 10) && (y <= 65)) 
+            if ((y >= 32) && (y <= 83))
             {
                 // CANBUS
-                waitForIt(10, 10, 130, 65);
+                waitForIt(10, 32, 130, 83);
                 page = 0;
                 hasDrawn = false;
             }
-            if ((y >= 70) && (y <= 125))  
+            if ((y >= 88) && (y <= 140))
             {
                 // VEHTOOL
-                waitForIt(10, 70, 130, 125);
+                waitForIt(10, 88, 130, 140);
                 page = 9;
                 hasDrawn = false;
             }
-            if ((y >= 130) && (y <= 185))
+            if ((y >= 145) && (y <= 197))
             {
                 // RZRTOOL
-                waitForIt(10, 130, 130, 185);
+                waitForIt(10, 145, 130, 197);
                 page = 18;
                 hasDrawn = false;
             }
-            if ((y >= 190) && (y <= 245))
+            if ((y >= 202) && (y <= 254))
             {
                 // EXTRAFN
-                waitForIt(10, 190, 130, 245);
+                waitForIt(10, 202, 130, 254);
                 page = 27;
                 hasDrawn = false;
             }
-            if ((y >= 250) && (y <= 305))
+            if ((y >= 259) && (y <= 312))
             {
                 // SETTING
-                waitForIt(10, 250, 130, 305);
+                waitForIt(10, 259, 130, 312);
                 page = 36;
                 hasDrawn = false;
             }
@@ -2276,7 +2277,8 @@ void menuButtons()
 }
 
 // the setup function runs once when you press reset or power the board
-void setup() {
+void setup() 
+{
     Serial.begin(115200);
     SerialUSB.begin(CAN_BPS_500K);
 
@@ -2292,31 +2294,11 @@ void setup() {
         Serial.println("SD Running");
     }
 
-    /*
-    char str[] = __TIME__;
-    char* pt;
-    uint8_t t[3];
-    uint8_t i = 0;
-    pt = strtok(str, ":");
-    while (pt != NULL) 
-    {
-        t[i] = atoi(pt);
-        pt = strtok(NULL, ":");
-        i++;
-    }
-
-    SerialUSB.println("");
-    SerialUSB.println(t[0]);
-    SerialUSB.println(t[1]);
-    SerialUSB.println(t[2]);
-    */
-
     // Initialize the rtc object
     rtc.begin();
-    rtc.setDOW(THURSDAY);
-    rtc.setTime(__TIME__);
-    //rtc.setTime(t[0], t[1], t[2]);
-    rtc.setDate(1, 1, 2014);
+    //rtc.setDOW(FRIDAY);
+    //rtc.setTime(__TIME__);
+    //rtc.setDate(__DATE__);
 
     // LCD  and touch screen settings
     myGLCD.InitLCD();
@@ -2340,7 +2322,7 @@ void updateTime()
     {
         char time[40];
         //sprintf(time, "%02d:%02d:%02d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
-        drawRoundBtn(10, 301, 130, 320, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
+        drawRoundBtn(10, 5, 130, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
         timer2 = millis();
     }
 }
