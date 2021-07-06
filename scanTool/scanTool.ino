@@ -971,7 +971,7 @@ void clearDTC()
             uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
             byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
 
-            can1.sendFrame(IDc[state], MSGc);
+            can1.sendFrame(IDc[state], MSGc, 8);
             counter1++;
             timer1 = millis();
         }
@@ -1106,7 +1106,7 @@ void drawExtraFN()
     drawRoundBtn(312, 135, 475, 185, F("PCAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 190, 308, 240, F("Jeep Text"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 245, 308, 295, F("GMC Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
@@ -1146,10 +1146,10 @@ void extraFNButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                //waitForIt(145, 245, 308, 295);
-                // Unused
-                //page = 34;
-                //hasDrawn = false;
+                waitForIt(145, 245, 308, 295);
+                // GMC Auto
+                page = 34;
+                hasDrawn = false;
             }
         }
         if ((x >= 312) && (x <= 475))
@@ -1192,7 +1192,7 @@ void autoStartStop()
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
     byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    can1.sendFrame(0x7E0, test1);
+    can1.sendFrame(0x7E0, test1, 8);
     delay(3);
 
     uint32_t timer1 = millis();
@@ -1204,12 +1204,12 @@ void autoStartStop()
 
         if (millis() - timer1 >= 2000)
         {
-            can1.sendFrame(0x7E0, test1);
+            can1.sendFrame(0x7E0, test1, 8);
             timer1 = millis();
         }
         if (millis() - timer2 >= 500)
         {
-            can1.sendFrame(0x101, test2);
+            can1.sendFrame(0x101, test2, 8);
             timer2 = millis();
         }
     }
@@ -1220,7 +1220,7 @@ void AFM()
 {
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
     byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    can1.sendFrame(0x7E0, test1);
+    can1.sendFrame(0x7E0, test1, 8);
     delay(2);
 
     uint32_t timer1 = millis();
@@ -1231,7 +1231,7 @@ void AFM()
 
         if (millis() - timer1 >= 2000)
         {
-            can1.sendFrame(0x101, test2);
+            can1.sendFrame(0x101, test2, 8);
             timer1 = millis();
         }
     }
@@ -1247,11 +1247,11 @@ void consoleTextJeep()
     uint8_t data4[8] = { 0x10, 0x01, 0x00, 0x3f, 0x00, 0x00, 0x00, 0x00 };
     uint8_t data5[8] = { 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    can1.sendFrame(id, data1);
-    can1.sendFrame(id, data2);
-    can1.sendFrame(id, data3);
-    can1.sendFrame(id, data4);
-    can1.sendFrame(id, data5);
+    can1.sendFrame(id, data1, 8);
+    can1.sendFrame(id, data2, 8);
+    can1.sendFrame(id, data3, 8);
+    can1.sendFrame(id, data4, 8);
+    can1.sendFrame(id, data5, 8);
 }
 
 //
@@ -1259,7 +1259,16 @@ void disableAutoStopJeep()
 {
     const uint16_t id = 0x137;
     uint8_t data1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x0d };
-    can1.sendFrame(id, data1);
+    can1.sendFrame(id, data1, 8);
+}
+
+//
+void GMC_AutoButton()
+{
+    const uint16_t id = 0x1F4;
+    uint8_t data1[8] = { 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    can1.sendFrame(id, data1, 6);
 }
 
 
@@ -2069,6 +2078,7 @@ void pageControl()
         if (!hasDrawn)
         {
             hasDrawn = true;
+            GMC_AutoButton();
             // Draw Page
         }
         // Call buttons if any

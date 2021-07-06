@@ -52,7 +52,7 @@ uint32_t CANBus::getBaud()
 }
 
 // CAN Bus send message method
-void CANBus::sendFrame(uint32_t id, byte* frame)
+void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8)
 {
     // Outgoing message ID
     outCAN.id = id;
@@ -61,18 +61,14 @@ void CANBus::sendFrame(uint32_t id, byte* frame)
     outCAN.extended = false;
 
     // Message length
-    outCAN.length = 8;
+    outCAN.length = frameLength;
 
     // Assign object to message array
-    outCAN.data.byte[0] = frame[0];
-    outCAN.data.byte[1] = frame[1];
-    outCAN.data.byte[2] = frame[2];
-    outCAN.data.byte[3] = frame[3];
-    outCAN.data.byte[4] = frame[4];
-    outCAN.data.byte[5] = frame[5];
-    outCAN.data.byte[6] = frame[6];
-    outCAN.data.byte[7] = frame[7];
-
+    for (uint8_t i = 0; i < frameLength; i++)
+    {
+        outCAN.data.byte[i] = frame[i];
+    }
+ 
     Can0.sendFrame(outCAN);
     return;
 }

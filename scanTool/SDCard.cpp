@@ -125,7 +125,7 @@ void SDCard::readLogFile()
         {
             i = 0;
             //Serial.println(" ");
-            can.sendFrame(ID, data);
+            can.sendFrame(ID, data, 8);
             delay(20);
         }
     }
@@ -211,7 +211,7 @@ void SDCard::readLogFile2()
             }
             if (counter == bytes && bytes > 0)
             {
-                can.sendFrame(ID, data);
+                can.sendFrame(ID, data, 8);
                 delay(10);
                 /*
                 Serial.print("ID: ");
