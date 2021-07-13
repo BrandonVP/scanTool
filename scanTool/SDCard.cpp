@@ -126,10 +126,9 @@ void SDCard::readLogFile()
             i = 0;
             //Serial.println(" ");
             can.sendFrame(ID, data, 8);
-            delay(20);
+            delay(8);
         }
     }
-    
     myFile.close();
 }
 
@@ -137,97 +136,26 @@ void SDCard::readLogFile2()
 {
     // File created and opened for writing
     myFile = SD.open("readcan2.txt", FILE_READ);
-    uint8_t i = 0;
-    uint8_t counter = 0;
-    uint16_t temp = 0;
-    uint16_t ID = 0;
-    uint8_t data[8];
-    uint8_t bytes = 0;
-    String tempStr;
+    char tempStr[64];
+    int messageNum, id;
+    float time;
+    uint8_t length = 0;
+    byte msg[8];
+    bool sendIt = true;
 
-    char c[20];
+    // readBytesUntil is reading an empty line after each line and I dont know why
+    // sendIt prevents sending the same message twice after the empty line
     while (myFile.available())
-    {
-        tempStr = (myFile.readStringUntil(' '));
-        strcpy(c, tempStr.c_str());
-        temp = strtol(c, NULL, 16);
-
+    {   
+        myFile.readBytesUntil('\n', tempStr, 64);
+        sscanf(tempStr, "%d %f %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length, &msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
         
-        // The most hacked code I have ever written but it works...
-        switch (i)
+        if (sendIt)
         {
-        case 0:
-            if (temp < 1)
-            {
-                break;
-            }
-            if (temp > 0)
-            {
-                counter++;
-            }
-            if (counter > 2)
-            {
-                i = 1;
-            }
-        case 1:
-                ID = temp;
-                i = 2;
-                counter = 0;
-            break;
-        case 2:
-            if (counter == 2)
-            {
-                bytes = temp;
-                counter = 0;
-                i = 3;
-            }
-            else
-            {
-                counter++;
-            }
-            break;
-        case 3:
-            if (counter == 2)
-            {
-                counter = 0;
-                i = 4;
-            }
-            else
-            {
-                counter++;
-            }
-            break;
-        case 4:
-            if (counter < bytes)
-            {
-                data[counter] = temp;
-                counter++;
-            }
-            else
-            {
-                counter = 0;
-                i = 0;
-                bytes = 0;
-            }
-            if (counter == bytes && bytes > 0)
-            {
-                can.sendFrame(ID, data, 8);
-                delay(10);
-                /*
-                Serial.print("ID: ");
-                Serial.print(ID, HEX);
-                Serial.print(" MSG: ");
-                for (uint8_t k = 0; k < 8; k++)
-                {
-                    Serial.print(data[k], HEX);
-                    Serial.print(" ");
-
-                }
-                Serial.println(" ");
-                */
-            }
-            break;
+            can.sendFrame(id, msg, length);
+            delay(8);
         }
+        sendIt = !sendIt;
     }
     myFile.close();
 }
@@ -240,5 +168,3 @@ void SDCard::createDRIVE(char* foldername)
 {
     SD.mkdir(foldername);
 }
-
-

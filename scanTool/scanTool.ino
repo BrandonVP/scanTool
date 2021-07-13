@@ -2305,7 +2305,7 @@ void setup()
     }
 
     // Initialize the rtc object
-    rtc.begin();
+    //rtc.begin();
     //rtc.setDOW(FRIDAY);
     //rtc.setTime(__TIME__);
     //rtc.setDate(__DATE__);
@@ -2345,5 +2345,5 @@ void loop()
 
     
     // Background Processes
-    updateTime();
+    //updateTime();
 }
