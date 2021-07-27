@@ -28,6 +28,13 @@ Convert Code to Non-Blocking
 #include "SDCard.h"
 #include <string.h>
 
+/*
+Uncomment to update the clock then comment out and upload to 
+the device a second time to prevent updating time to last time 
+device was on every at every startup.
+*/
+//#define UPDATE_CLOCK
+
 // Initialize display
 //(byte model, int RS, int WR, int CS, int RST, int SER)
 UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
@@ -472,7 +479,7 @@ void readInCANMsg(uint8_t channel)
     uint8_t rxBuf[8];
     uint32_t rxId;
     uint8_t len;
-    if (can1.getFrame(rxBuf, len, rxId, channel))
+    if (can1.LCDOutCAN(rxBuf, len, rxId, channel))
     {
         char printString[50];
         myGLCD.setColor(VGA_WHITE);
@@ -830,16 +837,16 @@ void PIDGauges()
     myGLCD.setBackColor(menuBtnColor);
 
     const float pi = 3.14159;
-    int r = 50;
+    const uint8_t r = 50;
 
-    float x1 = r * cos(pi / 2) + 220;
-    float y1 = r * sin(pi / 2) + 120;
-    float x2 = r * cos(pi / 2) + 380;
-    float y2 = r * sin(pi / 2) + 120;
-    float x3 = r * cos(pi / 2) + 220;
-    float y3 = r * sin(pi / 2) + 250;
-    float x4 = r * cos(pi / 2) + 380;
-    float y4 = r * sin(pi / 2) + 250;
+    uint16_t x1 = r * cos(pi / 2) + 220;
+    uint16_t y1 = r * sin(pi / 2) + 120;
+    uint16_t x2 = r * cos(pi / 2) + 380;
+    uint16_t y2 = r * sin(pi / 2) + 120;
+    uint16_t x3 = r * cos(pi / 2) + 220;
+    uint16_t y3 = r * sin(pi / 2) + 250;
+    uint16_t x4 = r * cos(pi / 2) + 380;
+    uint16_t y4 = r * sin(pi / 2) + 250;
 
     /*
     for (float t = pi / 2 + 1; t <= 2.5 * pi - 1; t+= 0.015)// 286 points
@@ -855,7 +862,7 @@ void PIDGauges()
         delay(10);
     }
     */
-    float offset = (pi / 2) + 1;
+    const float offset = (pi / 2) + 1;
     float g1, g2, g3, g4 = -1;
     while (isWait)
     {
@@ -873,10 +880,10 @@ void PIDGauges()
                 }
             }
         }
-        g1 = can1.PIDStreamGauge(CAN_PID_ID, 0x4);
-        g2 = can1.PIDStreamGauge(CAN_PID_ID, 0xC);
-        g3 = can1.PIDStreamGauge(CAN_PID_ID, 0x5);
-        g4 = can1.PIDStreamGauge(CAN_PID_ID, 0xD);
+        g1 = can1.PIDStream(CAN_PID_ID, 0x4, false);
+        g2 = can1.PIDStream(CAN_PID_ID, 0xC, false);
+        g3 = can1.PIDStream(CAN_PID_ID, 0x5, false);
+        g4 = can1.PIDStream(CAN_PID_ID, 0xD, false);
         myGLCD.setBackColor(VGA_WHITE);
         myGLCD.printNumI(g1, 197, 128, 3, '0');
         myGLCD.printNumI(g2, 343, 128, 5, '0');
@@ -1755,7 +1762,7 @@ void pageControl()
             drawCANSerial();
         }
         // Call buttons if any
-        can1.CANTraffic();
+        can1.SerialOutCAN();
         break;
     case 3:
         if (!hasDrawn)
@@ -1775,7 +1782,7 @@ void pageControl()
             drawCANSerial();
         }
         // Call buttons if any
-        can1.readCAN0TX();
+        can1.SerialOutCAN0TX();
         break;
     case 5:
         if (!hasDrawn)
@@ -1863,7 +1870,7 @@ void pageControl()
         }
         if (( state == 1 ) && ( counter1 < PIDSAMPLES ) && ( millis() - timer1 > 1000 ))
         {
-            can1.PIDStream(CAN_PID_ID, arrayIn[var1]);
+            can1.PIDStream(CAN_PID_ID, arrayIn[var1], true);
             counter1++;
             errorMSG("Samples", String(counter1), "Saved to SD");
             timer1 = millis();
@@ -1880,6 +1887,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            //can1.startPID();
         }
         // Call buttons if any
         PIDGauges();
@@ -2305,11 +2313,12 @@ void setup()
     }
 
     // Initialize the rtc object
-    //rtc.begin();
-    //rtc.setDOW(FRIDAY);
-    //rtc.setTime(__TIME__);
-    //rtc.setDate(__DATE__);
-
+    rtc.begin();
+#if defined UPDATE_CLOCK
+    rtc.setDOW(FRIDAY);
+    rtc.setTime(__TIME__);
+    rtc.setDate(__DATE__);
+#endif
     // LCD  and touch screen settings
     myGLCD.InitLCD();
     myGLCD.clrScr();
@@ -2342,8 +2351,7 @@ void loop()
 {
     // GUI
     pageControl();
-
     
     // Background Processes
-    //updateTime();
+    updateTime();
 }

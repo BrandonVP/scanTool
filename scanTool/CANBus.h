@@ -1,6 +1,7 @@
 // CANBus.h
 #pragma once
 #include "SDCard.h"
+#include <due_can.h>
 
 #ifndef _CANBus_h
 #define _CANBus_h
@@ -52,7 +53,7 @@ public:
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();
-	bool getFrame(buff&, uint8_t&, uint32_t&, uint8_t);
+	bool LCDOutCAN(buff&, uint8_t&, uint32_t&, uint8_t);
 	void sendFrame(uint32_t, byte*, uint8_t);
 	void startCAN0(uint32_t, uint32_t);
 	void startCAN1(uint32_t, uint32_t);
@@ -60,11 +61,12 @@ public:
 	void setFilterMask1(uint32_t, uint32_t);
 	void requestVIN(uint16_t, char*, bool);
 	char* getFullDir();
-	void CANTraffic();
-	void PIDStream(uint16_t, uint8_t);
+	void SerialOutCAN();
+	void startPID();
+	int PIDStream(uint16_t, uint8_t, bool);
 	int PIDStreamGauge(uint16_t, uint8_t);
 	void setBaud(uint32_t);
-	void readCAN0TX();
+	void SerialOutCAN0TX();
 	uint32_t getBaud();
 	String getVIN();
 };
