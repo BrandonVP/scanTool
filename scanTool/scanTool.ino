@@ -378,7 +378,7 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 ===========================================================*/
 void drawCANBus()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, F("CAN0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("CAN1: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -469,7 +469,7 @@ void CANBusButtons()
 /*============== CAN: LCD ==============*/
 void drawReadInCANLCD()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
 void readInCANMsg(uint8_t channel)
@@ -503,7 +503,7 @@ void readInCANMsg(uint8_t channel)
 /*============== CAN: Serial ==============*/
 void drawCANSerial()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawSquareBtn(145, 140, 479, 160, F("View CAN on serial"), themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
@@ -523,7 +523,7 @@ void drawCANSerial()
 ===========================================================*/
 void drawVehicleTools()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, F("PIDSCAN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, F("PIDSTRM"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("PID Guages"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -629,7 +629,7 @@ void VehicleToolButtons()
 /*========== PID Scan Functions ==========*/
 void drawPIDSCAN()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawSquareBtn(141, 90, 479, 110, F("Scan supported PIDs"), themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(141, 115, 479, 135, F("to SD Card"), themeBackground, themeBackground, menuBtnColor, CENTER);
 }
@@ -706,7 +706,7 @@ void drawPIDStreamScroll(uint8_t scroll)
 
 void drawPIDStream(uint8_t scroll = 0)
 {
-    drawSquareBtn(141, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(141, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     myGLCD.setColor(menuBtnColor);
     myGLCD.setBackColor(themeBackground);
     drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -948,7 +948,7 @@ void PIDGauges()
 void drawVIN()
 {
     uint16_t rxid = 0x7E8;
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     can1.requestVIN(rxid, currentDir, false);
     drawSquareBtn(150, 150, 479, 170, F("VIN"), themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(150, 180, 479, 200, can1.getVIN(), themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -998,12 +998,13 @@ void clearDTC()
     }
 }
 
+
 /*=========================================================
     Polaris Tools
 ===========================================================*/
 void drawRZRTOOL()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 135, 308, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1106,7 +1107,7 @@ void RZRToolButtons()
 ===========================================================*/
 void drawExtraFN()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, F("AFM"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, F("StartStop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("CAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1114,7 +1115,7 @@ void drawExtraFN()
     drawRoundBtn(145, 190, 308, 240, F("Jeep Text"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 245, 308, 295, F("GMC Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 245, 475, 295, F("Dongle Sim"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
@@ -1184,10 +1185,10 @@ void extraFNButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                //waitForIt(312, 245, 475, 295);
-                // Unused
-                //page = 35;
-                //hasDrawn = false;
+                waitForIt(312, 245, 475, 295);
+                // Dongle Sim
+                page = 35;
+                hasDrawn = false;
             }
         }
     }
@@ -1278,13 +1279,213 @@ void GMC_AutoButton()
     can1.sendFrame(id, data1, 6);
 }
 
+//
+void drawDongleSim()
+{
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+
+    drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 105, 250, 150, F("Engine"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 155, 250, 200, F("ECU"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 205, 250, 250, F("Speed"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 205, 325, 250, F("10"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(330, 205, 400, 250, F("20"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(405, 205, 475, 250, F("30"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 255, 250, 300, F("Button"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 255, 325, 300, F("0x00"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(330, 255, 400, 300, F("0x02"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(405, 255, 475, 300, F("0x08"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+ 
+    drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+}
+
+// 
+void dongleSimButtons()
+{
+     // Touch screen controls
+    if (myTouch.dataAvailable())
+    {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
+
+        // VIN
+        // 255, 65, 325, 100 
+        // 330, 65, 400, 100
+        // 405, 65, 475, 100
+        if ((y >= 55) && (y <= 100) && millis() - timer2 > 20)
+        {
+            if ((x >= 255) && (x <= 325))
+            {
+                waitForIt(255, 55, 325, 100);
+                // 1
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x47, 0x54 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 330) && (x <= 400))
+            {
+                waitForIt(330, 55, 400, 100);
+                // 2
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 405) && (x <= 475))
+            {
+                waitForIt(405, 55, 475, 100);
+                // 3
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
+                can1.sendFrame(id, data, 8);
+            }
+            timer2 = millis();
+        }
+
+        // Engine
+        // 255, 105, 325, 140
+        // 330, 105, 400, 140
+        // 405, 105, 475, 140
+        if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
+        {
+            if ((x >= 255) && (x <= 325))
+            {
+                waitForIt(255, 105, 325, 150);
+                // Off
+                const uint16_t id = 0x641;
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 330) && (x <= 400))
+            {
+                waitForIt(330, 105, 400, 150);
+                // Acc
+                const uint16_t id = 0x641;
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 405) && (x <= 475))
+            {
+                waitForIt(405, 105, 475, 150);
+                // On
+                const uint16_t id = 0x641;
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            timer2 = millis();
+        }
+
+        // ECU
+        // 255, 145, 362, 180
+        // 368, 145, 475, 180
+        if ((y >= 155) && (y <= 200) && millis() - timer2 > 20)
+        {
+            if ((x >= 255) && (x <= 362))
+            {
+                waitForIt(255, 155, 362, 200);
+                // Accept
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x02, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 368) && (x <= 475))
+            {
+                waitForIt(368, 155, 475, 200);
+                // Reject
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            timer2 = millis();
+        }
+
+        // Speed
+        // 255, 185, 325, 220
+        // 330, 185, 400, 220
+        // 405, 185, 475, 220
+        if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
+        {
+            if ((x >= 255) && (x <= 325))
+            {
+                waitForIt(255, 205, 325, 250);
+                // 10
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x03, 0x41, 0x0D, 0x09, 0x00, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 330) && (x <= 400))
+            {
+                waitForIt(330, 205, 400, 250);
+                // 20
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x03, 0x41, 0x0D, 0x1C, 0x00, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 405) && (x <= 475))
+            {
+                waitForIt(405, 205, 475, 250);
+                // 30
+                const uint16_t id = 0x7E8;
+                uint8_t data[8] = { 0x03, 0x41, 0x0D, 0x2D, 0x00, 0x00, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8);
+            }
+            timer2 = millis();
+        }
+
+        // Button
+        // 255, 225, 325, 260
+        // 330, 225, 400, 260
+        // 405, 225, 475, 260
+        if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
+        {
+            if ((x >= 255) && (x <= 325))
+            {
+                waitForIt(255, 255, 325, 300);
+                // 0x01
+                const uint16_t id = 0x1F4;
+                uint8_t data[8] = { 0x01, 0x0F, 0x01, 0x00, 0xFF, 0x00, 0xAA, 0x32 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 330) && (x <= 400))
+            {
+                waitForIt(330, 255, 400, 300);
+                // 0x02
+                const uint16_t id = 0x1F4;
+                uint8_t data[8] = { 0x01, 0x0F, 0x02, 0x00, 0xFF, 0x00, 0xAA, 0x32 };
+                can1.sendFrame(id, data, 8);
+            }
+            if ((x >= 405) && (x <= 475))
+            {
+                waitForIt(405, 255, 475, 300);
+                // 0x08
+                const uint16_t id = 0x1F4;
+                uint8_t data[8] = { 0x01, 0x0F, 0x08, 0x00, 0xFF, 0x00, 0xAA, 0x32 };
+                can1.sendFrame(id, data, 8);
+            }
+            timer2 = millis();
+        }
+    }
+}
+
 
 /*=========================================================
     Settings
 ===========================================================*/
 void drawSettings()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawRoundBtn(145, 80, 308, 130, F("Fltr CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 80, 475, 130, F("Fltr CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("Set Baud0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1374,7 +1575,7 @@ void settingsButtons()
 // Draw hex number pad
 void drawNumpad()
 {
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     drawSquareBtn(180, 57, 460, 77, "CAN Filter Range", themeBackground, themeBackground, menuBtnColor, CENTER);
 
     int posY = 80;
@@ -2097,9 +2298,11 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            drawDongleSim();
+            timer2 = 0;
         }
         // Call buttons if any
-        extraFNButtons();
+        dongleSimButtons();
         break;
 
     case 36: /*========== SETTINGS ==========*/
