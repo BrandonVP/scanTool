@@ -383,10 +383,10 @@ void drawCANBus()
     drawRoundBtn(312, 80, 475, 130, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("CAN1: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 135, 475, 185, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 190, 308, 240, F("Both: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 190, 475, 240, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 245, 308, 295, F("CTX0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 245, 475, 295, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
@@ -418,17 +418,17 @@ void CANBusButtons()
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(145, 190, 308, 240);
-                // Both: LCD
-                page = 5;
-                hasDrawn = false;
+                //waitForIt(145, 190, 308, 240);
+                // Unused
+                //page = 5;
+                //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(145, 245, 308, 295);
-                // CTX0: LCD
-                page = 7;
-                hasDrawn = false;
+                //waitForIt(145, 245, 308, 295);
+                // Unused
+                //page = 7;
+                //hasDrawn = false;
             }
         }
         if ((x >= 312) && (x <= 475))
@@ -436,7 +436,7 @@ void CANBusButtons()
             if ((y >= 80) && (y <= 130))
             {
                 waitForIt(312, 80, 475, 130);
-                // CAN0 Serial
+                // Unused
                 page = 2;
                 hasDrawn = false;
             }
@@ -450,17 +450,17 @@ void CANBusButtons()
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(312, 190, 475, 240);
-                // Both Serial
-                page = 6;
-                hasDrawn = false;
+                //waitForIt(312, 190, 475, 240);
+                // Unused
+                //page = 6;
+                //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(312, 245, 475, 295);
-                // CTX0 Serial
-                page = 8;
-                hasDrawn = false;
+                //waitForIt(312, 245, 475, 295);
+                // Unused
+                //page = 8;
+                //hasDrawn = false;
             }
         }
     }
@@ -1917,8 +1917,8 @@ void canFilter(bool CAN)
 void drawMenu()
 {
     // Draw Layout
-    drawSquareBtn(0, 0, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(0, 0, 140, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
+    drawSquareBtn(1, 1, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(1, 1, 140, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
 
     // Draw Menu Buttons
     drawRoundBtn(10, 32, 130, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1963,7 +1963,7 @@ void pageControl()
             drawCANSerial();
         }
         // Call buttons if any
-        can1.SerialOutCAN(CAN0);
+        can1.SerialOutCAN();
         break;
     case 3:
         if (!hasDrawn)
@@ -1983,47 +1983,39 @@ void pageControl()
             drawCANSerial();
         }
         // Call buttons if any
-        can1.SerialOutCAN(CAN1);
+        can1.SerialOutCAN0TX();
         break;
     case 5:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-            drawReadInCANLCD();
         }
         // Call buttons if any
-        readInCANMsg(2);
         break;
     case 6:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-            drawCANSerial();
         }
         // Call buttons if any
-        can1.SerialOutCAN(2);
         break;
     case 7:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-            drawReadInCANLCD();
         }
         // Call buttons if any
-        readInCANMsg(3);
         break;
     case 8:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-            drawCANSerial();
         }
         // Call buttons if any
-        can1.SerialOutCAN(3);
         break;
 
     case 9: /*========== VEHTOOL ==========*/

@@ -61,11 +61,12 @@ public:
 	void setFilterMask1(uint32_t, uint32_t);
 	void requestVIN(uint16_t, char*, bool);
 	char* getFullDir();
-	void SerialOutCAN(uint8_t);
+	void SerialOutCAN();
 	void startPID();
 	int PIDStream(uint16_t, uint8_t, bool);
 	int PIDStreamGauge(uint16_t, uint8_t);
 	void setBaud(uint32_t);
+	void SerialOutCAN0TX();
 	uint32_t getBaud();
 	String getVIN();
 };
