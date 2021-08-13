@@ -478,7 +478,7 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
 // Send CAN Bus traffic from channel 1 or 2 to LCD
 bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t channel)
 {
-    if (channel == 1 && Can0.available() > 0)
+    if (channel == 0 && Can0.available() > 0)
     {
         Can0.read(incCAN0);
         id = incCAN0.id;
@@ -488,7 +488,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t channel)
         }
         return true;
     }
-    else if (channel == 2 && Can1.available() > 0)
+    else if (channel == 1 && Can1.available() > 0)
     {
         Can1.read(incCAN1);
         id = incCAN1.id;
@@ -498,7 +498,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t channel)
         }
         return true;
     }
-    else if (channel == 3)
+    else if (channel == 2)
     {
         if (Can0.available() > 0) 
         {
@@ -521,7 +521,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t channel)
             return true;
         }
     }
-    else if (channel == 4)
+    else if (channel == 3)
     {
         if (Can0.available() > 0)
         {
@@ -548,19 +548,19 @@ void CANBus::SerialOutCAN(uint8_t channel)
 {
     char buffer[50];
     uint32_t temp = millis();
-    if (channel == 1 && Can0.available() > 0)
+    if (channel == 0 && Can0.available() > 0)
     {
         Can0.read(incCAN0);
         sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
         SerialUSB.print(buffer);
     }
-    else if (channel == 2 && Can1.available() > 0)
+    else if (channel == 1 && Can1.available() > 0)
     {
         Can1.read(incCAN1);
         sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
         SerialUSB.print(buffer);
     }
-    else if (channel == 3)
+    else if (channel == 2)
     {
         if (Can0.available() > 0) 
         {
@@ -575,7 +575,7 @@ void CANBus::SerialOutCAN(uint8_t channel)
             SerialUSB.print(buffer);
         }
     }
-    else if (channel == 4)
+    else if (channel == 3)
     {
         if (Can0.available() > 0)
         {

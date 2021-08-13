@@ -47,7 +47,6 @@ int x, y;
 // Used for page control
 uint8_t controlPage = 0;
 uint8_t page = 0;
-uint8_t selectedSerialOut = 0;
 bool hasDrawn = false;
 
 // External import for fonts
@@ -440,7 +439,6 @@ void CANBusButtons()
                 // CAN0 Serial
                 page = 2;
                 hasDrawn = false;
-                selectedSerialOut = 1;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -448,7 +446,7 @@ void CANBusButtons()
                 // CAN1 Serial
                 page = 4;
                 hasDrawn = false;
-                selectedSerialOut = 2;
+
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -456,7 +454,6 @@ void CANBusButtons()
                 // Both Serial
                 page = 6;
                 hasDrawn = false;
-                selectedSerialOut = 3;
             }
             if ((y >= 245) && (y <= 295))
             {
@@ -464,7 +461,6 @@ void CANBusButtons()
                 // CTX0 Serial
                 page = 8;
                 hasDrawn = false;
-                selectedSerialOut = 4;
             }
         }
     }
@@ -1495,7 +1491,7 @@ void drawSettings()
     drawRoundBtn(312, 80, 475, 130, F("Fltr CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("Set Baud0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 135, 475, 185, F("Set Baud1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 190, 308, 240, F("Serial Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1530,10 +1526,10 @@ void settingsButtons()
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(145, 190, 308, 240);
-                // Serial Off
-                page = 41;
-                hasDrawn = false;
+                //waitForIt(145, 190, 308, 240);
+                // Unused
+                //page = 41;
+                //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
@@ -1998,7 +1994,7 @@ void pageControl()
             drawReadInCANLCD();
         }
         // Call buttons if any
-        readInCANMsg(BOTH);
+        readInCANMsg(2);
         break;
     case 6:
         if (!hasDrawn)
@@ -2395,7 +2391,6 @@ void pageControl()
         if (!hasDrawn)
         {
             hasDrawn = true;
-            selectedSerialOut = 0;
             // Draw Page
         }
         // Call buttons if any
@@ -2563,25 +2558,6 @@ void updateTime()
     }
 }
 
-void serialOut()
-{
-    switch (selectedSerialOut)
-    {
-    case CAN0:
-        can1.SerialOutCAN(CAN0);
-        break;
-    case CAN1:
-        can1.SerialOutCAN(CAN1);
-        break;
-    case BOTH:
-        can1.SerialOutCAN(BOTH);
-        break;
-    case CTX0:
-        can1.SerialOutCAN(CTX0);
-        break;
-    }
-}
-
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
@@ -2590,5 +2566,4 @@ void loop()
     
     // Background Processes
     updateTime();
-    serialOut();
 }
