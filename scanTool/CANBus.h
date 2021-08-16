@@ -59,6 +59,11 @@ public:
 	void startCAN1(uint32_t, uint32_t);
 	void setFilterMask0(uint32_t, uint32_t);
 	void setFilterMask1(uint32_t, uint32_t);
+	void setDataCANOut(uint8_t, uint8_t);
+	void setIDCANOut(uint16_t);
+	uint16_t getCANOutID();
+	uint8_t getCANOutData(uint8_t);
+	void sendCANOut(uint8_t);
 	void requestVIN(uint16_t, char*, bool);
 	char* getFullDir();
 	void SerialOutCAN(uint8_t);

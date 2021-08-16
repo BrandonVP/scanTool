@@ -7,13 +7,18 @@
 
 CAN_FRAME incCAN0;
 CAN_FRAME incCAN1;
-CAN_FRAME outCAN;
+CAN_FRAME CANOut;
 
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN0(uint32_t start, uint32_t end)
 {
     Can0.begin(baud);
     Can0.watchForRange(start, end);
+
+    // Do not use extended frames
+    CANOut.extended = false;
+    // Message length
+    CANOut.length = 8;
 }
 
 // Initialize CAN1 and set the baud rates here
@@ -90,25 +95,50 @@ char* CANBus::getFullDir()
     return PIDDir;
 }
 
+void CANBus::setIDCANOut(uint16_t id)
+{
+    CANOut.id = id;
+}
+
+uint16_t CANBus::getCANOutID()
+{
+    return CANOut.id;
+}
+
+void CANBus::setDataCANOut(uint8_t value, uint8_t position)
+{
+    CANOut.data.byte[position] = value;
+}
+
+uint8_t CANBus::getCANOutData(uint8_t position)
+{
+    return CANOut.data.bytes[position];
+}
+
+void CANBus::sendCANOut(uint8_t channel)
+{
+    Can0.sendFrame(CANOut);
+}
+
 // Send out CAN Bus message
 void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8)
 {
     // Outgoing message ID
-    outCAN.id = id;
+    CANOut.id = id;
 
     // Do not use extended frames
-    outCAN.extended = false;
+    CANOut.extended = false;
 
     // Message length
-    outCAN.length = frameLength;
+    CANOut.length = frameLength;
 
     // Assign object to message array
     for (uint8_t i = 0; i < frameLength; i++)
     {
-        outCAN.data.byte[i] = frame[i];
+        CANOut.data.byte[i] = frame[i];
     }
 
-    Can0.sendFrame(outCAN);
+    Can0.sendFrame(CANOut);
     return;
 }
 
