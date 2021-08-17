@@ -125,7 +125,7 @@ void SDCard::readLogFile()
         {
             i = 0;
             //Serial.println(" ");
-            can.sendFrame(ID, data, 8);
+            can.sendFrame(ID, data, 8, false);
             delay(8);
         }
     }
@@ -152,7 +152,7 @@ void SDCard::readLogFile2()
         
         if (sendIt)
         {
-            can.sendFrame(id, msg, length);
+            can.sendFrame(id, msg, length, false);
             delay(8);
         }
         sendIt = !sendIt;

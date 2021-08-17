@@ -115,13 +115,28 @@ uint8_t CANBus::getCANOutData(uint8_t position)
     return CANOut.data.bytes[position];
 }
 
-void CANBus::sendCANOut(uint8_t channel)
+void CANBus::sendCANOut(uint8_t channel, bool serialOut)
 {
-    Can0.sendFrame(CANOut);
+    if (channel == 0)
+    {
+        Can0.sendFrame(CANOut);
+    }
+    if (channel == 1)
+    {
+        Can1.sendFrame(CANOut);
+    }
+    if (serialOut)
+    {
+    char buffer[50];
+    uint32_t temp = millis();
+    Can0.read(incCAN0);
+    sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
+    SerialUSB.print(buffer);
+    }
 }
 
 // Send out CAN Bus message
-void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8)
+void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8, bool serialOut = false)
 {
     // Outgoing message ID
     CANOut.id = id;
@@ -139,7 +154,15 @@ void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8)
     }
 
     Can0.sendFrame(CANOut);
-    return;
+
+    if (serialOut)
+    {
+    char buffer[50];
+    uint32_t temp = millis();
+    Can0.read(incCAN0);
+    sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
+    SerialUSB.print(buffer);
+    }
 }
 
 // Find supported vehicle PIDS

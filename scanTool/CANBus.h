@@ -54,7 +54,7 @@ public:
 	void setNextPID(bool);
 	bool getNextPID();
 	bool LCDOutCAN(buff&, uint8_t&, uint32_t&, uint8_t);
-	void sendFrame(uint32_t, byte*, uint8_t);
+	void sendFrame(uint32_t, byte*, uint8_t, bool);
 	void startCAN0(uint32_t, uint32_t);
 	void startCAN1(uint32_t, uint32_t);
 	void setFilterMask0(uint32_t, uint32_t);
@@ -63,7 +63,7 @@ public:
 	void setIDCANOut(uint16_t);
 	uint16_t getCANOutID();
 	uint8_t getCANOutData(uint8_t);
-	void sendCANOut(uint8_t);
+	void sendCANOut(uint8_t, bool);
 	void requestVIN(uint16_t, char*, bool);
 	char* getFullDir();
 	void SerialOutCAN(uint8_t);
