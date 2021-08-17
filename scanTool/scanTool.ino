@@ -47,8 +47,11 @@ int x, y;
 // Used for page control
 uint8_t controlPage = 0;
 uint8_t page = 0;
-uint8_t selectedSerialOut = 0;
 bool hasDrawn = false;
+
+// *Used by background process*
+uint8_t selectedSerialOut = 0;
+uint32_t timer2 = 0;
 
 // External import for fonts
 extern uint8_t SmallFont[];
@@ -61,8 +64,7 @@ DS3231 rtc(SDA, SCL);
 //RTCDue rtc(XTAL);
 
 // Used PID functions
-char currentDir[20];
-uint8_t arrayIn[100];
+uint8_t arrayIn[80];
 
 // Performing a sucessful PID scan will change this to true
 bool hasPID = false;
@@ -71,23 +73,27 @@ bool hasPID = false;
 uint16_t indexCANMsg = 60;
 
 // Filter range / Filter Mask
-uint32_t startRange = 0x000;
-uint32_t endRange = 0xFFF;
+uint32_t CAN0Filter = 0x000;
+uint32_t CAN0Mask = 0xFFF;
+uint32_t CAN1Filter = 0x000;
+uint32_t CAN1Mask = 0xFFF;
 
-// General use variables for state machines
-// Any function can use
-// Ensure state machine is assigned to a page in page control to prevent competing use 
+// General use variables
+// Any non-background process function can use
 // Initialize to 0 before use
 bool nextState = false;
 bool isFinished = false;
 uint8_t state = 0;
-uint8_t counter1 = 0;
+int16_t counter1 = 0;
 uint16_t var1 = 0;
 uint8_t var2 = 0;
 uint16_t var3 = 0;
+uint32_t var4 = 0;
+uint32_t var5 = 0;
 uint32_t timer1 = 0;
-uint32_t timer2 = 0;
 
+
+// Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
 
 void pageControl();
@@ -652,7 +658,7 @@ void setData(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t position)
     if (!isFinished)
     {
         drawKeypad();
-        drawRoundBtn(145, 220, 470, 260, String(can1.getCANOutData(position), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+        drawRoundBtn(145, 220, 470, 260, String(can1.getCANOutData(position), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         isFinished = true;
         counter1 = 1;
         var2 = 0;
@@ -664,12 +670,12 @@ void setData(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t position)
         var2 = keypadButtons();
         timer1 = millis();
     }
-    if (var2 > 0x00 && var2 < 0x10)
+    if (var2 >= 0x00 && var2 < 0x10 && counter1 >= 0)
     {
         // Var3 = current value + returned keypad value times its hex place
         var3 = var3 + (var2 * hexTable[counter1]);
-        drawRoundBtn(145, 220, 470, 260, String(var3, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-        if (counter1 > 0)
+        drawRoundBtn(145, 220, 470, 260, String(var3, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        if (counter1 >= 0)
         {
             counter1--;
         }
@@ -713,7 +719,7 @@ void sendFrame(uint8_t channel)
             if (!isFinished)
             {
                 drawKeypad();
-                drawRoundBtn(145, 220, 470, 260, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+                drawRoundBtn(145, 220, 470, 260, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
                 isFinished = true;
                 counter1 = 2;
                 var2 = 0;
@@ -729,7 +735,7 @@ void sendFrame(uint8_t channel)
             {
                 // Var3 = current value + returned keypad value times its hex place
                 var3 = var3 + (var2 * hexTable[counter1]);
-                drawRoundBtn(145, 220, 470, 260, String(var3, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+                drawRoundBtn(145, 220, 470, 260, String(var3, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
                 if (counter1 > 0)
                 {
                     counter1--;
@@ -901,7 +907,7 @@ void startPIDSCAN()
 
         // Get vehicle vin, will be saved in can1 object
         const uint16_t rxid = 0x7E8;
-        can1.requestVIN(rxid, currentDir, true);
+        can1.requestVIN(rxid, true);
 
         loadBar(state++);
     }
@@ -1106,20 +1112,6 @@ void PIDGauges()
     uint16_t x4 = r * cos(pi / 2) + 380;
     uint16_t y4 = r * sin(pi / 2) + 250;
 
-    /*
-    for (float t = pi / 2 + 1; t <= 2.5 * pi - 1; t+= 0.015)// 286 points
-    {
-        myGLCD.setBackColor(VGA_WHITE);
-        myGLCD.setColor(VGA_WHITE);
-        myGLCD.drawLine(380, 250, x, y);
-        x = r * cos(t) + 380;
-        y = r * sin(t) + 250;
-        myGLCD.setBackColor(menuBtnColor);
-        myGLCD.setColor(menuBtnColor);
-        myGLCD.drawLine(380, 250, x, y);
-        delay(10);
-    }
-    */
     const float offset = (pi / 2) + 1;
     float g1, g2, g3, g4 = -1;
     while (isWait)
@@ -1207,7 +1199,7 @@ void drawVIN()
 {
     uint16_t rxid = 0x7E8;
     drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    can1.requestVIN(rxid, currentDir, false);
+    can1.requestVIN(rxid, false);
     drawSquareBtn(150, 150, 479, 170, F("VIN"), themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(150, 180, 479, 200, can1.getVIN(), themeBackground, themeBackground, menuBtnColor, CENTER);
 }
@@ -1735,8 +1727,8 @@ void dongleSimButtons()
 void drawSettings()
 {
     drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(145, 80, 308, 130, F("Fltr CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 80, 475, 130, F("Fltr CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 80, 308, 130, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    //drawRoundBtn(312, 80, 475, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("Set Baud0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 135, 475, 185, F("Set Baud1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 190, 308, 240, F("Serial Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1761,7 +1753,7 @@ void settingsButtons()
             if ((y >= 80) && (y <= 130))
             {
                 waitForIt(145, 80, 308, 130);
-                // Filter CAN0
+                // Filter Mask
                 page = 37;
                 hasDrawn = false;
             }
@@ -1791,10 +1783,10 @@ void settingsButtons()
         {
             if ((y >= 80) && (y <= 130))
             {
-                waitForIt(312, 80, 475, 130);
-                // Filter CAN1
-                page = 38;
-                hasDrawn = false;
+                //waitForIt(312, 80, 475, 130);
+                // Unused
+                //page = 38;
+                //hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -1821,24 +1813,175 @@ void settingsButtons()
     }
 }
 
+void drawFilterMask()
+{
+    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+
+    drawRoundBtn(145, 70, 200, 120, F("CAN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(205, 70, 340, 120, F("Filter"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(345, 70, 475, 120, F("Mask"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 125, 200, 175, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 180, 200, 230, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(345, 180, 475, 230, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawRoundBtn(145, 235, 475, 285, F("Open All Traffic"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
+    drawSquareBtn(150, 295, 479, 315, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+}
+
+void filterMaskButtons()
+{
+    // Touch screen controls
+    if (myTouch.dataAvailable())
+    {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
+
+        if ((y >= 125) && (y <= 175))
+        {
+            if ((x >= 205) && (x <= 340))
+            {
+                waitForIt(205, 125, 340, 175);
+                // Set CAN0 Filter
+                state = 1;
+                isFinished = false;
+            }
+            if ((x >= 345) && (x <= 475))
+            {
+                waitForIt(345, 125, 475, 175);
+                // Set CAN 0Mask
+                state = 2;
+                isFinished = false;
+            }
+        }
+        if ((y >= 180) && (y <= 230))
+        {
+            if ((x >= 205) && (x <= 340))
+            {
+                waitForIt(205, 180, 340, 230);
+                // Set CAN1 Filter
+                state = 3;
+                isFinished = false;
+            }
+            if ((x >= 345) && (x <= 475))
+            {
+                waitForIt(345, 180, 475, 230);
+                // Set CAN1 Mask
+                state = 4;
+                isFinished = false;
+            }
+        }
+    }
+}
+
+uint8_t setFilterMask(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint32_t &value)
+{
+    if (!isFinished)
+    {
+        drawKeypad();
+        var5 = 0;
+        drawRoundBtn(145, 220, 470, 260, String(var5, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        isFinished = true;
+        counter1 = 7;
+        var4 = 0;
+        timer1 = millis();
+    }
+    if (millis() - timer1 > 100)
+    {
+        var4 = keypadButtons();
+        timer1 = millis();
+    }
+    if (var4 >= 0x00 && var4 < 0x10 && counter1 >= 0)
+    {
+        // CAN0Filter = current value + returned keypad value times its hex place
+        var5 = var5 + (var4 * hexTable[counter1]);
+        drawRoundBtn(145, 220, 470, 260, String(var5, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        if (counter1 >= 0)
+        {
+            counter1--;
+        }
+        var4 = 0xFF;
+    }
+    if (var4 == 0x10)
+    {
+        counter1 = 7;
+        var4 = 0;
+        var5 = 0;
+        drawRoundBtn(145, 220, 470, 260, String(var4, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    }
+    if (var4 == 0x11)
+    {
+        isFinished = false;
+        state = 0;
+        value = var5;
+        return 0x11;
+    }
+    if (var4 == 0x12)
+    {
+        isFinished = false;
+        state = 0;
+    }
+    return 0;
+}
+
+void filterMask()
+{
+    uint8_t temp = 0;
+    switch (state)
+    {
+    case 0: // 
+        if (!isFinished)
+        {
+            drawFilterMask();
+            isFinished = true;
+        }
+        filterMaskButtons();
+        break;
+    case 1: temp = setFilterMask(205, 125, 340, 175, CAN0Filter);
+        if (temp == 0x11)
+        {
+            can1.setFilterMask0(CAN0Filter, CAN0Mask);
+        }
+        break;
+    case 2: setFilterMask(345, 125, 475, 175, CAN0Mask);
+        if (temp == 0x11)
+        {
+            can1.setFilterMask0(CAN0Filter, CAN0Mask);
+        }
+        break;
+    case 3: setFilterMask(205, 180, 340, 230, CAN1Filter);
+        if (temp == 0x11)
+        {
+            can1.setFilterMask0(CAN1Filter, CAN1Mask);
+        }
+        break;
+    case 4: setFilterMask(345, 180, 475, 230, CAN0Mask);
+        if (temp == 0x11)
+        {
+            can1.setFilterMask0(CAN1Filter, CAN1Mask);
+        }
+        break;
+    }
+}
+
+
+
+
+
+
+/*
 void drawRange()
 {
     drawSquareBtn(180, 57, 460, 77, "CAN Filter Range", themeBackground, themeBackground, menuBtnColor, CENTER);
     drawRoundBtn(145, 220, 305, 260, String(startRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
     drawRoundBtn(310, 220, 470, 260, String(endRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 }
-
-void drawFilterMask()
-{
-
-}
-
-void setFilterMask()
-{
-
-}
-
-
 
 // Draw hex number pad
 void drawNumpad()
@@ -2173,7 +2316,7 @@ void canFilter(bool CAN)
         }
     }
 }
-
+*/
 
 /*=========================================================
     Framework Functions
@@ -2215,6 +2358,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            selectedSerialOut = 0;
             drawReadInCANLCD();
         }
         // Call buttons if any
@@ -2235,6 +2379,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            selectedSerialOut = 0;
             drawReadInCANLCD();
         }
         // Call buttons if any
@@ -2255,6 +2400,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            selectedSerialOut = 0;
             drawReadInCANLCD();
         }
         // Call buttons if any
@@ -2275,6 +2421,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            selectedSerialOut = 0;
             drawReadInCANLCD();
         }
         // Call buttons if any
@@ -2591,22 +2738,20 @@ void pageControl()
         if (!hasDrawn)
         {
             hasDrawn = true;
-            // Draw Page
-            drawNumpad();
-            drawRange();
+            var1 = 0;
+            var4 = 0;
+            state = 0;
+            counter1 = 5;
+            isFinished = false;
         }
-        canFilter(true);
+        filterMask();
         break;
     case 38:
         if (!hasDrawn)
         {
             hasDrawn = true;
-            // Draw Page
-            drawNumpad();
-            drawRange();
         }
         // Call buttons if any
-        canFilter(false);
         break;
     case 39:
         if (!hasDrawn)
@@ -3036,17 +3181,13 @@ void serialOut()
 {
     switch (selectedSerialOut)
     {
-    case CAN0:
-        can1.SerialOutCAN(CAN0);
+    case CAN0: can1.SerialOutCAN(CAN0);
         break;
-    case CAN1:
-        can1.SerialOutCAN(CAN1);
+    case CAN1: can1.SerialOutCAN(CAN1);
         break;
-    case BOTH:
-        can1.SerialOutCAN(BOTH);
+    case BOTH: can1.SerialOutCAN(BOTH);
         break;
-    case CTX0:
-        can1.SerialOutCAN(CTX0);
+    case CTX0: can1.SerialOutCAN(CTX0);
         break;
     }
 }

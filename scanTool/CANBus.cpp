@@ -224,7 +224,7 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
 }
 
 // Get VIN, last argument gives option to save in SD Card
-void CANBus::requestVIN(uint16_t IDFilter, char* currentDir, bool saveSD)
+void CANBus::requestVIN(uint16_t IDFilter, bool saveSD)
 {
     char VINLOG[7] = { 'L', 'O', 'G', '.', 't', 'x', 't' };
     char PID[7] = { 'P', 'I', 'D', '.', 't', 'x', 't' };
