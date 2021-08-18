@@ -31,14 +31,14 @@ void CANBus::startCAN1(uint32_t start, uint32_t end)
 // Set Can0 Filter and Mask
 void CANBus::setFilterMask0(uint32_t filter, uint32_t mask)
 {
-    Can0.begin(baud);
+    //Can0.begin(baud);
     Can0.watchFor(filter, mask);
 }
 
 // Set Can1 Filter and Mask
 void CANBus::setFilterMask1(uint32_t filter, uint32_t mask)
 {
-    Can1.begin(baud);
+    //Can1.begin(baud);
     Can1.watchFor(filter, mask);
 }
 

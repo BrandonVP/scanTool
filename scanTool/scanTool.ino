@@ -653,28 +653,27 @@ void sendFrameButtons(uint8_t channel)
 }
 
 // Using this function in sendFrame switch statement to avoid writing it out 8 times
-void setData(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t position)
+void setData(uint8_t position)
 {
+    char displayText[10];
     if (!isFinished)
     {
         drawKeypad();
-        drawRoundBtn(145, 220, 470, 260, String(can1.getCANOutData(position), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        sprintf(displayText, "%02X", can1.getCANOutData(position));
         isFinished = true;
         counter1 = 1;
-        var2 = 0;
+        var2 = 0xFF;
         var3 = 0;
-        timer1 = millis();
+        drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     }
-    if (millis() - timer1 > 100)
-    {
-        var2 = keypadButtons();
-        timer1 = millis();
-    }
+
+    var2 = keypadButtons();
     if (var2 >= 0x00 && var2 < 0x10 && counter1 >= 0)
     {
         // Var3 = current value + returned keypad value times its hex place
         var3 = var3 + (var2 * hexTable[counter1]);
-        drawRoundBtn(145, 220, 470, 260, String(var3, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        sprintf(displayText, "%02X", var3);
+        drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         if (counter1 >= 0)
         {
             counter1--;
@@ -686,12 +685,11 @@ void setData(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t position)
         counter1 = 2;
         var2 = 0;
         var3 = 0;
-        drawRoundBtn(145, 220, 470, 260, String(var2, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     }
     if (var2 == 0x11)
-    {//can1.getCANOutID() String(var3, 16)
+    {
         can1.setDataCANOut(var3, position);
-        drawRoundBtn(x1, y1, x2, y2, String(can1.getCANOutData(position), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         isFinished = false;
         state = 0;
     }
@@ -700,11 +698,12 @@ void setData(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t position)
         isFinished = false;
         state = 0;
     }
-
 }
  
+//
 void sendFrame(uint8_t channel)
 {
+    char displayText[10];
     switch (state)
     {
         case 0: // 
@@ -719,24 +718,22 @@ void sendFrame(uint8_t channel)
             if (!isFinished)
             {
                 drawKeypad();
-                drawRoundBtn(145, 220, 470, 260, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+                sprintf(displayText, "%03X", can1.getCANOutID());
                 isFinished = true;
                 counter1 = 2;
-                var2 = 0;
-                var3 = 0;
-                timer1 = millis();
+                var2 = 0xFF;
+                var4 = 0;
+                drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
             }
-            if (millis() - timer1 > 100)
-            {
-                var2 = keypadButtons();
-                timer1 = millis();
-            }
-            if (var2 > 0x00 && var2 < 0x10)
+
+            var2 = keypadButtons();
+            if (var2 >= 0x00 && var2 < 0x10 && counter1 >= 0)
             {
                 // Var3 = current value + returned keypad value times its hex place
-                var3 = var3 + (var2 * hexTable[counter1]);
-                drawRoundBtn(145, 220, 470, 260, String(var3, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-                if (counter1 > 0)
+                var4 = var4 + (var2 * hexTable[counter1]);
+                sprintf(displayText, "%03X", var4);
+                drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+                if (counter1 >= 0)
                 {
                     counter1--;
                 }
@@ -746,12 +743,12 @@ void sendFrame(uint8_t channel)
             {
                 counter1 = 2;
                 var2 = 0;
-                var3 = 0;
-                drawRoundBtn(145, 220, 470, 260, String(var2, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+                var4 = 0;
+                drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
             }
             if (var2 == 0x11)
-            {//can1.getCANOutID() String(var3, 16)
-                can1.setIDCANOut(var3);
+            {
+                can1.setIDCANOut(var4);
                 drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
                 isFinished = false;
                 state = 0;
@@ -762,21 +759,21 @@ void sendFrame(uint8_t channel)
                 state = 0;
             }
             break;
-        case 2: setData(145, 195, 186, 250, 0);
+        case 2: setData(0);
             break;
-        case 3: setData(186, 195, 227, 250, 1); 
+        case 3: setData(1); 
             break;
-        case 4: setData(227, 195, 268, 250, 2);
+        case 4: setData(2);
             break;
-        case 5: setData(268, 195, 309, 250, 3);
+        case 5: setData(3);
             break;
-        case 6: setData(309, 195, 350, 250, 4);
+        case 6: setData(4);
             break;
-        case 7: setData(350, 195, 391, 250, 5);
+        case 7: setData(5);
             break;
-        case 8: setData(391, 195, 432, 250, 6);
+        case 8: setData(6);
             break;
-        case 9: setData(432, 195, 473, 250, 7);
+        case 9: setData(7);
             break;
     }
 }
@@ -1197,7 +1194,7 @@ void PIDGauges()
 /*================ Draw Vin ================*/
 void drawVIN()
 {
-    uint16_t rxid = 0x7E8;
+    const uint16_t rxid = 0x7E8;
     drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     can1.requestVIN(rxid, false);
     drawSquareBtn(150, 150, 479, 170, F("VIN"), themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -1877,31 +1874,40 @@ void filterMaskButtons()
                 isFinished = false;
             }
         }
+        if ((y >= 235) && (y <= 285))
+        {
+            if ((x >= 145) && (x <= 475))
+            {
+                waitForIt(145, 235, 475, 285);
+                // Open All Traffic
+                can1.startCAN0(0x000, 0x800);
+                can1.startCAN1(0x000, 0x800);
+            }
+        }
     }
 }
 
-uint8_t setFilterMask(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint32_t &value)
+uint8_t setFilterMask(uint32_t &value)
 {
+    
+    char displayText[10];
     if (!isFinished)
     {
         drawKeypad();
-        var5 = 0;
-        drawRoundBtn(145, 220, 470, 260, String(var5, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         isFinished = true;
-        counter1 = 7;
-        var4 = 0;
-        timer1 = millis();
+        counter1 = 2;
+        var4 =0xFF;
+        var5 = 0;
+        drawRoundBtn(145, 220, 470, 260, F("000"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     }
-    if (millis() - timer1 > 100)
-    {
-        var4 = keypadButtons();
-        timer1 = millis();
-    }
+
+    var4 = keypadButtons();
     if (var4 >= 0x00 && var4 < 0x10 && counter1 >= 0)
     {
         // CAN0Filter = current value + returned keypad value times its hex place
         var5 = var5 + (var4 * hexTable[counter1]);
-        drawRoundBtn(145, 220, 470, 260, String(var5, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        sprintf(displayText, "%03X", var5);
+        drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         if (counter1 >= 0)
         {
             counter1--;
@@ -1913,7 +1919,7 @@ uint8_t setFilterMask(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint32_t &
         counter1 = 7;
         var4 = 0;
         var5 = 0;
-        drawRoundBtn(145, 220, 470, 260, String(var4, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     }
     if (var4 == 0x11)
     {
@@ -1935,7 +1941,7 @@ void filterMask()
     uint8_t temp = 0;
     switch (state)
     {
-    case 0: // 
+    case 0: 
         if (!isFinished)
         {
             drawFilterMask();
@@ -1943,380 +1949,37 @@ void filterMask()
         }
         filterMaskButtons();
         break;
-    case 1: temp = setFilterMask(205, 125, 340, 175, CAN0Filter);
+    case 1: temp = setFilterMask(CAN0Filter);
         if (temp == 0x11)
         {
             can1.setFilterMask0(CAN0Filter, CAN0Mask);
+            temp = 0;
         }
         break;
-    case 2: setFilterMask(345, 125, 475, 175, CAN0Mask);
+    case 2: temp = setFilterMask(CAN0Mask);
         if (temp == 0x11)
         {
             can1.setFilterMask0(CAN0Filter, CAN0Mask);
+            temp = 0;
         }
         break;
-    case 3: setFilterMask(205, 180, 340, 230, CAN1Filter);
+    case 3: temp = setFilterMask(CAN1Filter);
         if (temp == 0x11)
         {
             can1.setFilterMask0(CAN1Filter, CAN1Mask);
+            temp = 0;
         }
         break;
-    case 4: setFilterMask(345, 180, 475, 230, CAN0Mask);
+    case 4: temp = setFilterMask(CAN0Mask);
         if (temp == 0x11)
         {
             can1.setFilterMask0(CAN1Filter, CAN1Mask);
+            temp = 0;
         }
         break;
     }
 }
 
-
-
-
-
-
-/*
-void drawRange()
-{
-    drawSquareBtn(180, 57, 460, 77, "CAN Filter Range", themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawRoundBtn(145, 220, 305, 260, String(startRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-    drawRoundBtn(310, 220, 470, 260, String(endRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-}
-
-// Draw hex number pad
-void drawNumpad()
-{
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    
-    int posY = 80;
-    uint8_t numPad = 0x00;
-
-    for (uint8_t i = 0; i < 3; i++)
-    {
-        int posX = 145;
-        for (uint8_t j = 0; j < 6; j++)
-        {
-            if (numPad < 0x10)
-            {
-                drawRoundBtn(posX, posY, posX + 50, posY + 40, String(numPad, HEX), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-                posX += 55;
-                numPad++;
-            }
-        }
-        posY += 45;
-    }
-    drawRoundBtn(365, 170, 470, 210, "Clear", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 270, 305, 310, "Accept", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(315, 270, 470, 310, "Cancel", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-}
-
-// Buttons for number pad
-int numpadButtons()
-{
-    // Touch screen controls
-    if (myTouch.dataAvailable())
-    {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
-        if ((y >= 80) && (y <= 120))
-        {
-            // 0
-            if ((x >= 145) && (x <= 195))
-            {
-                waitForIt(145, 80, 195, 120);
-                return 0x00;
-            }
-            // 1
-            if ((x >= 200) && (x <= 250))
-            {
-                waitForIt(200, 80, 250, 120);
-                return 0x01;
-            }
-            // 2
-            if ((x >= 255) && (x <= 305))
-            {
-                waitForIt(255, 80, 305, 120);
-                return 0x02;
-            }
-            // 3
-            if ((x >= 310) && (x <= 360))
-            {
-                waitForIt(310, 80, 360, 120);
-                return 0x03;
-            }
-            // 4
-            if ((x >= 365) && (x <= 415))
-            {
-                waitForIt(365, 80, 415, 120);
-                return 0x05;
-            }
-            // 5
-            if ((x >= 420) && (x <= 470))
-            {
-                waitForIt(420, 80, 470, 120);
-                return 0x05;
-            }
-        }
-        if ((y >= 125) && (y <= 165))
-        {
-            // 6
-            if ((x >= 145) && (x <= 195))
-            {
-                waitForIt(145, 125, 195, 165);
-                return 0x06;
-            }
-            // 7
-            if ((x >= 200) && (x <= 250))
-            {
-                waitForIt(200, 125, 250, 165);
-                return 0x07;
-            }
-            // 8
-            if ((x >= 255) && (x <= 305))
-            {
-                waitForIt(255, 125, 305, 165);
-                return 0x08;
-            }
-            // 9
-            if ((x >= 310) && (x <= 360))
-            {
-                waitForIt(310, 125, 360, 165);
-                return 0x09;
-            }
-            // A
-            if ((x >= 365) && (x <= 415))
-            {
-                waitForIt(365, 125, 415, 165);
-                return 0x0A;
-            }
-            // B
-            if ((x >= 420) && (x <= 470))
-            {
-                waitForIt(420, 125, 470, 165);
-                return 0x0B;
-            }
-        }
-        if ((y >= 170) && (y <= 210))
-        {
-            // C
-            if ((x >= 145) && (x <= 195))
-            {
-                waitForIt(145, 170, 195, 210);
-                return 0x0C;
-            }
-            // D
-            if ((x >= 200) && (x <= 250))
-            {
-                waitForIt(200, 170, 250, 210);
-                return 0x0D;
-            }
-            // E
-            if ((x >= 255) && (x <= 305))
-            {
-                waitForIt(255, 170, 305, 210);
-                return 0x0E;
-            }
-            // F
-            if ((x >= 310) && (x <= 360))
-            {
-                waitForIt(310, 170, 360, 210);
-                return 0x0F;
-
-            }
-            // Clear
-            if ((x >= 365) && (x <= 470))
-            {
-                waitForIt(365, 170, 470, 210);
-                return 0x10;
-            }
-        }
-        if ((y >= 220) && (y <= 260))
-        {
-            // Start
-            if ((x >= 145) && (x <= 305))
-            {
-                waitForIt(145, 220, 305, 260);
-                return 0x12;
-            }
-            // End
-            if ((x >= 310) && (x <= 470))
-            {
-                waitForIt(310, 220, 470, 260);
-                return 0x13;
-            }
-        }
-        if ((y >= 270) && (y <= 310))
-        {
-            // Accept
-            if ((x >= 145) && (x <= 305))
-            {
-                waitForIt(145, 270, 305, 310);
-                return 0x11;
-
-            }
-            // Cancel
-            if ((x >= 315) && (x <= 470))
-            {
-                waitForIt(315, 270, 470, 310);
-                return -2;
-            }
-        }
-    }
-    return -1;
-}
-
-//
-void canFilter(bool CAN)
-{
-    uint8_t startPos = 0;
-    uint8_t endPos = 0;
-    uint8_t startArray[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    uint8_t endArray[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    int rValue = -1;
-
-    uint8_t sLength = 0;
-    uint8_t eLength = 0;
-    bool selectedRange = false;
-    while (page == 37 || page == 38)
-    {
-        
-        menuButtons();
-        rValue = numpadButtons();
-        delay(100);
-        if (rValue == 0x12)
-        {
-            selectedRange = false;
-        }
-        if (rValue == 0x13)
-        {
-            selectedRange = true;
-        }
-        if (rValue >= 0x00 && rValue < 0x10)
-        {
-            Serial.print("rValue: ");
-            Serial.println(rValue);
-            switch (selectedRange)
-            {
-            case false:
-                if (sLength == 0)
-                {
-                    // New value always goes to pos 0
-                    startArray[0] = rValue;
-                    sLength++;
-                }
-                else if (sLength < 8)
-                {
-                    // Shift array left as each new value comes in
-                    for (uint8_t i = sLength; i > 0; i--)
-                    {
-                        startArray[i] = startArray[i - 1];
-                    }
-                    startArray[0] = rValue;
-                    sLength++;
-                }
-                else
-                {
-                    // Full
-                }
-                startRange = 0;
-                for (uint8_t i = 0; i < sLength; i++)
-                {
-                    Serial.print("startArray[i]: ");
-                    Serial.println(startArray[i]);
-                    startRange = startRange + (hexTable[i] * startArray[i]);
-                    Serial.print("hexTable: ");
-                    Serial.println(hexTable[i]);
-                    Serial.print("startRange: ");
-                    Serial.println(startRange);
-                    Serial.println("");
-                }
-
-                drawRoundBtn(145, 220, 305, 260, String(startRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-                break;
-            case true:
-                if (eLength == 0)
-                {
-                    // New value always goes to pos 0
-                    endArray[0] = rValue;
-                    eLength++;
-                }
-                else if (eLength < 8)
-                {
-                    // Shift array left as each new value comes in
-                    for (uint8_t i = eLength; i > 0; i--)
-                    {
-                        endArray[i] = endArray[i - 1];
-                    }
-                    endArray[0] = rValue;
-                    eLength++;
-                }
-                else
-                {
-                    // Full
-                }
-                endRange = 0;
-                for (uint8_t i = 0; i < eLength; i++)
-                {
-                    endRange = endRange + (hexTable[i] * endArray[i]);
-                }
-
-                drawRoundBtn(310, 220, 470, 260, String(endRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-                break;
-            }
-        }
-        if (rValue == 0x10)
-        {
-            switch (selectedRange)
-            {
-            case false:
-                for (uint8_t i = 0; i < 8; i++)
-                {
-                    startArray[i] = 0;
-                }
-                startRange = 0;
-                sLength = 0;
-                drawRoundBtn(145, 220, 305, 260, String(startRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-                break;
-            case true:
-                for (uint8_t i = 0; i < 8; i++)
-                {
-                    endArray[i] = 0;
-                }
-                endRange = 0x1FFFFFFF;
-                eLength = 0;
-                drawRoundBtn(310, 220, 470, 260, String(endRange, 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-            }
-        }
-        if (rValue == 0x11)
-        {
-            if (CAN == true)
-            {
-                can1.setFilterMask0(startRange, endRange);
-                Serial.println(startRange, HEX);
-                Serial.println(endRange, HEX);
-                page = 36;
-                hasDrawn = false;
-                return;
-            }
-            if (CAN == false)
-            {
-                can1.setFilterMask1(startRange, endRange);
-                page = 37;
-                hasDrawn = false;
-                return;
-            }
-        }
-        if (rValue == -2)
-        {
-            page = 36;
-            hasDrawn = false;
-            return;
-        }
-    }
-}
-*/
 
 /*=========================================================
     Framework Functions
@@ -2874,8 +2537,9 @@ void pageControl()
 void drawKeypad()
 {
     drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(180, 57, 460, 77, "Keypad", themeBackground, themeBackground, menuBtnColor, CENTER);
-    int posY = 80;
+    drawSquareBtn(180, 57, 460, 77, F("Keypad"), themeBackground, themeBackground, menuBtnColor, CENTER);
+  
+    uint16_t posY = 80;
     uint8_t numPad = 0x00;
 
     for (uint8_t i = 0; i < 3; i++)
@@ -2892,10 +2556,10 @@ void drawKeypad()
         }
         posY += 45;
     }
-    drawRoundBtn(365, 170, 470, 210, "Clear", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(365, 170, 470, 210, F("Clear"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     
-    drawRoundBtn(145, 270, 305, 310, "Accept", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(315, 270, 470, 310, "Cancel", menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 270, 305, 310, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(315, 270, 470, 310, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // User input keypad
@@ -2938,7 +2602,7 @@ int keypadButtons()
             if ((x >= 365) && (x <= 415))
             {
                 waitForIt(365, 80, 415, 120);
-                return 0x05;
+                return 0x04;
             }
             // 5
             if ((x >= 420) && (x <= 470))
