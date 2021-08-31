@@ -1361,8 +1361,8 @@ void drawExtraFN()
     drawRoundBtn(312, 135, 475, 185, F("PCAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 245, 475, 295, F("Dongle Sim"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 245, 308, 295, F("Ford Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 245, 475, 295, F("GM Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
@@ -1401,10 +1401,10 @@ void extraFNButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                //waitForIt(145, 245, 308, 295);
-                // Unused
-                //page = 34;
-                //hasDrawn = false;
+                waitForIt(145, 245, 308, 295);
+                // Ford Dongle Sim
+                page = 34;
+                hasDrawn = false;
             }
         }
         if ((x >= 312) && (x <= 475))
@@ -1433,7 +1433,7 @@ void extraFNButtons()
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(312, 245, 475, 295);
-                // Dongle Sim
+                // GM Dongle Sim
                 page = 35;
                 hasDrawn = false;
             }
