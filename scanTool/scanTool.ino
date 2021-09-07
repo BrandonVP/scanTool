@@ -1359,10 +1359,10 @@ void drawExtraFN()
     drawRoundBtn(312, 80, 475, 130, F("StartStop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(145, 135, 308, 185, F("CAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 135, 475, 185, F("PCAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 190, 308, 240, F("C Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 245, 308, 295, F("Ford Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 245, 475, 295, F("GM Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 245, 308, 295, F("F Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(312, 245, 475, 295, F("G Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
@@ -2077,7 +2077,7 @@ void pageControl()
             drawCANSerial();
         }
         // Call buttons if any
-        can1.SerialOutCAN(2);
+        can1.SerialOutCAN(BOTH);
         break;
     case 7:
         if (!hasDrawn)
@@ -2088,17 +2088,17 @@ void pageControl()
             drawReadInCANLCD();
         }
         // Call buttons if any
-        readInCANMsg(3);
+        readInCANMsg(4);
         break;
     case 8:
-        if (!hasDrawn)
+        if (!hasDrawn) // CTX
         {
             hasDrawn = true;
             // Draw Page
             drawCANSerial();
         }
         // Call buttons if any
-        can1.SerialOutCAN(3);
+        can1.SerialOutCAN(4);
         break;
 
     case 9: /*========== VEHTOOL ==========*/
