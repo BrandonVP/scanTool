@@ -13,8 +13,8 @@ CAN_FRAME CANOut;
 void CANBus::startCAN0(uint32_t start, uint32_t end)
 {
     Can0.begin(baud);
-    Can0.watchForRange(start, end);
-    //Can0.watchFor(0x042F, 0x1FFF);
+    //Can0.watchForRange(start, end);
+    Can0.watchFor(0x042F, 0x1FFF);
     // Do not use extended frames
     CANOut.extended = false;
     // Message length
@@ -31,14 +31,14 @@ void CANBus::startCAN1(uint32_t start, uint32_t end)
 // Set Can0 Filter and Mask
 void CANBus::setFilterMask0(uint32_t filter, uint32_t mask)
 {
-    Can0.begin(baud);
+    //Can0.begin(baud);
     Can0.watchFor(filter, mask);
 }
 
 // Set Can1 Filter and Mask
 void CANBus::setFilterMask1(uint32_t filter, uint32_t mask)
 {
-    Can1.begin(baud);
+    //Can1.begin(baud);
     Can1.watchFor(filter, mask);
 }
 

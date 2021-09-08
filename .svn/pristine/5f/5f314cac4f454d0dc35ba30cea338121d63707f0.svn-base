@@ -50,7 +50,7 @@ uint8_t page = 0;
 bool hasDrawn = false;
 
 // *Used by background process*
-uint8_t selectedChannelOut = 0;
+uint8_t selectedSerialOut = 0;
 uint32_t timer2 = 0;
 
 // External import for fonts
@@ -83,7 +83,6 @@ uint32_t CAN1Mask = 0xFFF;
 // Initialize to 0 before use
 bool nextState = false;
 bool isFinished = false;
-bool isSerialOut = false;
 uint8_t state = 0;
 int16_t counter1 = 0;
 uint16_t var1 = 0;
@@ -93,9 +92,6 @@ uint32_t var4 = 0;
 uint32_t var5 = 0;
 uint32_t timer1 = 0;
 
-// Use to load pages in pieces to prevent blocking while loading entire page
-uint8_t graphicLoaderState = 0;
-bool graphicsLoaded = false;
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
@@ -424,38 +420,34 @@ void CANBusButtons()
                 waitForIt(145, 55, 308, 100);
                 // CAN0: LCD
                 page = 1;
-                selectedChannelOut = 1;
                 hasDrawn = false;
             }
             if ((y >= 105) && (y <= 150))
             {
                 waitForIt(145, 105, 308, 150);
                 // CAN1: LCD
-                page = 1;
-                selectedChannelOut = 2;
+                page = 3;
                 hasDrawn = false;
             }
             if ((y >= 155) && (y <= 200))
             {
                 waitForIt(145, 155, 308, 200);
                 // Both: LCD
-                page = 1;
-                selectedChannelOut = 3;
+                page = 5;
                 hasDrawn = false;
             }
             if ((y >= 205) && (y <= 250))
             {
                 waitForIt(145, 205, 308, 250);
                 // CTX0: LCD
-                page = 1;
-                selectedChannelOut = 4;
+                page = 7;
                 hasDrawn = false;
             }
             if ((y >= 255) && (y <= 300))
             {
                 waitForIt(145, 255, 308, 300);
                 // CAN0 RX
-                page = 3;
+                page = 45;
                 hasDrawn = false;
             }
         }
@@ -467,37 +459,37 @@ void CANBusButtons()
                 // CAN0 Serial
                 page = 2;
                 hasDrawn = false;
-                selectedChannelOut = 1;
+                selectedSerialOut = 1;
             }
             if ((y >= 105) && (y <= 150))
             {
                 waitForIt(312, 105, 475, 150);
                 // CAN1 Serial
-                page = 2;
+                page = 4;
                 hasDrawn = false;
-                selectedChannelOut = 2;
+                selectedSerialOut = 2;
             }
             if ((y >= 155) && (y <= 200))
             {
                 waitForIt(312, 155, 475, 200);
                 // Both Serial
-                page = 2;
+                page = 6;
                 hasDrawn = false;
-                selectedChannelOut = 3;
+                selectedSerialOut = 3;
             }
             if ((y >= 205) && (y <= 250))
             {
                 waitForIt(312, 205, 475, 250);
                 // CTX0 Serial
-                page = 2;
+                page = 8;
                 hasDrawn = false;
-                selectedChannelOut = 4;
+                selectedSerialOut = 4;
             }
             if ((y >= 255) && (y <= 300))
             {
                 waitForIt(312, 255, 475, 300);
                 // CTX1 RX
-                page = 4;
+                page = 46;
                 hasDrawn = false;
             }
         }
@@ -654,7 +646,7 @@ void sendFrameButtons(uint8_t channel)
             {
                 waitForIt(145, 255, 473, 300);
                 // Send Frame
-                can1.sendCANOut(channel, selectedChannelOut);
+                can1.sendCANOut(channel, selectedSerialOut);
             }
         }
     }
@@ -1233,7 +1225,7 @@ void clearDTC()
             uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
             byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
 
-            can1.sendFrame(IDc[state], MSGc, 8, selectedChannelOut);
+            can1.sendFrame(IDc[state], MSGc, 8, selectedSerialOut);
             counter1++;
             timer1 = millis();
         }
@@ -1455,7 +1447,7 @@ void autoStartStop()
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
     byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    can1.sendFrame(0x7E0, test1, 8, selectedChannelOut);
+    can1.sendFrame(0x7E0, test1, 8, selectedSerialOut);
     delay(3);
 
     uint32_t timer1 = millis();
@@ -1467,12 +1459,12 @@ void autoStartStop()
 
         if (millis() - timer1 >= 2000)
         {
-            can1.sendFrame(0x7E0, test1, 8, selectedChannelOut);
+            can1.sendFrame(0x7E0, test1, 8, selectedSerialOut);
             timer1 = millis();
         }
         if (millis() - timer2 >= 500)
         {
-            can1.sendFrame(0x101, test2, 8, selectedChannelOut);
+            can1.sendFrame(0x101, test2, 8, selectedSerialOut);
             timer2 = millis();
         }
     }
@@ -1483,7 +1475,7 @@ void AFM()
 {
     byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
     byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    can1.sendFrame(0x7E0, test1, 8, selectedChannelOut);
+    can1.sendFrame(0x7E0, test1, 8, selectedSerialOut);
     delay(2);
 
     uint32_t timer1 = millis();
@@ -1494,7 +1486,7 @@ void AFM()
 
         if (millis() - timer1 >= 2000)
         {
-            can1.sendFrame(0x101, test2, 8, selectedChannelOut);
+            can1.sendFrame(0x101, test2, 8, selectedSerialOut);
             timer1 = millis();
         }
     }
@@ -1510,11 +1502,11 @@ void consoleTextJeep()
     uint8_t data4[8] = { 0x10, 0x01, 0x00, 0x3f, 0x00, 0x00, 0x00, 0x00 };
     uint8_t data5[8] = { 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    can1.sendFrame(id, data1, 8, selectedChannelOut);
-    can1.sendFrame(id, data2, 8, selectedChannelOut);
-    can1.sendFrame(id, data3, 8, selectedChannelOut);
-    can1.sendFrame(id, data4, 8, selectedChannelOut);
-    can1.sendFrame(id, data5, 8, selectedChannelOut);
+    can1.sendFrame(id, data1, 8, selectedSerialOut);
+    can1.sendFrame(id, data2, 8, selectedSerialOut);
+    can1.sendFrame(id, data3, 8, selectedSerialOut);
+    can1.sendFrame(id, data4, 8, selectedSerialOut);
+    can1.sendFrame(id, data5, 8, selectedSerialOut);
 }
 
 //
@@ -1522,7 +1514,7 @@ void disableAutoStopJeep()
 {
     const uint16_t id = 0x137;
     uint8_t data1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x0d };
-    can1.sendFrame(id, data1, 8, selectedChannelOut);
+    can1.sendFrame(id, data1, 8, selectedSerialOut);
 }
 
 //
@@ -1530,12 +1522,12 @@ void drawDongleSim()
 {
     drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 
-    drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 55, 325, 100, F("G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(330, 55, 400, 100, F("F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(405, 55, 475, 100, F("C"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 55, 250, 100, F("VIN G"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 
-    drawRoundBtn(145, 105, 250, 150, F("Eng G"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 105, 250, 150, F("Engine"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1544,12 +1536,12 @@ void drawDongleSim()
     drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 
-    drawRoundBtn(145, 205, 250, 250, F("Eng F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 205, 250, 250, F("VIN F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(255, 205, 325, 250, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(330, 205, 400, 250, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(405, 205, 475, 250, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 
-    drawRoundBtn(145, 255, 250, 300, F("Aut F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(145, 255, 250, 300, F("VIN C"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(255, 255, 325, 300, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(330, 255, 400, 300, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(405, 255, 475, 300, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1578,193 +1570,8 @@ void dongleSimButtons()
                 waitForIt(255, 55, 325, 100);
                 // 1
                 const uint16_t id = 0x7E8;
-                uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x47, 0x54 };
-                can1.sendFrame(id, data1, 8, selectedChannelOut);
-                delay(15);
-                uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data2, 8, selectedChannelOut);
-                delay(10);
-                uint8_t data3[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data3, 8, selectedChannelOut);
-            }
-            if ((x >= 330) && (x <= 400))
-            {
-                waitForIt(255, 55, 325, 100);
-                // 1
-                const uint16_t id = 0x7E8;
-                uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
-                can1.sendFrame(id, data1, 8, selectedChannelOut);
-                delay(15);
-                uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data2, 8, selectedChannelOut);
-                delay(10);
-                uint8_t data3[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data3, 8, selectedChannelOut);
-            }
-            if ((x >= 405) && (x <= 475))
-            {
-                waitForIt(255, 55, 325, 100);
-                // 1
-                const uint16_t id = 0x7E8;
-                uint8_t data1[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data1, 8, selectedChannelOut);
-                delay(15);
-                uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data2, 8, selectedChannelOut);
-                delay(10);
-                uint8_t data3[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data3, 8, selectedChannelOut);
-            }
-            timer2 = millis();
-        }
-
-        // Engine
-        // 255, 105, 325, 140
-        // 330, 105, 400, 140
-        // 405, 105, 475, 140
-        if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
-        {
-            if ((x >= 255) && (x <= 325))
-            {
-                waitForIt(255, 105, 325, 150);
-                // Off
-                const uint16_t id = 0x641;
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 330) && (x <= 400))
-            {
-                waitForIt(330, 105, 400, 150);
-                // Acc
-                const uint16_t id = 0x641;
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 405) && (x <= 475))
-            {
-                waitForIt(405, 105, 475, 150);
-                // On
-                const uint16_t id = 0x641;
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            timer2 = millis();
-        }
-
-        // ECU
-        // 255, 145, 362, 180
-        // 368, 145, 475, 180
-        if ((y >= 155) && (y <= 200) && millis() - timer2 > 20)
-        {
-            if ((x >= 255) && (x <= 362))
-            {
-                waitForIt(255, 155, 362, 200);
-                // Accept
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x02, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 368) && (x <= 475))
-            {
-                waitForIt(368, 155, 475, 200);
-                // Reject
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            timer2 = millis();
-        }
-
-        // VIN F
-        // 255, 185, 325, 220
-        // 330, 185, 400, 220
-        // 405, 185, 475, 220
-        if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
-        {
-            if ((x >= 255) && (x <= 325))
-            {
-                waitForIt(255, 205, 325, 250);
-                // 10
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 330) && (x <= 400))
-            {
-                waitForIt(330, 205, 400, 250);
-                // 20
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 405) && (x <= 475))
-            {
-                waitForIt(405, 205, 475, 250);
-                // 30
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            timer2 = millis();
-        }
-
-        // VIN C
-        // 255, 225, 325, 260
-        // 330, 225, 400, 260
-        // 405, 225, 475, 260
-        if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
-        {
-            if ((x >= 255) && (x <= 325))
-            {
-                waitForIt(255, 255, 325, 300);
-                // 0x01
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 330) && (x <= 400))
-            {
-                waitForIt(330, 255, 400, 300);
-                // 0x02
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 405) && (x <= 475))
-            {
-                waitForIt(405, 255, 475, 300);
-                // 0x08
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            timer2 = millis();
-        }
-    }
-}
-
-void dongleSimButtonsFord()
-{
-    // Touch screen controls
-    if (myTouch.dataAvailable())
-    {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
-        // VIN G
-        // 255, 65, 325, 100 
-        // 330, 65, 400, 100
-        // 405, 65, 475, 100
-        if ((y >= 55) && (y <= 100) && millis() - timer2 > 20)
-        {
-            if ((x >= 255) && (x <= 325))
-            {
-                waitForIt(255, 55, 325, 100);
-                // 1
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x47, 0x54 };
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 330) && (x <= 400))
             {
@@ -1772,7 +1579,7 @@ void dongleSimButtonsFord()
                 // 2
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 405) && (x <= 475))
             {
@@ -1780,7 +1587,7 @@ void dongleSimButtonsFord()
                 // 3
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             timer2 = millis();
         }
@@ -1797,7 +1604,7 @@ void dongleSimButtonsFord()
                 // Off
                 const uint16_t id = 0x641;
                 uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 330) && (x <= 400))
             {
@@ -1805,7 +1612,7 @@ void dongleSimButtonsFord()
                 // Acc
                 const uint16_t id = 0x641;
                 uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 405) && (x <= 475))
             {
@@ -1813,7 +1620,7 @@ void dongleSimButtonsFord()
                 // On
                 const uint16_t id = 0x641;
                 uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             timer2 = millis();
         }
@@ -1829,7 +1636,7 @@ void dongleSimButtonsFord()
                 // Accept
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x02, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 368) && (x <= 475))
             {
@@ -1837,7 +1644,7 @@ void dongleSimButtonsFord()
                 // Reject
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             timer2 = millis();
         }
@@ -1854,7 +1661,7 @@ void dongleSimButtonsFord()
                 // 10
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 330) && (x <= 400))
             {
@@ -1862,7 +1669,7 @@ void dongleSimButtonsFord()
                 // 20
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 405) && (x <= 475))
             {
@@ -1870,7 +1677,7 @@ void dongleSimButtonsFord()
                 // 30
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             timer2 = millis();
         }
@@ -1887,7 +1694,7 @@ void dongleSimButtonsFord()
                 // 0x01
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 330) && (x <= 400))
             {
@@ -1895,7 +1702,7 @@ void dongleSimButtonsFord()
                 // 0x02
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             if ((x >= 405) && (x <= 475))
             {
@@ -1903,13 +1710,12 @@ void dongleSimButtonsFord()
                 // 0x08
                 const uint16_t id = 0x7E8;
                 uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                can1.sendFrame(id, data, 8, selectedSerialOut);
             }
             timer2 = millis();
         }
     }
 }
-
 
 
 /*=========================================================
@@ -2110,11 +1916,10 @@ uint8_t setFilterMask(uint32_t &value)
     }
     if (var4 == 0x10)
     {
-        counter1 = 2;
+        counter1 = 7;
         var4 = 0;
         var5 = 0;
-        sprintf(displayText, "%03X", var5);
-        drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     }
     if (var4 == 0x11)
     {
@@ -2216,11 +2021,11 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
+            selectedSerialOut = 0;
             drawReadInCANLCD();
-            isSerialOut = false;
         }
         // Call buttons if any
-        readInCANMsg(selectedChannelOut);
+        readInCANMsg(CAN0);
         break;
     case 2:
         if (!hasDrawn)
@@ -2228,84 +2033,72 @@ void pageControl()
             hasDrawn = true;
             // Draw Page
             drawCANSerial();
-            isSerialOut = true;
         }
         // Call buttons if any
-        can1.SerialOutCAN(selectedChannelOut);
+        can1.SerialOutCAN(CAN0);
         break;
     case 3:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-
-            // Initialize global var to 0
-            var1 = 0;
-            var2 = 0;
-            var3 = 0;
-            state = 0;
-            counter1 = 1;
-            isFinished = false;
+            selectedSerialOut = 0;
+            drawReadInCANLCD();
         }
         // Call buttons if any
-        sendFrame(0);
+        readInCANMsg(CAN1);
         break;
     case 4:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-
-            // Initialize global var to 0
-            var1 = 0;
-            var2 = 0;
-            var3 = 0;
-            state = 0;
-            counter1 = 1;
-            isFinished = false;
+            drawCANSerial();
         }
         // Call buttons if any
-        sendFrame(1);
+        can1.SerialOutCAN(CAN1);
         break;
     case 5:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-
+            selectedSerialOut = 0;
+            drawReadInCANLCD();
         }
         // Call buttons if any
-
+        readInCANMsg(BOTH);
         break;
     case 6:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-
+            drawCANSerial();
         }
         // Call buttons if any
-
+        can1.SerialOutCAN(BOTH);
         break;
     case 7:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-
+            selectedSerialOut = 0;
+            drawReadInCANLCD();
         }
         // Call buttons if any
-
+        readInCANMsg(4);
         break;
     case 8:
         if (!hasDrawn) // CTX
         {
             hasDrawn = true;
             // Draw Page
-
+            drawCANSerial();
         }
         // Call buttons if any
-
+        can1.SerialOutCAN(4);
         break;
 
     case 9: /*========== VEHTOOL ==========*/
@@ -2359,14 +2152,14 @@ void pageControl()
         {
             errorMSGButton(9);
         }
-        if ((state == 1) && (counter1 < PIDSAMPLES) && (millis() - timer1 > 1000))
+        if (( state == 1 ) && ( counter1 < PIDSAMPLES ) && ( millis() - timer1 > 1000 ))
         {
             can1.PIDStream(CAN_PID_ID, arrayIn[var1], true);
             counter1++;
             errorMSG("Samples", String(counter1), "Saved to SD");
             timer1 = millis();
         }
-        if ((counter1 == PIDSAMPLES) && (state == 1) && (millis() - timer1 > 2000))
+        if (( counter1 == PIDSAMPLES ) && ( state == 1 ) && ( millis() - timer1 > 2000 ))
         {
             state = 0;
             drawPIDStream();
@@ -2405,7 +2198,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-
+            
         }
         clearDTC();
         // Call buttons if any
@@ -2671,8 +2464,7 @@ void pageControl()
         if (!hasDrawn)
         {
             hasDrawn = true;
-            selectedChannelOut = 0;
-            isSerialOut = false;
+            selectedSerialOut = 0;
             // Draw Page
         }
         // Call buttons if any
@@ -2701,6 +2493,42 @@ void pageControl()
             // Draw Page
         }
         // Call buttons if any
+        break;
+    // ** CANBUS menu ran out of pages **
+    case 45: // CAN0 RX
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+            // Draw Page
+
+            // Initialize global var to 0
+            var1 = 0;
+            var2 = 0;
+            var3 = 0;
+            state = 0;
+            counter1 = 1;
+            isFinished = false;
+        }
+        // Call buttons if any
+        sendFrame(0);
+        break;
+    case 46: // CAN1 RX
+        if (!hasDrawn)
+        {
+            hasDrawn = true;
+
+            // Draw Page
+            
+            // Initialize global var to 0
+            var1 = 0;
+            var2 = 0;
+            var3 = 0;
+            state = 0;
+            counter1 = 1;
+            isFinished = false;
+        }
+        // Call buttons if any
+        sendFrame(1);
         break;
     }
 }
@@ -3015,12 +2843,7 @@ void updateTime()
 // Sends CAN Bus traffic to serial as a background process
 void serialOut()
 {
-    if (!isSerialOut)
-    {
-        return;
-    }
-
-    switch (selectedChannelOut)
+    switch (selectedSerialOut)
     {
     case CAN0: can1.SerialOutCAN(CAN0);
         break;
