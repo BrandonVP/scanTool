@@ -31,6 +31,7 @@ class SDCard
 	void deleteFile(char*);
 	void readLogFile();
 	void readLogFile2();
+	void printDirectory(File dir, uint8_t);
 };
 #endif
 

@@ -95,7 +95,14 @@ uint32_t timer1 = 0;
 
 // Use to load pages in pieces to prevent blocking while loading entire page
 uint8_t graphicLoaderState = 0;
-bool graphicsLoaded = false;
+
+//
+uint32_t waitForItTimer = 0;
+uint16_t x1_ = 0;
+uint16_t y1_ = 0;
+uint16_t x2_ = 0;
+uint16_t y2_ = 0;
+bool isWaitForIt = false;
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
@@ -368,6 +375,21 @@ void loadBar(int progress)
 }
 
 // Function to highlight buttons when clicked
+void waitForItMenu(int x1, int y1, int x2, int y2)
+{
+    waitForItTimer = millis();
+
+    if (!isWaitForIt)
+    {
+        myGLCD.setColor(themeBackground);
+        myGLCD.drawRoundRect(x1, y1, x2, y2);
+        x1_ = x1;
+        y1_ = y1;
+        x2_ = x2;
+        y2_ = y2;
+        isWaitForIt = true;
+    }
+}
 void waitForIt(int x1, int y1, int x2, int y2)
 {
     myGLCD.setColor(themeBackground);
@@ -393,18 +415,47 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 ===========================================================*/
 void drawCANBus()
 {
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(145, 55, 308, 100, F("CAN0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 55, 475, 100, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 105, 308, 150, F("CAN1: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 105, 475, 150, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 155, 308, 200, F("Both: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 155, 475, 200, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 205, 308, 250, F("CTX0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 205, 475, 250, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 255, 308, 300, F("CAN0 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 255, 475, 300, F("CAN1 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 2:
+        drawRoundBtn(145, 55, 308, 100, F("CAN0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 3:
+        drawRoundBtn(312, 55, 475, 100, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        drawRoundBtn(145, 105, 308, 150, F("CAN1: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        drawRoundBtn(312, 105, 475, 150, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        drawRoundBtn(145, 155, 308, 200, F("Both: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        drawRoundBtn(312, 155, 475, 200, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        drawRoundBtn(145, 205, 308, 250, F("CTX0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 9:
+        drawRoundBtn(312, 205, 475, 250, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 10:
+        drawRoundBtn(145, 255, 308, 300, F("CAN0 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 11:
+        drawRoundBtn(312, 255, 475, 300, F("CAN1 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 12:
+        drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    }
 }
 
 void CANBusButtons()
@@ -791,16 +842,41 @@ void sendFrame(uint8_t channel)
 ===========================================================*/
 void drawVehicleTools()
 {
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(145, 80, 308, 130, F("PIDSCAN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 80, 475, 130, F("PIDSTRM"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 135, 308, 185, F("PID Guages"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 135, 475, 185, F("VIN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 190, 308, 240, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 2:
+        drawRoundBtn(145, 80, 308, 130, F("PIDSCAN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 3:
+        drawRoundBtn(312, 80, 475, 130, F("PIDSTRM"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        drawRoundBtn(145, 135, 308, 185, F("PID Guages"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        drawRoundBtn(312, 135, 475, 185, F("VIN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        drawRoundBtn(145, 190, 308, 240, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        drawRoundBtn(312, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 9:
+        //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 10:
+        drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    } 
 }
 
 // TODO: Odd even button page assignments are swapped
@@ -1259,16 +1335,41 @@ void clearDTC()
 ===========================================================*/
 void drawRZRTOOL()
 {
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(145, 80, 308, 130, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 80, 475, 130, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 135, 308, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 135, 475, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 2:
+        drawRoundBtn(145, 80, 308, 130, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 3:
+        drawRoundBtn(312, 80, 475, 130, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        //drawRoundBtn(145, 135, 308, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        //drawRoundBtn(312, 135, 475, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 9:
+        //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 10:
+        drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    }  
 }
 
 void RZRToolButtons()
@@ -1362,16 +1463,41 @@ void RZRToolButtons()
 ===========================================================*/
 void drawExtraFN()
 {
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(145, 80, 308, 130, F("AFM"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 80, 475, 130, F("StartStop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 135, 308, 185, F("CAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 135, 475, 185, F("PCAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 190, 308, 240, F("C Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 245, 308, 295, F("F Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 245, 475, 295, F("G Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 2:
+        //drawRoundBtn(145, 80, 308, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 3:
+        //drawRoundBtn(312, 80, 475, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        drawRoundBtn(145, 135, 308, 185, F("CAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        drawRoundBtn(312, 135, 475, 185, F("PCAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 9:
+        drawRoundBtn(312, 245, 475, 295, F("Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 10:
+        drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    }
 }
 
 void extraFNButtons()
@@ -1388,10 +1514,10 @@ void extraFNButtons()
         {
             if ((y >= 80) && (y <= 130))
             {
-                waitForIt(145, 80, 308, 130);
-                // AFM
-                page = 28;
-                hasDrawn = false;
+                //waitForIt(145, 80, 308, 130);
+                // Unused
+                //page = 28;
+                //hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -1419,17 +1545,17 @@ void extraFNButtons()
         {
             if ((y >= 80) && (y <= 130))
             {
-                waitForIt(312, 80, 475, 130);
-                // autoStartStop
-                page = 29;
-                hasDrawn = false;
+                //waitForIt(312, 80, 475, 130);
+                // Unused
+                //page = 29;
+                //hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
-                waitForIt(312, 135, 475, 185);
+                //waitForIt(312, 135, 475, 185);
                 // Unused
-                page = 31;
-                hasDrawn = false;
+                //page = 31;
+                //hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -1444,58 +1570,8 @@ void extraFNButtons()
                 // GM Dongle Sim
                 page = 35;
                 hasDrawn = false;
+                graphicLoaderState = 0;
             }
-        }
-    }
-}
-
-// Custom vehicle testing functions / scripts
-void autoStartStop()
-{
-    byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
-    byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-    can1.sendFrame(0x7E0, test1, 8, selectedChannelOut);
-    delay(3);
-
-    uint32_t timer1 = millis();
-    uint32_t timer2 = millis();
-
-    while (page == 29)
-    {
-        menuButtons();
-
-        if (millis() - timer1 >= 2000)
-        {
-            can1.sendFrame(0x7E0, test1, 8, selectedChannelOut);
-            timer1 = millis();
-        }
-        if (millis() - timer2 >= 500)
-        {
-            can1.sendFrame(0x101, test2, 8, selectedChannelOut);
-            timer2 = millis();
-        }
-    }
-}
-
-//
-void AFM()
-{
-    byte test1[8] = { 0x07, 0xAE, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00 };
-    byte test2[8] = { 0xFE, 0x01, 0x3E, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    can1.sendFrame(0x7E0, test1, 8, selectedChannelOut);
-    delay(2);
-
-    uint32_t timer1 = millis();
-
-    while (page == 28)
-    {
-        menuButtons();
-
-        if (millis() - timer1 >= 2000)
-        {
-            can1.sendFrame(0x101, test2, 8, selectedChannelOut);
-            timer1 = millis();
         }
     }
 }
@@ -1528,33 +1604,69 @@ void disableAutoStopJeep()
 //
 void drawDongleSim()
 {
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-
-    drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 55, 325, 100, F("G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(330, 55, 400, 100, F("F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(405, 55, 475, 100, F("C"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-    drawRoundBtn(145, 105, 250, 150, F("Eng G"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-    drawRoundBtn(145, 155, 250, 200, F("ECU"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-    drawRoundBtn(145, 205, 250, 250, F("Eng F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 205, 325, 250, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(330, 205, 400, 250, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(405, 205, 475, 250, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-    drawRoundBtn(145, 255, 250, 300, F("Aut F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 255, 325, 300, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(330, 255, 400, 300, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(405, 255, 475, 300, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
- 
-    drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 1:
+        drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 2:
+        drawRoundBtn(255, 55, 325, 100, F("G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 3:
+        drawRoundBtn(330, 55, 400, 100, F("F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        drawRoundBtn(405, 55, 475, 100, F("C"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        drawRoundBtn(145, 105, 250, 150, F("Eng G"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 9:
+        drawRoundBtn(145, 155, 250, 200, F("ECU"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 10:
+        drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 11:
+        drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 12:
+        drawRoundBtn(145, 205, 250, 250, F("Eng F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 13:
+        drawRoundBtn(255, 205, 325, 250, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 14:
+        drawRoundBtn(330, 205, 400, 250, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 15:
+        drawRoundBtn(405, 205, 475, 250, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 16 :
+        drawRoundBtn(145, 255, 250, 300, F("Aut F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 17:
+        drawRoundBtn(255, 255, 362, 300, F("opt1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 18:
+        drawRoundBtn(368, 255, 475, 300, F("opt2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 19:
+        drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    } 
 }
 
 // 
@@ -1567,10 +1679,7 @@ void dongleSimButtons()
         x = myTouch.getX();
         y = myTouch.getY();
 
-        // VIN G
-        // 255, 65, 325, 100 
-        // 330, 65, 400, 100
-        // 405, 65, 475, 100
+        // VIN
         if ((y >= 55) && (y <= 100) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 325))
@@ -1581,6 +1690,7 @@ void dongleSimButtons()
                 uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x47, 0x54 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
                 delay(15);
+                serialOut();
                 uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
                 can1.sendFrame(id, data2, 8, selectedChannelOut);
                 delay(10);
@@ -1595,6 +1705,7 @@ void dongleSimButtons()
                 uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
                 delay(15);
+                serialOut();
                 uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
                 can1.sendFrame(id, data2, 8, selectedChannelOut);
                 delay(10);
@@ -1609,6 +1720,7 @@ void dongleSimButtons()
                 uint8_t data1[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
                 delay(15);
+                serialOut();
                 uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
                 can1.sendFrame(id, data2, 8, selectedChannelOut);
                 delay(10);
@@ -1618,10 +1730,7 @@ void dongleSimButtons()
             timer2 = millis();
         }
 
-        // Engine
-        // 255, 105, 325, 140
-        // 330, 105, 400, 140
-        // 405, 105, 475, 140
+        // Engine GM
         if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 325))
@@ -1651,9 +1760,7 @@ void dongleSimButtons()
             timer2 = millis();
         }
 
-        // ECU
-        // 255, 145, 362, 180
-        // 368, 145, 475, 180
+        // ECU GM
         if ((y >= 155) && (y <= 200) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 362))
@@ -1675,67 +1782,45 @@ void dongleSimButtons()
             timer2 = millis();
         }
 
-        // VIN F
-        // 255, 185, 325, 220
-        // 330, 185, 400, 220
-        // 405, 185, 475, 220
+        // Engine Ford
         if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
         {
+            const uint16_t id = 0x42F;
             if ((x >= 255) && (x <= 325))
             {
                 waitForIt(255, 205, 325, 250);
-                // 10
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 330) && (x <= 400))
             {
                 waitForIt(330, 205, 400, 250);
-                // 20
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x87 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 405) && (x <= 475))
             {
                 waitForIt(405, 205, 475, 250);
-                // 30
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xEA };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             timer2 = millis();
         }
 
-        // VIN C
-        // 255, 225, 325, 260
-        // 330, 225, 400, 260
-        // 405, 225, 475, 260
+        // Auto Ford
         if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
         {
-            if ((x >= 255) && (x <= 325))
+            const uint16_t id = 0x326;
+            if ((x >= 255) && (x <= 362))
             {
-                waitForIt(255, 255, 325, 300);
-                // 0x01
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
+                waitForIt(255, 255, 362, 300);
+                uint8_t data[8] = { 0x81, 0xA0, 0x25, 0xB5, 0x81, 0xA0, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            if ((x >= 330) && (x <= 400))
+            if ((x >= 368) && (x <= 475))
             {
-                waitForIt(330, 255, 400, 300);
-                // 0x02
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 405) && (x <= 475))
-            {
-                waitForIt(405, 255, 475, 300);
-                // 0x08
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
+                waitForIt(368, 255, 475, 300);
+                uint8_t data[8] = { 0x01, 0xA0, 0x45, 0xBA, 0x81, 0x90, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             timer2 = millis();
@@ -1911,22 +1996,46 @@ void dongleSimButtonsFord()
 }
 
 
-
 /*=========================================================
     Settings
 ===========================================================*/
 void drawSettings()
 {
-    drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(145, 80, 308, 130, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 80, 475, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 135, 308, 185, F("Set Baud0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(312, 135, 475, 185, F("Set Baud1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(145, 190, 308, 240, F("Serial Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 2:
+        drawRoundBtn(145, 80, 308, 130, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 3:
+        //drawRoundBtn(312, 80, 475, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        drawRoundBtn(145, 135, 308, 185, F("Set Baud0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        drawRoundBtn(312, 135, 475, 185, F("Set Baud1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        drawRoundBtn(145, 190, 308, 240, F("Serial Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 9:
+        drawRoundBtn(312, 245, 475, 295, F("PushMe"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 10:
+        drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    }
 }
 
 void settingsButtons()
@@ -1995,10 +2104,16 @@ void settingsButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                //waitForIt(312, 245, 475, 295);
-                // Unused
+                waitForIt(312, 245, 475, 295);
+                //Unused
                 //page = 44;
                 //hasDrawn = false;
+                SerialUSB.println("1");
+                File root1;
+                root1 = SD.open("/");
+                sdCard.printDirectory(root1, 0);
+                SerialUSB.println("2");
+
             }
         }
     }
@@ -2161,14 +2276,14 @@ void filterMask()
     case 3: temp = setFilterMask(CAN1Filter);
         if (temp == 0x11)
         {
-            can1.setFilterMask0(CAN1Filter, CAN1Mask);
+            can1.setFilterMask1(CAN1Filter, CAN1Mask);
             temp = 0;
         }
         break;
-    case 4: temp = setFilterMask(CAN0Mask);
+    case 4: temp = setFilterMask(CAN1Mask);
         if (temp == 0x11)
         {
-            can1.setFilterMask0(CAN1Filter, CAN1Mask);
+            can1.setFilterMask1(CAN1Filter, CAN1Mask);
             temp = 0;
         }
         break;
@@ -2204,9 +2319,16 @@ void pageControl()
     case 0: /*========== CANBUS ==========*/
         if (!hasDrawn)
         {
-            hasDrawn = true;
             // Draw Page
-            drawCANBus();
+            if (graphicLoaderState < 13)
+            {
+                drawCANBus();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+            }
         }
         // Call buttons if any
         CANBusButtons();
@@ -2311,9 +2433,16 @@ void pageControl()
     case 9: /*========== VEHTOOL ==========*/
         if (!hasDrawn)
         {
-            hasDrawn = true;
             // Draw Page
-            drawVehicleTools();
+            if (graphicLoaderState < 11)
+            {
+                drawVehicleTools();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+            }
         }
         // Call buttons if any
         VehicleToolButtons();
@@ -2322,7 +2451,7 @@ void pageControl()
         if (!hasDrawn)
         {
             hasDrawn = true;
-            // Draw Page
+            
             can1.startCAN0(0x7E0, 0x7EF);
             drawPIDSCAN();
         }
@@ -2428,11 +2557,18 @@ void pageControl()
         break;
 
     case 18: /*========== RZRTOOL ==========*/
+        // Draw Page
         if (!hasDrawn)
         {
-            hasDrawn = true;
-            // Draw Page
-            drawRZRTOOL();
+            if (graphicLoaderState < 11)
+            {
+                drawRZRTOOL();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+            }
         }
         // Call buttons if any
         RZRToolButtons();
@@ -2503,11 +2639,18 @@ void pageControl()
         break;
 
     case 27: /*========== EXTRAFN ==========*/
+        // Draw Page
         if (!hasDrawn)
         {
-            hasDrawn = true;
-            // Draw Page
-            drawExtraFN();
+            if (graphicLoaderState < 11)
+            {
+                drawExtraFN();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+            }
         }
         // Call buttons if any
         extraFNButtons();
@@ -2517,20 +2660,20 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-            AFM();
+
         }
         // Call buttons if any
-        extraFNButtons();
+
         break;
     case 29:
         if (!hasDrawn)
         {
             hasDrawn = true;
             // Draw Page
-            autoStartStop();
+
         }
         // Call buttons if any
-        extraFNButtons();
+
         break;
     case 30:
         if (!hasDrawn)
@@ -2587,19 +2730,30 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-            drawDongleSim();
             timer2 = 0;
+        }
+        if (graphicLoaderState < 20)
+        {
+            drawDongleSim();
+            graphicLoaderState++;
         }
         // Call buttons if any
         dongleSimButtons();
         break;
 
     case 36: /*========== SETTINGS ==========*/
+        // Draw Page
         if (!hasDrawn)
         {
-            hasDrawn = true;
-            // Draw Page
-            drawSettings();
+            if (graphicLoaderState < 11)
+            {
+                drawSettings();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+            }
         }
         // Call buttons if any
         settingsButtons();
@@ -2923,37 +3077,42 @@ void menuButtons()
             if ((y >= 32) && (y <= 83))
             {
                 // CANBUS
-                waitForIt(10, 32, 130, 83);
+                waitForItMenu(10, 32, 130, 83);
                 page = 0;
                 hasDrawn = false;
+                graphicLoaderState = 0;
             }
             if ((y >= 88) && (y <= 140))
             {
                 // VEHTOOL
-                waitForIt(10, 88, 130, 140);
+                waitForItMenu(10, 88, 130, 140);
                 page = 9;
                 hasDrawn = false;
+                graphicLoaderState = 0;
             }
             if ((y >= 145) && (y <= 197))
             {
                 // RZRTOOL
-                waitForIt(10, 145, 130, 197);
+                waitForItMenu(10, 145, 130, 197);
                 page = 18;
                 hasDrawn = false;
+                graphicLoaderState = 0;
             }
             if ((y >= 202) && (y <= 254))
             {
                 // EXTRAFN
-                waitForIt(10, 202, 130, 254);
+                waitForItMenu(10, 202, 130, 254);
                 page = 27;
                 hasDrawn = false;
+                graphicLoaderState = 0;
             }
             if ((y >= 259) && (y <= 312))
             {
                 // SETTING
-                waitForIt(10, 259, 130, 312);
+                waitForItMenu(10, 259, 130, 312);
                 page = 36;
                 hasDrawn = false;
+                graphicLoaderState = 0;
             }
         }
     }
@@ -3033,6 +3192,19 @@ void serialOut()
     }
 }
 
+void waitForItBackground()
+{
+    if (!isWaitForIt)
+    {
+        return;
+    }
+    if (millis() - waitForItTimer > 50)
+    {
+        myGLCD.setColor(menuBtnBorder);
+        myGLCD.drawRoundRect(x1_, y1_, x2_, y2_);
+        isWaitForIt = false;
+    }
+}
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
@@ -3042,4 +3214,5 @@ void loop()
     // Background Processes
     updateTime();
     serialOut();
+    waitForItBackground();
 }

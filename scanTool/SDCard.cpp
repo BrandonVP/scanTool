@@ -168,3 +168,61 @@ void SDCard::createDRIVE(char* foldername)
 {
     SD.mkdir(foldername);
 }
+
+bool canDir = false;
+void SDCard::printDirectory(File dir, uint8_t numTabs) 
+{
+    
+    String str1 = "canlog";
+    while (true) 
+    {
+
+        File entry = dir.openNextFile();
+
+        if (!entry) {
+
+            // no more files
+            break;
+
+        }
+
+        
+        if (entry.isDirectory() && str1.compareTo(entry.name()))
+        {
+            canDir = true;
+        }
+        else if (entry.isDirectory() && !(str1.compareTo(entry.name())))
+        {
+            canDir = false;
+        }
+        if (canDir && !entry.isDirectory())
+        {
+            SerialUSB.println(entry.name());
+        }
+        //SerialUSB.println(canDir);
+        if (entry.isDirectory()) {
+
+            //SerialUSB.println("/");
+
+            printDirectory(entry, numTabs + 1);
+
+        }
+        /*
+        else {
+
+            // files have sizes, directories do not
+            if (canDir)
+            {
+                SerialUSB.println("");
+
+                SerialUSB.println(entry.size(), DEC);
+            }
+      
+
+        }
+        */
+
+        entry.close();
+
+    }
+}

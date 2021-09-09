@@ -302,8 +302,8 @@ void CANBus::requestVIN(uint16_t IDFilter, bool saveSD)
         }
         fullDir[8] = '/';
         PIDDir[8] = '/';
-        Serial.println(fullDir);
-        Serial.println(PIDDir);
+        SerialUSB.println(fullDir);
+        SerialUSB.println(PIDDir);
         SDPrint.createDRIVE(fullDir);
 
         j = 0;
@@ -312,14 +312,14 @@ void CANBus::requestVIN(uint16_t IDFilter, bool saveSD)
             PIDDir[i] = PID[j];
             j++;
         }
-        Serial.println(PIDDir);
+        SerialUSB.println(PIDDir);
         j = 0;
         for (uint8_t i = 9; i < 16; i++)
         {
             fullDir[i] = VINLOG[j];
             j++;
         }
-        Serial.println(fullDir);
+        SerialUSB.println(fullDir);
 
         // Write VIN to log
         SDPrint.writeFile(fullDir, "VIN: ");
