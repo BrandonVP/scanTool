@@ -16,15 +16,10 @@
 
 class CANBus;
 
-typedef char MyArray[5][20];
-
 class SDCard
 {
  protected:
-	 struct files
-	 {
-		 char name[20];
-	 }list[2];
+	 
 
  public:
 	bool startSD();
@@ -36,7 +31,7 @@ class SDCard
 	void deleteFile(char*);
 	void readLogFile();
 	void readLogFile2();
-	void printDirectory(File dir, MyArray&);
+	void printDirectory(File dir, uint8_t);
 };
 #endif
 

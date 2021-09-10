@@ -66,7 +66,7 @@ public:
 	void sendCANOut(uint8_t, bool);
 	void requestVIN(uint16_t, bool);
 	char* getFullDir();
-	void SerialOutCAN(uint8_t);
+	bool SerialOutCAN(uint8_t);
 	void startPID();
 	int PIDStream(uint16_t, uint8_t, bool);
 	int PIDStreamGauge(uint16_t, uint8_t);

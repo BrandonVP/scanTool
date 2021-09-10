@@ -597,7 +597,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t channel)
 }
 
 // Displays CAN traffic on Serial out
-bool CANBus::SerialOutCAN(uint8_t channel)
+void CANBus::SerialOutCAN(uint8_t channel)
 {
     char buffer[50];
     uint32_t temp = millis();
@@ -643,5 +643,4 @@ bool CANBus::SerialOutCAN(uint8_t channel)
             Can0.sendFrame(incCAN1);
         }
     }
-    return true;
 }

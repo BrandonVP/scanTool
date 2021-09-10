@@ -78,11 +78,6 @@ uint32_t CAN0Mask = 0xFFF;
 uint32_t CAN1Filter = 0x000;
 uint32_t CAN1Mask = 0xFFF;
 
-struct files
-{
-    char name[20];
-};
-
 // General use variables
 // Any non-background process function can use
 // Initialize to 0 before use
@@ -1694,12 +1689,11 @@ void dongleSimButtons()
                 const uint16_t id = 0x7E8;
                 uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x47, 0x54 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
-                delay(10);
+                delay(15);
                 serialOut();
                 uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
                 can1.sendFrame(id, data2, 8, selectedChannelOut);
-                delay(5);
-                serialOut();
+                delay(10);
                 uint8_t data3[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
                 can1.sendFrame(id, data3, 8, selectedChannelOut);
             }
@@ -1710,12 +1704,11 @@ void dongleSimButtons()
                 const uint16_t id = 0x7E8;
                 uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
-                delay(10);
+                delay(15);
                 serialOut();
                 uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
                 can1.sendFrame(id, data2, 8, selectedChannelOut);
-                delay(5);
-                serialOut();
+                delay(10);
                 uint8_t data3[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
                 can1.sendFrame(id, data3, 8, selectedChannelOut);
             }
@@ -1724,14 +1717,13 @@ void dongleSimButtons()
                 waitForIt(255, 55, 325, 100);
                 // 1
                 const uint16_t id = 0x7E8;
-                uint8_t data1[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x43, 0x54 };
+                uint8_t data1[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
-                delay(10);
+                delay(15);
                 serialOut();
                 uint8_t data2[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
                 can1.sendFrame(id, data2, 8, selectedChannelOut);
-                delay(5);
-                serialOut();
+                delay(10);
                 uint8_t data3[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
                 can1.sendFrame(id, data3, 8, selectedChannelOut);
             }
@@ -2003,21 +1995,7 @@ void dongleSimButtonsFord()
     }
 }
 
-void drawCANLog()
-{
-    char list[5][20];
-    File root1;
-    root1 = SD.open("/");
-    sdCard.printDirectory(root1, list);
-    SerialUSB.print(list[0]);
-    SerialUSB.print(list[1]);
-    SerialUSB.print(list[2]);
-    if (list[3] != NULL)
-    {
-        SerialUSB.print(list[3]);
-    }
-    SerialUSB.print(list[4]);
-}
+
 /*=========================================================
     Settings
 ===========================================================*/
@@ -2052,7 +2030,7 @@ void drawSettings()
         //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        //drawRoundBtn(312, 245, 475, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(312, 245, 475, 295, F("PushMe"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -2126,10 +2104,16 @@ void settingsButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                //waitForIt(312, 245, 475, 295);
+                waitForIt(312, 245, 475, 295);
                 //Unused
                 //page = 44;
                 //hasDrawn = false;
+                SerialUSB.println("1");
+                File root1;
+                root1 = SD.open("/");
+                sdCard.printDirectory(root1, 0);
+                SerialUSB.println("2");
+
             }
         }
     }
@@ -2696,7 +2680,7 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-            sdCard.readLogFile2();
+            sdCard.readLogFile();
         }
         // Call buttons if any
         extraFNButtons();
@@ -3142,8 +3126,15 @@ void setup()
 
     can1.startCAN0(0x000, 0x800);
     can1.startCAN1(0x000, 0x800);
-
-    (sdCard.startSD()) ? Serial.println("SD Running") : Serial.println("SD failed");
+    bool hasFailed = sdCard.startSD();
+    if (!hasFailed)
+    {
+        Serial.println("SD failed");
+    }
+    else if (hasFailed)
+    {
+        Serial.println("SD Running");
+    }
 
     // Initialize the rtc object
     rtc.begin();
@@ -3174,6 +3165,7 @@ void updateTime()
     if (millis() - timer2 > 1000)
     {
         char time[40];
+        //sprintf(time, "%02d:%02d:%02d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
         drawRoundBtn(10, 5, 130, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
         timer2 = millis();
     }
@@ -3182,19 +3174,37 @@ void updateTime()
 // Sends CAN Bus traffic to serial as a background process
 void serialOut()
 {
-    (isSerialOut) && (can1.SerialOutCAN(selectedChannelOut));
+    if (!isSerialOut)
+    {
+        return;
+    }
+
+    switch (selectedChannelOut)
+    {
+    case CAN0: can1.SerialOutCAN(CAN0);
+        break;
+    case CAN1: can1.SerialOutCAN(CAN1);
+        break;
+    case BOTH: can1.SerialOutCAN(BOTH);
+        break;
+    case CTX0: can1.SerialOutCAN(CTX0);
+        break;
+    }
 }
 
 void waitForItBackground()
 {
-    if (isWaitForIt && millis() - waitForItTimer > 50)
+    if (!isWaitForIt)
+    {
+        return;
+    }
+    if (millis() - waitForItTimer > 50)
     {
         myGLCD.setColor(menuBtnBorder);
         myGLCD.drawRoundRect(x1_, y1_, x2_, y2_);
         isWaitForIt = false;
     }
 }
-
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {

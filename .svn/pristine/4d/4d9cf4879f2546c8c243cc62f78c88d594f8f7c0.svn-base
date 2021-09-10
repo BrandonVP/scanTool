@@ -170,40 +170,58 @@ void SDCard::createDRIVE(char* foldername)
 }
 
 bool canDir = false;
-void SDCard::printDirectory(File dir, MyArray &list)
+void SDCard::printDirectory(File dir, uint8_t numTabs) 
 {
-    const String str1 = "CANLOG";
-    uint8_t count = 0;
-
-    //struct files list[2];
-
-
+    
+    String str1 = "canlog";
     while (true) 
     {
+
         File entry = dir.openNextFile();
+
         if (!entry) {
 
             // no more files
             break;
 
         }
-        if (entry.isDirectory() && !(str1.compareTo(entry.name())))
+
+        
+        if (entry.isDirectory() && str1.compareTo(entry.name()))
         {
             canDir = true;
         }
-        else if (entry.isDirectory() && (str1.compareTo(entry.name())))
+        else if (entry.isDirectory() && !(str1.compareTo(entry.name())))
         {
             canDir = false;
         }
         if (canDir && !entry.isDirectory())
         {
-            sprintf(list[count], "%s\r\n", entry.name());
-            //SerialUSB.print(list[count]);
-            count++;
+            SerialUSB.println(entry.name());
         }
+        //SerialUSB.println(canDir);
         if (entry.isDirectory()) {
-            printDirectory(entry, list);
+
+            //SerialUSB.println("/");
+
+            printDirectory(entry, numTabs + 1);
+
         }
+        /*
+        else {
+
+            // files have sizes, directories do not
+            if (canDir)
+            {
+                SerialUSB.println("");
+
+                SerialUSB.println(entry.size(), DEC);
+            }
+      
+
+        }
+        */
+
         entry.close();
 
     }
