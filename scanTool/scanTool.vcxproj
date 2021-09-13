@@ -126,6 +126,7 @@
     <ClInclude Include="definitions.h" />
     <ClInclude Include="PIDS.h" />
     <ClInclude Include="SDCard.h" />
+    <ClInclude Include="variables.h" />
     <ClInclude Include="__vm\.scanTool.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>

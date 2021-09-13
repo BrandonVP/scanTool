@@ -16,7 +16,7 @@
 
 class CANBus;
 
-typedef char MyArray[5][20];
+typedef char MyArray[10][13];
 
 class SDCard
 {
@@ -34,9 +34,8 @@ class SDCard
 	void writeFile(char*, String);
 	void writeFileln(char*);
 	void deleteFile(char*);
-	void readLogFile();
-	void readLogFile2();
-	void printDirectory(File dir, MyArray&);
+	void readLogFile(char*);
+	uint8_t printDirectory(File dir, MyArray&);
 };
 #endif
 

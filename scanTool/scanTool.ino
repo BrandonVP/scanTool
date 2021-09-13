@@ -9,8 +9,7 @@
 ===========================================================
 Read Vehicle DTCs
 Read / Clear RZR DTCs
-Send custom message
-Convert Code to Non-Blocking
+Replace uint8_t scroll with var
 ===========================================================
     End Todo List
 =========================================================*/
@@ -27,6 +26,7 @@ Convert Code to Non-Blocking
 #include "definitions.h"
 #include "SDCard.h"
 #include <string.h>
+#include "variables.h"
 
 /*
 Uncomment to update the clock then comment out and upload to 
@@ -34,86 +34,6 @@ the device a second time to prevent updating time to last time
 device was on every at every startup.
 */
 //#define UPDATE_CLOCK
-
-// Initialize display
-//(byte model, int RS, int WR, int CS, int RST, int SER)
-UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
-//RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
-UTouch  myTouch(2, 6, 3, 4, 5);
-
-// For touch controls
-int x, y;
-
-// Used for page control
-uint8_t controlPage = 0;
-uint8_t page = 0;
-bool hasDrawn = false;
-
-// *Used by background process*
-uint8_t selectedChannelOut = 0;
-uint32_t timer2 = 0;
-
-// External import for fonts
-extern uint8_t SmallFont[];
-extern uint8_t BigFont[];
-
-// Harware Objects
-CANBus can1;
-SDCard sdCard;
-DS3231 rtc(SDA, SCL);
-//RTCDue rtc(XTAL);
-
-// Used PID functions
-uint8_t arrayIn[80];
-
-// Performing a sucessful PID scan will change this to true
-bool hasPID = false;
-
-// Keeps track of current line when displaying CAN traffic on LCD
-uint16_t indexCANMsg = 60;
-
-// Filter range / Filter Mask
-uint32_t CAN0Filter = 0x000;
-uint32_t CAN0Mask = 0xFFF;
-uint32_t CAN1Filter = 0x000;
-uint32_t CAN1Mask = 0xFFF;
-
-struct files
-{
-    char name[20];
-};
-
-// General use variables
-// Any non-background process function can use
-// Initialize to 0 before use
-bool nextState = false;
-bool isFinished = false;
-bool isSerialOut = false;
-uint8_t state = 0;
-int16_t counter1 = 0;
-uint16_t var1 = 0;
-uint8_t var2 = 0;
-uint16_t var3 = 0;
-uint32_t var4 = 0;
-uint32_t var5 = 0;
-uint32_t timer1 = 0;
-
-// Use to load pages in pieces to prevent blocking while loading entire page
-uint8_t graphicLoaderState = 0;
-
-//
-uint32_t waitForItTimer = 0;
-uint16_t x1_ = 0;
-uint16_t y1_ = 0;
-uint16_t x2_ = 0;
-uint16_t y2_ = 0;
-bool isWaitForIt = false;
-
-// Used for converting keypad input to appropriate hex place
-const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
-
-void pageControl();
-
 
 /*=========================================================
     Framework Functions
@@ -425,7 +345,7 @@ void drawCANBus()
     case 0:
         break;
     case 1:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
         drawRoundBtn(145, 55, 308, 100, F("CAN0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -480,6 +400,7 @@ void CANBusButtons()
                 waitForIt(145, 55, 308, 100);
                 // CAN0: LCD
                 page = 1;
+                var1 = 60;
                 selectedChannelOut = 1;
                 hasDrawn = false;
             }
@@ -488,6 +409,7 @@ void CANBusButtons()
                 waitForIt(145, 105, 308, 150);
                 // CAN1: LCD
                 page = 1;
+                var1 = 60;
                 selectedChannelOut = 2;
                 hasDrawn = false;
             }
@@ -496,6 +418,7 @@ void CANBusButtons()
                 waitForIt(145, 155, 308, 200);
                 // Both: LCD
                 page = 1;
+                var1 = 60;
                 selectedChannelOut = 3;
                 hasDrawn = false;
             }
@@ -504,6 +427,7 @@ void CANBusButtons()
                 waitForIt(145, 205, 308, 250);
                 // CTX0: LCD
                 page = 1;
+                var1 = 60;
                 selectedChannelOut = 4;
                 hasDrawn = false;
             }
@@ -577,18 +501,18 @@ void readInCANMsg(uint8_t channel)
     {
         char printString[50];
         myGLCD.setColor(VGA_WHITE);
-        myGLCD.fillRect(150, (indexCANMsg - 5), 479, (indexCANMsg + 25));
+        myGLCD.fillRect(150, (var1 - 5), 479, (var1 + 25));
         myGLCD.setColor(VGA_BLACK);
         sprintf(printString, "%04X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
-        myGLCD.print(printString, 150, indexCANMsg);
+        myGLCD.print(printString, 150, var1);
 
-        if (indexCANMsg < 300)
+        if (var1 < 300)
         {
-            indexCANMsg += 15;
+            var1 += 15;
         }
         else
         {
-            indexCANMsg = 60;
+            var1 = 60;
         }
     }
     myGLCD.setFont(BigFont);
@@ -842,6 +766,7 @@ void sendFrame(uint8_t channel)
     }
 }
 
+
 /*=========================================================
     Vehicle Tools
 ===========================================================*/
@@ -852,7 +777,7 @@ void drawVehicleTools()
     case 0:
         break;
     case 1:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
         drawRoundBtn(145, 80, 308, 130, F("PIDSCAN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1065,11 +990,9 @@ void drawPIDStream(uint8_t scroll = 0)
     drawRoundBtn(150, 275, 410, 315, F("Stream PID"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-// Button function for the program page
+//
 void PIDStreamButtons()
 {
-    static uint8_t scroll = 0;
-
     // Touch screen controls
     if (myTouch.dataAvailable())
     {
@@ -1345,7 +1268,7 @@ void drawRZRTOOL()
     case 0:
         break;
     case 1:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
         drawRoundBtn(145, 80, 308, 130, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1473,19 +1396,19 @@ void drawExtraFN()
     case 0:
         break;
     case 1:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        //drawRoundBtn(145, 80, 308, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 80, 308, 130, F("CAN Cap"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
         //drawRoundBtn(312, 80, 475, 130, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(145, 135, 308, 185, F("CAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        //drawRoundBtn(145, 135, 308, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
-        drawRoundBtn(312, 135, 475, 185, F("PCAN Log"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        //drawRoundBtn(312, 135, 475, 185, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
         //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1519,17 +1442,17 @@ void extraFNButtons()
         {
             if ((y >= 80) && (y <= 130))
             {
-                //waitForIt(145, 80, 308, 130);
-                // Unused
-                //page = 28;
-                //hasDrawn = false;
+                waitForIt(145, 80, 308, 130);
+                // CAN capture playback
+                page = 28;
+                hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
-                waitForIt(145, 135, 308, 185);
-                 // Read in CAN Log
-                 page = 30;
-                 hasDrawn = false;
+                //waitForIt(145, 135, 308, 185);
+                // Unused
+                //page = 30;
+                //hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -1540,10 +1463,10 @@ void extraFNButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(145, 245, 308, 295);
-                // Ford Dongle Sim
-                page = 34;
-                hasDrawn = false;
+                //waitForIt(145, 245, 308, 295);
+                // Unused
+                //page = 34;
+                //hasDrawn = false;
             }
         }
         if ((x >= 312) && (x <= 475))
@@ -1576,6 +1499,134 @@ void extraFNButtons()
                 page = 35;
                 hasDrawn = false;
                 graphicLoaderState = 0;
+            }
+        }
+    }
+}
+
+void drawCANLog()
+{
+    // clear LCD
+    drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+
+    drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(131, 275, 216, 315, F("Play"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(216, 275, 301, 315, F("Del"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(301, 275, 386, 315, F("Split"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(386, 275, 479, 315, F("Conf"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
+
+//
+void drawCANLogScroll()
+{
+    isWaitForIt = false;
+    File root1;
+    root1 = SD.open("/");
+  
+    uint8_t size = sdCard.printDirectory(root1, fileList);
+  
+    // Starting y location for list
+    uint16_t y = 60;
+
+    // Draw the scroll window
+    for (int i = 0; i < MAXSCROLL; i++)
+    {
+        if ((scroll + i < 10))
+        {
+            char temp[13];
+            sprintf(temp, "%s", fileList[scroll + i]);
+            drawSquareBtn(150, y, 410, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+        }
+        else
+        {
+            drawSquareBtn(150, y, 410, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
+        }
+        y = y + 35;
+    }
+}
+
+//
+void CANLogButtons()
+{
+    // Touch screen controls
+    if (myTouch.dataAvailable())
+    {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
+
+        if ((x >= 150) && (x <= 410))
+        {
+            if ((y >= 60) && (y <= 95))
+            {
+                waitForItRect(150, 60, 410, 95);
+                Serial.println(1 + scroll);
+                var1 = 1 + scroll;
+            }
+            if ((y >= 95) && (y <= 130))
+            {
+                waitForItRect(150, 95, 410, 130);
+                Serial.println(2 + scroll);
+                var1 = 2 + scroll;
+            }
+            if ((y >= 130) && (y <= 165))
+            {
+                waitForItRect(150, 130, 410, 165);
+                Serial.println(3 + scroll);
+                var1 = 3 + scroll;
+            }
+            if ((y >= 165) && (y <= 200))
+            {
+                waitForItRect(150, 165, 410, 200);
+                Serial.println(4 + scroll);
+                var1 = 4 + scroll;
+            }
+            if ((y >= 200) && (y <= 235))
+            {
+                waitForItRect(150, 200, 410, 235);
+                Serial.println(5 + scroll);
+                var1 = 5 + scroll;
+            }
+            if ((y >= 235) && (y <= 270))
+            {
+                waitForItRect(150, 235, 410, 270);
+                Serial.println(6 + scroll);
+                var1 = 6 + scroll;
+            }
+        }
+        if ((x >= 420) && (x <= 470))
+        {
+            if ((y >= 80) && (y <= 160))
+            {
+                waitForItRect(420, 80, 470, 160);
+                if (scroll > 0)
+                {
+                    scroll--;
+                    drawCANLogScroll();
+                }
+            }
+        }
+        if ((x >= 420) && (x <= 470))
+        {
+            if ((y >= 160) && (y <= 240))
+            {
+                waitForItRect(420, 160, 470, 240);
+                if (scroll < 100)
+                {
+                    scroll++;
+                    drawCANLogScroll();
+                }
+            }
+        }
+        if ((x >= 131) && (x <= 216))
+        {
+            if ((y >= 275) && (y <= 315))
+            {
+                // Play
+                waitForItRect(131, 275, 216, 315);
+                SerialUSB.println(fileList[var1]);
+                sdCard.readLogFile(fileList[var1]);
             }
         }
     }
@@ -2003,21 +2054,7 @@ void dongleSimButtonsFord()
     }
 }
 
-void drawCANLog()
-{
-    char list[5][20];
-    File root1;
-    root1 = SD.open("/");
-    sdCard.printDirectory(root1, list);
-    SerialUSB.print(list[0]);
-    SerialUSB.print(list[1]);
-    SerialUSB.print(list[2]);
-    if (list[3] != NULL)
-    {
-        SerialUSB.print(list[3]);
-    }
-    SerialUSB.print(list[4]);
-}
+
 /*=========================================================
     Settings
 ===========================================================*/
@@ -2028,7 +2065,7 @@ void drawSettings()
     case 0:
         break;
     case 1:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
         drawRoundBtn(145, 80, 308, 130, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -2315,14 +2352,14 @@ void drawMenu()
 {
     // Draw Layout
     drawSquareBtn(0, 0, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(0, 0, 140, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
+    drawSquareBtn(0, 0, 130, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
 
     // Draw Menu Buttons
-    drawRoundBtn(10, 32, 130, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 88, 130, 140, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 145, 130, 197, F("RZRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 202, 130, 254, F("EXTRAFN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(10, 259, 130, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(5, 32, 125, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(5, 88, 125, 140, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(5, 145, 125, 197, F("RZRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(5, 202, 125, 254, F("EXTRAFN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(5, 259, 125, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 //Manages the different App pages
@@ -2674,12 +2711,15 @@ void pageControl()
     case 28:
         if (!hasDrawn)
         {
+            scroll = 0;
+            var1 = 0;
             hasDrawn = true;
             // Draw Page
-
+            drawCANLog();
+            drawCANLogScroll();
         }
         // Call buttons if any
-
+        CANLogButtons();
         break;
     case 29:
         if (!hasDrawn)
@@ -2696,7 +2736,6 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-            sdCard.readLogFile2();
         }
         // Call buttons if any
         extraFNButtons();
@@ -2707,7 +2746,6 @@ void pageControl()
         {
             hasDrawn = true;
             // Draw Page
-            sdCard.readLogFile2();
         }
         // Call buttons if any
         extraFNButtons();
@@ -3088,12 +3126,12 @@ void menuButtons()
         x = myTouch.getX();
         y = myTouch.getY();
         
-        if ((x >= 10) && (x <= 130)) 
+        if ((x >= 5) && (x <= 125))
         {
             if ((y >= 32) && (y <= 83))
             {
                 // CANBUS
-                waitForItMenu(10, 32, 130, 83);
+                waitForItMenu(5, 32, 125, 83);
                 page = 0;
                 hasDrawn = false;
                 graphicLoaderState = 0;
@@ -3101,7 +3139,7 @@ void menuButtons()
             if ((y >= 88) && (y <= 140))
             {
                 // VEHTOOL
-                waitForItMenu(10, 88, 130, 140);
+                waitForItMenu(5, 88, 125, 140);
                 page = 9;
                 hasDrawn = false;
                 graphicLoaderState = 0;
@@ -3109,7 +3147,7 @@ void menuButtons()
             if ((y >= 145) && (y <= 197))
             {
                 // RZRTOOL
-                waitForItMenu(10, 145, 130, 197);
+                waitForItMenu(5, 145, 125, 197);
                 page = 18;
                 hasDrawn = false;
                 graphicLoaderState = 0;
@@ -3117,7 +3155,7 @@ void menuButtons()
             if ((y >= 202) && (y <= 254))
             {
                 // EXTRAFN
-                waitForItMenu(10, 202, 130, 254);
+                waitForItMenu(5, 202, 125, 254);
                 page = 27;
                 hasDrawn = false;
                 graphicLoaderState = 0;
@@ -3125,7 +3163,7 @@ void menuButtons()
             if ((y >= 259) && (y <= 312))
             {
                 // SETTING
-                waitForItMenu(10, 259, 130, 312);
+                waitForItMenu(5, 259, 125, 312);
                 page = 36;
                 hasDrawn = false;
                 graphicLoaderState = 0;
@@ -3174,7 +3212,7 @@ void updateTime()
     if (millis() - timer2 > 1000)
     {
         char time[40];
-        drawRoundBtn(10, 5, 130, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
+        drawRoundBtn(5, 5, 125, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
         timer2 = millis();
     }
 }

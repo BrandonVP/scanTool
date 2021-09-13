@@ -93,6 +93,7 @@ void SDCard::readFile(char* filename, uint8_t* arrayIn)
     myFile.close();
 }
 
+/*
 void SDCard::readLogFile()
 {
     Serial.println("in");
@@ -131,11 +132,15 @@ void SDCard::readLogFile()
     }
     myFile.close();
 }
+*/
 
-void SDCard::readLogFile2()
+void SDCard::readLogFile(char * filename)
 {
+    char fileLoc[20] = "CANLOG/";
+    strcat(fileLoc, filename);
+    SerialUSB.println(fileLoc);
     // File created and opened for writing
-    myFile = SD.open("readcan2.txt", FILE_READ);
+    myFile = SD.open(fileLoc, FILE_READ);
     char tempStr[64];
     int messageNum, id;
     float time;
@@ -170,22 +175,17 @@ void SDCard::createDRIVE(char* foldername)
 }
 
 bool canDir = false;
-void SDCard::printDirectory(File dir, MyArray &list)
+uint8_t SDCard::printDirectory(File dir, MyArray &list)
 {
     const String str1 = "CANLOG";
     uint8_t count = 0;
 
-    //struct files list[2];
-
-
     while (true) 
     {
         File entry = dir.openNextFile();
-        if (!entry) {
-
-            // no more files
+        if (!entry || count > 9)
+        {
             break;
-
         }
         if (entry.isDirectory() && !(str1.compareTo(entry.name())))
         {
@@ -197,14 +197,13 @@ void SDCard::printDirectory(File dir, MyArray &list)
         }
         if (canDir && !entry.isDirectory())
         {
-            sprintf(list[count], "%s\r\n", entry.name());
-            //SerialUSB.print(list[count]);
+            sprintf(list[count], "%s", entry.name());
             count++;
         }
         if (entry.isDirectory()) {
             printDirectory(entry, list);
         }
         entry.close();
-
     }
+    return count;
 }
