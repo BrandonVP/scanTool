@@ -13,11 +13,7 @@ uint8_t controlPage = 0;
 uint8_t page = 0;
 bool hasDrawn = false;
 
-// *Used by background process*
-uint8_t selectedChannelOut = 0;
-uint32_t timer2 = 0;
-
-// External import for fonts
+// LCD fonts
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
 
@@ -26,14 +22,22 @@ CANBus can1;
 SDCard sdCard;
 DS3231 rtc(SDA, SCL);
 
-// Used PID functions
+// Holds CAN Bus capture replay filenames
+char fileList[10][13];
+
+// Determines if a PID scan was performed before displaying pid list
+bool hasPID = false;
+
+// Holds PIDS for the pidscan function
 uint8_t arrayIn[80];
 
 // TODO: Replace scroll with var
 uint8_t scroll = 0;
 
-// Performing a sucessful PID scan will change this to true
-bool hasPID = false;
+// *Used by background process*
+uint8_t selectedChannelOut = 0;
+uint32_t timer2 = 0;
+bool isSerialOut = false;
 
 // Filter range / Filter Mask
 uint32_t CAN0Filter = 0x000;
@@ -46,7 +50,6 @@ uint32_t CAN1Mask = 0xFFF;
 // Initialize to 0 before use
 bool nextState = false;
 bool isFinished = false;
-bool isSerialOut = false;
 uint8_t state = 0;
 int16_t counter1 = 0;
 uint16_t var1 = 0;
@@ -69,6 +72,3 @@ bool isWaitForIt = false;
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
-
-//
-char fileList[10][13];

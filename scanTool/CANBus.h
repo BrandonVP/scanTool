@@ -26,7 +26,6 @@ public:
 	// Def for getMSG()
 	typedef byte buff[8];
 	uint32_t baud = 500000;
-	//uint16_t rxID = 0x00;
 	bool hasNextPID;
 	String vehicleVIN;
 	char VIN[18];

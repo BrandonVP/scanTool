@@ -21,11 +21,7 @@ typedef char MyArray[10][13];
 class SDCard
 {
  protected:
-	 struct files
-	 {
-		 char name[20];
-	 }list[2];
-
+	 bool canDir = false;
  public:
 	bool startSD();
 	void createDRIVE(char*);
@@ -35,6 +31,8 @@ class SDCard
 	void writeFileln(char*);
 	void deleteFile(char*);
 	void readLogFile(char*);
+	uint32_t fileLength(char*);
+	void split(char*, uint32_t);
 	uint8_t printDirectory(File dir, MyArray&);
 };
 #endif

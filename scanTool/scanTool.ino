@@ -215,10 +215,9 @@ void print_icon(int x, int y, const unsigned char icon[]) {
 }
 
 /*****************************************************
-*  Draw Round/Square Button                          *
+*           Draw Round/Square Button                 *
 *                                                    *
 *  Description:   Draws shapes with/without text     *
-*                                                    *
 *  Parameters: int: x start, y start, x stop, y stop *
 *              String: Button text                   *
 *              Hex value: Background Color           *
@@ -226,7 +225,6 @@ void print_icon(int x, int y, const unsigned char icon[]) {
 *              Hex value: Color of text              *
 *              int: Alignment of text #defined as    *
 *                   LEFT, CENTER, RIGHT              *
-*                                                    *
 *****************************************************/
 void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
     int size, temp, offset;
@@ -952,7 +950,7 @@ void startPIDSCAN()
 }
 
 /*========== PID Stream Functions ==========*/
-void drawPIDStreamScroll(uint8_t scroll)
+void drawPIDStreamScroll()
 {
     // Temp to hold PIDS value before strcat
     char temp[2];
@@ -979,14 +977,14 @@ void drawPIDStreamScroll(uint8_t scroll)
     }
 }
 
-void drawPIDStream(uint8_t scroll = 0)
+void drawPIDStream()
 {
     drawSquareBtn(141, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
     myGLCD.setColor(menuBtnColor);
     myGLCD.setBackColor(themeBackground);
     drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawPIDStreamScroll(scroll);
+    drawPIDStreamScroll();
     drawRoundBtn(150, 275, 410, 315, F("Stream PID"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
@@ -1047,7 +1045,7 @@ void PIDStreamButtons()
                 if (scroll > 0)
                 {
                     scroll = scroll - 6;
-                    drawPIDStreamScroll(scroll);
+                    drawPIDStreamScroll();
                 }
             }
         }
@@ -1059,7 +1057,7 @@ void PIDStreamButtons()
                 if (scroll < 100)
                 {
                     scroll = scroll + 6;
-                    drawPIDStreamScroll(scroll);
+                    drawPIDStreamScroll();
                 }
             }
         }
@@ -1619,16 +1617,38 @@ void CANLogButtons()
                 }
             }
         }
-        if ((x >= 131) && (x <= 216))
+        if ((y >= 275) && (y <= 315))
         {
-            if ((y >= 275) && (y <= 315))
+            char fileLoc[20] = "CANLOG/";
+            strcat(fileLoc, fileList[var1 - 1]);
+            if ((x >= 131) && (x <= 216))
             {
                 // Play
                 waitForItRect(131, 275, 216, 315);
-                SerialUSB.println(fileList[var1]);
+                sdCard.readLogFile(fileLoc);
+            }
+            if ((x >= 216) && (x <= 301))
+            {
+                // Delete
+                waitForItRect(216, 275, 301, 315);
+                drawErrorMSG(F("Confirmation"), F("Permenently"), F("Delete File?"));
+                //sdCard.deleteFile(fileLoc);
+            }
+            if ((x >= 301) && (x <= 386))
+            {
+                // Split
+                waitForItRect(301, 275, 386, 315);
+                uint32_t temp = sdCard.fileLength(fileLoc);
+                sdCard.split(fileLoc, temp);
+            }
+            if ((x >= 386) && (x <= 479))
+            {
+                // Settings
+                waitForItRect(386, 275, 479, 315);
                 sdCard.readLogFile(fileList[var1]);
             }
         }
+ 
     }
 }
 
@@ -2522,13 +2542,14 @@ void pageControl()
                     arrayIn[i] = 0x00;
                 }
                 sdCard.readFile(can1.getFullDir(), arrayIn);
+                scroll = 0;
                 drawPIDStream();
                 hasDrawn = true;
             }
             else
             {
                 controlPage = 9;
-                errorMSG("Error", "Please Perform", "PIDSCAN First");
+                drawErrorMSG("Error", "Please Perform", "PIDSCAN First");
                 hasDrawn = true;
             }
         }
@@ -2545,12 +2566,13 @@ void pageControl()
         {
             can1.PIDStream(CAN_PID_ID, arrayIn[var1], true);
             counter1++;
-            errorMSG("Samples", String(counter1), "Saved to SD");
+            drawErrorMSG("Samples", String(counter1), "Saved to SD");
             timer1 = millis();
         }
         if ((counter1 == PIDSAMPLES) && (state == 1) && (millis() - timer1 > 2000))
         {
             state = 0;
+            scroll = 0;
             drawPIDStream();
         }
         break;
@@ -2841,13 +2863,13 @@ void pageControl()
             {
                 can1.setBaud(250000);
                 //can1.startCAN0(startRange, endRange);
-                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+                drawErrorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
             }
             else if (temp == 250000)
             {
                 can1.setBaud(500000);
                 //can1.startCAN0(startRange, endRange);
-                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+                drawErrorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
             }
         }
         // Call buttons if any
@@ -2863,13 +2885,13 @@ void pageControl()
             {
                 can1.setBaud(250000);
                 //can1.startCAN0(startRange, endRange);
-                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+                drawErrorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
             }
             else if (temp == 250000)
             {
                 can1.setBaud(500000);
                 //can1.startCAN0(startRange, endRange);
-                errorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
+                drawErrorMSG("Baud Rate", "Set to:", String(can1.getBaud()));
             }
         }
         // Call buttons if any
@@ -3085,13 +3107,15 @@ int keypadButtons()
 }
 
 // Error Message function
-void errorMSG(String title, String eMessage1, String eMessage2)
+void drawErrorMSG(String title, String eMessage1, String eMessage2)
 {
-    drawSquareBtn(170, 140, 450, 240, "", menuBackground, menuBtnColor, menuBtnColor, CENTER);
-    drawSquareBtn(170, 140, 450, 170, title, themeBackground, menuBtnColor, menuBtnBorder, LEFT);
-    drawSquareBtn(171, 171, 449, 204, eMessage1, menuBackground, menuBackground, menuBtnText, CENTER);
-    drawSquareBtn(171, 205, 449, 239, eMessage2, menuBackground, menuBackground, menuBtnText, CENTER);
-    drawRoundBtn(400, 140, 450, 170, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
+    drawSquareBtn(145, 100, 415, 220, "", menuBackground, menuBtnColor, menuBtnColor, CENTER);
+    drawSquareBtn(145, 100, 415, 130, title, themeBackground, menuBtnColor, menuBtnBorder, LEFT);
+    drawSquareBtn(146, 131, 414, 155, eMessage1, menuBackground, menuBackground, menuBtnText, CENTER);
+    drawSquareBtn(146, 155, 414, 180, eMessage2, menuBackground, menuBackground, menuBtnText, CENTER);
+    drawRoundBtn(365, 100, 415, 130, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
+    drawRoundBtn(155, 180, 275, 215, "Confirm", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
+    drawRoundBtn(285, 180, 405, 215, "Cancel", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 }
 
 // Error Message buttons
@@ -3104,16 +3128,29 @@ uint8_t errorMSGButton(uint8_t returnPage)
         x = myTouch.getX();
         y = myTouch.getY();
 
-        if ((x >= 400) && (x <= 450))
+        if ((x >= 365) && (x <= 415))
         {
-            if ((y >= 140) && (y <= 170))
+            if ((y >= 100) && (y <= 130))
             {
-                waitForItRect(398, 138, 452, 172);
-                page = returnPage;
-                hasDrawn = false;
+                waitForItRect(365, 100, 415, 130);
+                return 3;
+            }
+        }
+        if ((y >= 180) && (y <= 215))
+        {
+            if ((x >= 155) && (x <= 275))
+            {
+                waitForItRect(155, 180, 275, 215);
+                return 1;
+            }
+            if ((x >= 285) && (x <= 405))
+            {
+                waitForItRect(285, 180, 405, 215);
+                return 2;
             }
         }
     }
+    return 0;
 }
 
 // Button functions for main menu
