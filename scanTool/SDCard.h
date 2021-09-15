@@ -32,6 +32,7 @@ class SDCard
 	void deleteFile(char*);
 	void readLogFile(char*);
 	uint32_t fileLength(char*);
+	void tempCopy(char* filename);
 	void split(char*, uint32_t);
 	uint8_t printDirectory(File dir, MyArray&);
 };

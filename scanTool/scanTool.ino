@@ -1639,7 +1639,9 @@ void CANLogButtons()
                 // Split
                 waitForItRect(301, 275, 386, 315);
                 uint32_t temp = sdCard.fileLength(fileLoc);
-                sdCard.split(fileLoc, temp);
+                sdCard.tempCopy(fileLoc);
+                sdCard.split("canlog/temp.txt", temp);
+                sdCard.deleteFile("canlog/temp.txt");
             }
             if ((x >= 386) && (x <= 479))
             {

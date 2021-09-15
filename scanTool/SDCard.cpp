@@ -99,7 +99,7 @@ void SDCard::readLogFile(char * filename)
     //char fileLoc[20] = "CANLOG/";
     //strcat(fileLoc, filename);
     // File created and opened for writing
-    SerialUSB.println(filename);
+    //SerialUSB.println(filename);
     myFile = SD.open(filename, FILE_READ);
     char tempStr[64];
     int messageNum, id;
@@ -114,7 +114,15 @@ void SDCard::readLogFile(char * filename)
     {   
         myFile.readBytesUntil('\n', tempStr, 64);
         sscanf(tempStr, "%d %f %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length, &msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
-        
+        /*
+        SerialUSB.println(tempStr);
+        SerialUSB.print("ID: ");
+        SerialUSB.print(id);
+        SerialUSB.print("  Length: ");
+        SerialUSB.print(length);
+        SerialUSB.print("  MSG: ");
+        SerialUSB.println(msg[0]);
+        */
         if (sendIt)
         {
             can.sendFrame(id, msg, length, false);
@@ -181,22 +189,25 @@ uint32_t SDCard::fileLength(char* filename)
         length++;
     }
     myFile.close();
-    return length;
+    return length / 2;
 }
 
 void SDCard::split(char* filename, uint32_t size)
 {
-    uint8_t mState = 0;
     SerialUSB.println(filename);
-    SerialUSB.println(size);
-    uint32_t fileSize = size / 4;
-    SerialUSB.println(fileSize);
+
+    uint32_t fileSize;
     String tempStr;
     //char tempStr[64];
     uint32_t count = 0;
-    //(size % 2 > 0) ? fileSize = (size / 2) + 1 : fileSize = size / 2;
-    
+
+    SerialUSB.println(size);
+    (size % 2 > 0) ? fileSize = (size / 2) + 1 : fileSize = size / 2;
+    SerialUSB.println(fileSize);
+
     myFile = SD.open(filename, FILE_READ);
+    deleteFile("canlog/a.txt");
+    deleteFile("canlog/b.txt");
 
     File myFileW1 = SD.open("canlog/a.txt", FILE_WRITE);
     File myFileW2 = SD.open("canlog/b.txt", FILE_WRITE);
@@ -205,27 +216,103 @@ void SDCard::split(char* filename, uint32_t size)
     {
         tempStr = myFile.readStringUntil('\n');
         //myFile.readBytesUntil('\n', tempStr, 64);
-        //SerialUSB.println(tempStr);
-        //myFileW1.print(tempStr);
-        
+
         if (count < fileSize)
         {
-            myFileW1.print(tempStr);
+            myFileW1.println(tempStr);
             SerialUSB.print("a: ");
             SerialUSB.println(count);
         }
         else
         {
-            myFileW2.print(tempStr);
+            myFileW2.println(tempStr);
             SerialUSB.print("b: ");
             SerialUSB.println(count);
         }
-        
-
-
         count++;
     }
     myFile.close();
     myFileW1.close();
     myFileW2.close();
 }
+
+void SDCard::tempCopy(char* filename)
+{
+    String tempStr;
+    myFile = SD.open(filename, FILE_READ);
+    File myFileW1 = SD.open("canlog/temp.txt", FILE_WRITE);
+
+    while (myFile.available())
+    {
+        tempStr = myFile.readStringUntil('\n');
+        myFileW1.println(tempStr);
+    }
+    myFile.close();
+    myFileW1.close();
+}
+
+/*
+void SDCard::split(char* filename, uint32_t size)
+{
+    SerialUSB.println("");
+    SerialUSB.println(filename);
+    SerialUSB.println(size);
+
+    uint32_t fileSize;
+    String tempStr;
+    uint32_t count = 0;
+
+    (size % 2 > 0) ? fileSize = (size / 2) + 1 : fileSize = size / 2;
+
+    //SerialUSB.println(fileSize);
+
+    myFile = SD.open(filename, FILE_READ);
+    File myFileW1 = SD.open("canlog/temp.txt", FILE_WRITE);
+
+    //SerialUSB.println("Temp");
+    while (myFile.available())
+    {
+        tempStr = myFile.readStringUntil('\n');
+        myFileW1.print(tempStr);
+    }
+    myFile.close();
+    myFileW1.close();
+
+
+    File myFile2 = SD.open("canlog/temp.txt", FILE_READ);
+    File myFileW2 = SD.open("canlog/a.txt", FILE_WRITE);
+    File myFileW3 = SD.open("canlog/b.txt", FILE_WRITE);
+
+    //SerialUSB.println("A");
+    while (myFile2.available())
+    {
+        tempStr = myFile2.readStringUntil('\n');
+        
+        if (count < fileSize)
+        {
+            myFileW2.print(tempStr);
+            //SerialUSB.print("a: ");
+            //SerialUSB.println(count);
+        }
+        else if (count == fileSize)
+        {
+            //SerialUSB.println("B");
+            myFileW2.close();
+            
+            myFileW3.print(tempStr);
+        }
+        else if ( count > fileSize)
+        {
+            myFileW3.print(tempStr);
+            //SerialUSB.print("b: ");
+            //SerialUSB.println(count);
+        }
+        
+
+
+        count++;
+    }
+    myFile2.close();
+    myFileW3.close();
+}
+*/
