@@ -25,7 +25,9 @@ public:
 
 	// Def for getMSG()
 	typedef byte buff[8];
-	uint32_t baud = 500000;
+	//uint32_t baud = 125000;
+	uint32_t baud0 = 500000;
+	uint32_t baud1 = 500000;
 	bool hasNextPID;
 	String vehicleVIN;
 	char VIN[18];
@@ -69,8 +71,10 @@ public:
 	void startPID();
 	int PIDStream(uint16_t, uint8_t, bool);
 	int PIDStreamGauge(uint16_t, uint8_t);
-	void setBaud(uint32_t);
-	uint32_t getBaud();
+	void setBaud0(uint32_t);
+	void setBaud1(uint32_t);
+	uint32_t getBaud0();
+	uint32_t getBaud1();
 	String getVIN();
 };
 #endif

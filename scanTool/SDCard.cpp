@@ -194,16 +194,16 @@ uint32_t SDCard::fileLength(char* filename)
 
 void SDCard::split(char* filename, uint32_t size)
 {
-    SerialUSB.println(filename);
+    //SerialUSB.println(filename);
 
     uint32_t fileSize;
     String tempStr;
     //char tempStr[64];
     uint32_t count = 0;
 
-    SerialUSB.println(size);
+    //SerialUSB.println(size);
     (size % 2 > 0) ? fileSize = (size / 2) + 1 : fileSize = size / 2;
-    SerialUSB.println(fileSize);
+    //SerialUSB.println(fileSize);
 
     myFile = SD.open(filename, FILE_READ);
     deleteFile("canlog/a.txt");
@@ -220,14 +220,14 @@ void SDCard::split(char* filename, uint32_t size)
         if (count < fileSize)
         {
             myFileW1.println(tempStr);
-            SerialUSB.print("a: ");
-            SerialUSB.println(count);
+            //SerialUSB.print("a: ");
+            //SerialUSB.println(count);
         }
         else
         {
             myFileW2.println(tempStr);
-            SerialUSB.print("b: ");
-            SerialUSB.println(count);
+            //SerialUSB.print("b: ");
+            //SerialUSB.println(count);
         }
         count++;
     }
@@ -238,17 +238,20 @@ void SDCard::split(char* filename, uint32_t size)
 
 void SDCard::tempCopy(char* filename)
 {
+    //SerialUSB.println("here");
     String tempStr;
     myFile = SD.open(filename, FILE_READ);
     File myFileW1 = SD.open("canlog/temp.txt", FILE_WRITE);
-
+    //SerialUSB.println(filename);
     while (myFile.available())
     {
         tempStr = myFile.readStringUntil('\n');
+        //SerialUSB.println(tempStr);
         myFileW1.println(tempStr);
     }
     myFile.close();
     myFileW1.close();
+    //SerialUSB.println("Leaving");
 }
 
 /*

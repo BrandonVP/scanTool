@@ -72,3 +72,5 @@ bool isWaitForIt = false;
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
+
+const uint32_t baudRates[6] = { 1000000, 800000, 500000, 250000, 125000, 100000 };

@@ -12,11 +12,12 @@ CAN_FRAME CANOut;
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN0(uint32_t start, uint32_t end)
 {
-    Can0.begin(baud);
+    Can0.begin(baud0);
     Can0.watchForRange(start, end);
-    //Can0.watchFor(0x042F, 0x1FFF);
+
     // Do not use extended frames
     CANOut.extended = false;
+
     // Message length
     CANOut.length = 8;
 }
@@ -24,30 +25,36 @@ void CANBus::startCAN0(uint32_t start, uint32_t end)
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN1(uint32_t start, uint32_t end)
 {
-    Can1.begin(baud);
+    Can1.begin(baud1);
     Can1.watchForRange(start, end);
 }
 
 // Set Can0 Filter and Mask
 void CANBus::setFilterMask0(uint32_t filter, uint32_t mask)
 {
-    Can0.begin(baud);
+    Can0.begin(baud0);
     Can0.watchFor(filter, mask);
 }
 
 // Set Can1 Filter and Mask
 void CANBus::setFilterMask1(uint32_t filter, uint32_t mask)
 {
-    Can1.begin(baud);
+    Can1.begin(baud1);
     Can1.watchFor(filter, mask);
 }
 
-// Set baud rates for both CAN Bus
-void CANBus::setBaud(uint32_t newBaud)
+// Set baud rate for CAN Bus
+void CANBus::setBaud0(uint32_t newBaud)
 {
-    baud = newBaud;
-    Can0.set_baudrate(baud);
-    Can1.set_baudrate(baud);
+    baud0 = newBaud;
+    Can0.set_baudrate(baud0);
+}
+
+void CANBus::setBaud1(uint32_t newBaud)
+{
+    baud1 = newBaud;
+    Can0.set_baudrate(baud1);
+    Can1.set_baudrate(baud1);
 }
 
 void ECUtraffic(CAN_FRAME* incCAN0)
@@ -66,9 +73,14 @@ void CANBus::startPID()
 }
 
 // Get the current baud rate
-uint32_t CANBus::getBaud()
+uint32_t CANBus::getBaud0()
 {
-    return baud;
+    return baud0;
+}
+
+uint32_t CANBus::getBaud1()
+{
+    return baud1;
 }
 
 // True if there are still PIDs left to scan 
