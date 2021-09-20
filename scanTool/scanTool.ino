@@ -1412,7 +1412,7 @@ void drawExtraFN()
         //drawRoundBtn(145, 190, 308, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(312, 190, 475, 240, F("Jeep Auto"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        //drawRoundBtn(312, 190, 475, 240, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
         //drawRoundBtn(145, 245, 308, 295, F("Unused"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1485,10 +1485,10 @@ void extraFNButtons()
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(312, 190, 475, 240);
-                // Jeep Auto Start/Stop
-                page = 33;
-                hasDrawn = false;
+                //waitForIt(312, 190, 475, 240);
+                // Unused
+                //page = 33;
+                //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
