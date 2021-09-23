@@ -1734,15 +1734,12 @@ void drawDongleSim()
         drawRoundBtn(405, 205, 475, 250, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 16 :
-        drawRoundBtn(145, 255, 250, 300, F("RPM"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 255, 250, 300, F("Reset"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 17:
-        drawRoundBtn(255, 255, 362, 300, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 18:
-        drawRoundBtn(368, 255, 475, 300, F("2000"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 19:
         drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     } 
@@ -1785,7 +1782,6 @@ void dongleSimButtons()
                 uint8_t data1[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
                 can1.sendFrame(id, data1, 8, selectedChannelOut);
             }
-            timer2 = millis();
         }
 
         // Engine GM
@@ -1813,7 +1809,6 @@ void dongleSimButtons()
                 uint8_t data[8] = { 0x80, 0x02, 0x00, 0x27, 0x00, 0x00, 0x30, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
         }
 
         // ECU GM
@@ -1835,13 +1830,12 @@ void dongleSimButtons()
                 uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
         }
 
-        // Engine Ford
+        // BCM
         if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
         {
-            const uint16_t id = 0x42F;
+            const uint16_t id = 0x641;
             if ((x >= 255) && (x <= 325))
             {
                 waitForIt(255, 205, 325, 250);
@@ -1851,35 +1845,24 @@ void dongleSimButtons()
             if ((x >= 330) && (x <= 400))
             {
                 waitForIt(330, 205, 400, 250);
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x87 };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 405) && (x <= 475))
             {
                 waitForIt(405, 205, 475, 250);
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xEA };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x02, 0x02, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
         }
-
-        // Auto Ford
+        // Reset Dongle
         if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
         {
-            const uint16_t id = 0x326;
-            if ((x >= 255) && (x <= 362))
+            if ((x >= 255) && (x <= 475))
             {
-                waitForIt(255, 255, 362, 300);
-                uint8_t data[8] = { 0x81, 0xA0, 0x25, 0xB5, 0x81, 0xA0, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                waitForIt(255, 255, 475, 300);
+                resetDongle();
             }
-            if ((x >= 368) && (x <= 475))
-            {
-                waitForIt(368, 255, 475, 300);
-                uint8_t data[8] = { 0x01, 0xA0, 0x45, 0xBA, 0x81, 0x90, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            timer2 = millis();
         }
     }
 }
@@ -1896,16 +1879,16 @@ void drawDongleSimFord()
         drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 2:
-        drawRoundBtn(255, 55, 325, 100, F("G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
-        drawRoundBtn(330, 55, 400, 100, F("F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(405, 55, 475, 100, F("C"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
-        drawRoundBtn(145, 105, 250, 150, F("Eng G"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 105, 250, 150, F("Engine"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
         drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1917,36 +1900,33 @@ void drawDongleSimFord()
         drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(145, 155, 250, 200, F("ECU"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 155, 250, 200, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
-        drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 155, 362, 200, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 11:
-        drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(368, 155, 475, 200, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 12:
-        drawRoundBtn(145, 205, 250, 250, F("Eng F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 205, 250, 250, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 13:
-        drawRoundBtn(255, 205, 325, 250, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 205, 325, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 14:
-        drawRoundBtn(330, 205, 400, 250, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 205, 400, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 15:
-        drawRoundBtn(405, 205, 475, 250, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 205, 475, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 16:
-        drawRoundBtn(145, 255, 250, 300, F("Aut F"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 255, 250, 300, F("Reset"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 17:
-        drawRoundBtn(255, 255, 362, 300, F("opt1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 18:
-        drawRoundBtn(368, 255, 475, 300, F("opt2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 19:
         drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     }
@@ -1963,9 +1943,6 @@ void dongleSimButtonsFord()
         y = myTouch.getY();
 
         // VIN G
-        // 255, 65, 325, 100 
-        // 330, 65, 400, 100
-        // 405, 65, 475, 100
         if ((y >= 55) && (y <= 100) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 325))
@@ -1994,11 +1971,7 @@ void dongleSimButtonsFord()
             }
             timer2 = millis();
         }
-
         // Engine
-        // 255, 105, 325, 140
-        // 330, 105, 400, 140
-        // 405, 105, 475, 140
         if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 325))
@@ -2027,99 +2000,74 @@ void dongleSimButtonsFord()
             }
             timer2 = millis();
         }
-
-        // ECU
-        // 255, 145, 362, 180
-        // 368, 145, 475, 180
+        //
         if ((y >= 155) && (y <= 200) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 362))
             {
                 waitForIt(255, 155, 362, 200);
                 // Accept
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x02, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                //const uint16_t id = 0x7E8;
+                //uint8_t data[8] = { 0x02, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                //can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 368) && (x <= 475))
             {
                 waitForIt(368, 155, 475, 200);
                 // Reject
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                //const uint16_t id = 0x7E8;
+                //uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                //can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             timer2 = millis();
         }
-
-        // VIN F
-        // 255, 185, 325, 220
-        // 330, 185, 400, 220
-        // 405, 185, 475, 220
+        //
         if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
         {
             if ((x >= 255) && (x <= 325))
             {
                 waitForIt(255, 205, 325, 250);
                 // 10
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                //const uint16_t id = 0x7E8;
+                //uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
+                //can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 330) && (x <= 400))
             {
                 waitForIt(330, 205, 400, 250);
                 // 20
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                //const uint16_t id = 0x7E8;
+                //uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
+                //can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 405) && (x <= 475))
             {
                 waitForIt(405, 205, 475, 250);
                 // 30
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                //const uint16_t id = 0x7E8;
+                //uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
+                //can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
         }
-
-        // VIN C
-        // 255, 225, 325, 260
-        // 330, 225, 400, 260
-        // 405, 225, 475, 260
+        // Reset Dongle
         if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
         {
-            if ((x >= 255) && (x <= 325))
+            if ((x >= 255) && (x <= 475))
             {
-                waitForIt(255, 255, 325, 300);
-                // 0x01
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x40, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 330) && (x <= 400))
-            {
-                waitForIt(330, 255, 400, 300);
-                // 0x02
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x04, 0x41, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
-            }
-            if ((x >= 405) && (x <= 475))
-            {
-                waitForIt(405, 255, 475, 300);
-                // 0x08
-                const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
-                can1.sendFrame(id, data, 8, selectedChannelOut);
+                waitForIt(255, 255, 475, 300);
+                resetDongle();
             }
             timer2 = millis();
         }
     }
 }
 
+void resetDongle()
+{
+    const uint16_t DONGLE_RESET = 0x1FE;
+    byte RESET_KEY[8] = { 0x00, 0xFE, 0x00, 0x00, 0x00, 0x00, 0xBB, 0x13 };
+    can1.sendFrame(DONGLE_RESET, RESET_KEY, 8, selectedChannelOut);
+}
 
 /*=========================================================
     Settings
@@ -2937,7 +2885,7 @@ void pageControl()
             // Draw Page
             timer2 = 0;
         }
-        if (graphicLoaderState < 20)
+        if (graphicLoaderState < 19)
         {
             drawDongleSimFord();
             graphicLoaderState++;
@@ -2952,7 +2900,7 @@ void pageControl()
             // Draw Page
             timer2 = 0;
         }
-        if (graphicLoaderState < 20)
+        if (graphicLoaderState < 19)
         {
             drawDongleSim();
             graphicLoaderState++;
