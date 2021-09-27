@@ -666,9 +666,10 @@ void setData(uint8_t position)
         }
         var2 = 0xFF;
     }
+    // Clear
     if (var2 == 0x10)
     {
-        counter1 = 2;
+        counter1 = 1;
         var2 = 0;
         var3 = 0;
         drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
