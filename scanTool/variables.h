@@ -1,26 +1,11 @@
 #pragma once
-// LCD display
-//(byte model, int RS, int WR, int CS, int RST, int SER)
-UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
-//RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
-UTouch  myTouch(2, 6, 3, 4, 5);
-
-// For touch controls
-int x, y;
-
 // Used for page control
 uint8_t controlPage = 0;
 uint8_t page = 0;
 bool hasDrawn = false;
 
-// LCD fonts
-extern uint8_t SmallFont[];
-extern uint8_t BigFont[];
-
-// Harware Objects
-CANBus can1;
-SDCard sdCard;
-DS3231 rtc(SDA, SCL);
+// For touch controls
+int x, y;
 
 // Holds CAN Bus capture replay filenames
 char fileList[10][13];

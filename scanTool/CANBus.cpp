@@ -5,10 +5,6 @@
 #include "variant.h"
 #include "PIDS.h"
 
-CAN_FRAME incCAN0;
-CAN_FRAME incCAN1;
-CAN_FRAME CANOut;
-
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN0(uint32_t start, uint32_t end)
 {

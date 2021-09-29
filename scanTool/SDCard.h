@@ -14,14 +14,12 @@
 #define SD_CARD_CS 8
 #define ROW_DIM 100
 
-class CANBus;
-
-typedef char MyArray[10][13];
-
 class SDCard
 {
  protected:
 	 bool canDir = false;
+	 File myFile;
+	 typedef char MyArray[10][13];
  public:
 	bool startSD();
 	void createDRIVE(char*);

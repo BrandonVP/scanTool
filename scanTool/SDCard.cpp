@@ -1,9 +1,7 @@
 // SDCard class manages the SD card reader hardware
 
 #include "SDCard.h"
-
-File myFile;
-CANBus can;
+#include "common.h"
 
 // Called at setup to initialize the SD Card
 bool SDCard::startSD()
@@ -125,7 +123,7 @@ void SDCard::readLogFile(char * filename)
         */
         if (sendIt)
         {
-            can.sendFrame(id, msg, length, false);
+            can1.sendFrame(id, msg, length, false);
             delay(8);
         }
         sendIt = !sendIt;
@@ -253,69 +251,3 @@ void SDCard::tempCopy(char* filename)
     myFileW1.close();
     //SerialUSB.println("Leaving");
 }
-
-/*
-void SDCard::split(char* filename, uint32_t size)
-{
-    SerialUSB.println("");
-    SerialUSB.println(filename);
-    SerialUSB.println(size);
-
-    uint32_t fileSize;
-    String tempStr;
-    uint32_t count = 0;
-
-    (size % 2 > 0) ? fileSize = (size / 2) + 1 : fileSize = size / 2;
-
-    //SerialUSB.println(fileSize);
-
-    myFile = SD.open(filename, FILE_READ);
-    File myFileW1 = SD.open("canlog/temp.txt", FILE_WRITE);
-
-    //SerialUSB.println("Temp");
-    while (myFile.available())
-    {
-        tempStr = myFile.readStringUntil('\n');
-        myFileW1.print(tempStr);
-    }
-    myFile.close();
-    myFileW1.close();
-
-
-    File myFile2 = SD.open("canlog/temp.txt", FILE_READ);
-    File myFileW2 = SD.open("canlog/a.txt", FILE_WRITE);
-    File myFileW3 = SD.open("canlog/b.txt", FILE_WRITE);
-
-    //SerialUSB.println("A");
-    while (myFile2.available())
-    {
-        tempStr = myFile2.readStringUntil('\n');
-        
-        if (count < fileSize)
-        {
-            myFileW2.print(tempStr);
-            //SerialUSB.print("a: ");
-            //SerialUSB.println(count);
-        }
-        else if (count == fileSize)
-        {
-            //SerialUSB.println("B");
-            myFileW2.close();
-            
-            myFileW3.print(tempStr);
-        }
-        else if ( count > fileSize)
-        {
-            myFileW3.print(tempStr);
-            //SerialUSB.print("b: ");
-            //SerialUSB.println(count);
-        }
-        
-
-
-        count++;
-    }
-    myFile2.close();
-    myFileW3.close();
-}
-*/

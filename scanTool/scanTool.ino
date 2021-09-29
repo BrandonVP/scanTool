@@ -14,19 +14,28 @@ Replace uint8_t scroll with var
     End Todo List
 =========================================================*/
 
-#include <DS3231.h>
-#include <RTCDue.h>
-#include <UTFT.h>
 #include <SD.h>
 #include <UTouchCD.h>
 #include <memorysaver.h>
 #include <SPI.h>
-#include <UTouch.h>
+
 #include "CANBus.h"
 #include "definitions.h"
 #include "SDCard.h"
 #include <string.h>
 #include "variables.h"
+#include "common.h"
+
+// Harware Objects
+CANBus can1;
+SDCard sdCard;
+DS3231 rtc(SDA, SCL);
+
+// LCD display
+//(byte model, int RS, int WR, int CS, int RST, int SER)
+UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
+//RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
+UTouch  myTouch(2, 6, 3, 4, 5);
 
 /*
 Uncomment to update the clock then comment out and upload to 
@@ -1807,7 +1816,7 @@ void dongleSimButtons()
             {
                 waitForIt(405, 105, 475, 150);
                 // On
-                uint8_t data[8] = { 0x80, 0x02, 0x00, 0x27, 0x00, 0x00, 0x30, 0x00 };
+                uint8_t data[8] = { 0x84, 0x02, 0x00, 0x27, 0x00, 0x00, 0x30, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
         }
@@ -1828,7 +1837,7 @@ void dongleSimButtons()
                 waitForIt(368, 155, 475, 200);
                 // Reject
                 const uint16_t id = 0x7E8;
-                uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                uint8_t data[8] = { 0x05, 0x7F, 0xAE, 0xE3, 0x00, 0x10, 0xAA, 0xAA };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
         }
