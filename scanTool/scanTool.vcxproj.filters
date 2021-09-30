@@ -42,12 +42,18 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CANBusCapture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SDCard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CANBus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CANBusCapture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

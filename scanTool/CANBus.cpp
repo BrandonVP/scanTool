@@ -4,6 +4,7 @@
 #include <due_can.h>
 #include "variant.h"
 #include "PIDS.h"
+#include "common.h"
 
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN0(uint32_t start, uint32_t end)
@@ -197,15 +198,15 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
                 isWait = false;
 
                 // Log PID message
-                SDPrint.writeFile(fullDir, "RX ID: ");
-                SDPrint.writeFile(fullDir, incCAN0.id, HEX);
-                SDPrint.writeFile(fullDir, " MSG: ");
+                sdCard.writeFile(fullDir, "RX ID: ");
+                sdCard.writeFile(fullDir, incCAN0.id, HEX);
+                sdCard.writeFile(fullDir, " MSG: ");
                 for (int count = 0; count < incCAN0.length; count++)
                 {
-                    SDPrint.writeFile(fullDir, incCAN0.data.bytes[count], HEX);
-                    SDPrint.writeFile(fullDir, " ");
+                    sdCard.writeFile(fullDir, incCAN0.data.bytes[count], HEX);
+                    sdCard.writeFile(fullDir, " ");
                 }
-                SDPrint.writeFileln(fullDir);
+                sdCard.writeFileln(fullDir);
 
                 // Check to see if the vehicle supports more PIDS
                 setNextPID(CHECK_BIT(incCAN0.data.byte[6], 0));
@@ -218,9 +219,9 @@ void CANBus::getPIDList(uint8_t range, uint8_t bank)
                     {
                         if (CHECK_BIT(incCAN0.data.bytes[i], j))
                         {
-                            SDPrint.writeFile(PIDDir, "0x");
-                            SDPrint.writeFile(PIDDir, PID_bank[bank][pos], HEX);
-                            SDPrint.writeFileln(PIDDir);
+                            sdCard.writeFile(PIDDir, "0x");
+                            sdCard.writeFile(PIDDir, PID_bank[bank][pos], HEX);
+                            sdCard.writeFileln(PIDDir);
                         }
                         pos++;
                     }
@@ -312,7 +313,7 @@ void CANBus::requestVIN(uint16_t IDFilter, bool saveSD)
         PIDDir[8] = '/';
         SerialUSB.println(fullDir);
         SerialUSB.println(PIDDir);
-        SDPrint.createDRIVE(fullDir);
+        sdCard.createDRIVE(fullDir);
 
         j = 0;
         for (uint8_t i = 9; i < 16; i++)
@@ -330,10 +331,10 @@ void CANBus::requestVIN(uint16_t IDFilter, bool saveSD)
         SerialUSB.println(fullDir);
 
         // Write VIN to log
-        SDPrint.writeFile(fullDir, "VIN: ");
-        SDPrint.writeFile(fullDir, VIN);
-        SDPrint.writeFileln(fullDir);
-        SDPrint.deleteFile(PIDDir);
+        sdCard.writeFile(fullDir, "VIN: ");
+        sdCard.writeFile(fullDir, VIN);
+        sdCard.writeFileln(fullDir);
+        sdCard.deleteFile(PIDDir);
     }
 }
 
@@ -350,10 +351,10 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 
     if (saveToSD)
     {
-        SDPrint.writeFileln(fullDir);
-        SDPrint.writeFile(fullDir, "PID ID: ");
-        SDPrint.writeFile(fullDir, PID, HEX);
-        SDPrint.writeFileln(fullDir);
+        sdCard.writeFileln(fullDir);
+        sdCard.writeFile(fullDir, "PID ID: ");
+        sdCard.writeFile(fullDir, PID, HEX);
+        sdCard.writeFileln(fullDir);
     }
     
     // Send first frame requesting VIN
@@ -372,9 +373,9 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
                 //Serial.println(rpm, DEC);
                 if (saveToSD)
                 {
-                    SDPrint.writeFile(fullDir, "Engine RPM: ");
-                    SDPrint.writeFile(fullDir, rpm, DEC);
-                    SDPrint.writeFileln(fullDir);
+                    sdCard.writeFile(fullDir, "Engine RPM: ");
+                    sdCard.writeFile(fullDir, rpm, DEC);
+                    sdCard.writeFileln(fullDir);
                 }
                 isWait = false;
                 return rpm;
@@ -387,9 +388,9 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
                 //Serial.println(lev, DEC);
                 if (saveToSD)
                 {
-                    SDPrint.writeFile(fullDir, "Fuel Level (%): ");
-                    SDPrint.writeFile(fullDir, level, DEC);
-                    SDPrint.writeFileln(fullDir);
+                    sdCard.writeFile(fullDir, "Fuel Level (%): ");
+                    sdCard.writeFile(fullDir, level, DEC);
+                    sdCard.writeFileln(fullDir);
                 }
                 return level;
             }
@@ -402,9 +403,9 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
                 //Serial.println(pos, DEC);
                 if (saveToSD)
                 {
-                    SDPrint.writeFile(fullDir, "Throttle (%): ");
-                    SDPrint.writeFile(fullDir, position, DEC);
-                    SDPrint.writeFileln(fullDir);
+                    sdCard.writeFile(fullDir, "Throttle (%): ");
+                    sdCard.writeFile(fullDir, position, DEC);
+                    sdCard.writeFileln(fullDir);
                 }  
                 return position;
             }
@@ -416,9 +417,9 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
                 //Serial.println(spd, DEC);
                 if (saveToSD)
                 {
-                    SDPrint.writeFile(fullDir, "MPH: ");
-                    SDPrint.writeFile(fullDir, vehicleSpeed, DEC);
-                    SDPrint.writeFileln(fullDir);
+                    sdCard.writeFile(fullDir, "MPH: ");
+                    sdCard.writeFile(fullDir, vehicleSpeed, DEC);
+                    sdCard.writeFileln(fullDir);
                 }
                 return vehicleSpeed;
             }
@@ -431,9 +432,9 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
                 //Serial.println(flow, DEC);
                 if (saveToSD)
                 {
-                    SDPrint.writeFile(fullDir, "MAF: ");
-                    SDPrint.writeFile(fullDir, airFlow, DEC);
-                    SDPrint.writeFileln(fullDir);
+                    sdCard.writeFile(fullDir, "MAF: ");
+                    sdCard.writeFile(fullDir, airFlow, DEC);
+                    sdCard.writeFileln(fullDir);
                 }
                 return airFlow;
             }
@@ -442,11 +443,11 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 
         if (saveToSD)
         {
-            SDPrint.writeFile(fullDir, "ID: 0x");
-            SDPrint.writeFile(fullDir, incCAN0.id, HEX);
-            SDPrint.writeFile(fullDir, " Len: ");
-            SDPrint.writeFile(fullDir, incCAN0.length, HEX);
-            SDPrint.writeFile(fullDir, " Data: ");
+            sdCard.writeFile(fullDir, "ID: 0x");
+            sdCard.writeFile(fullDir, incCAN0.id, HEX);
+            sdCard.writeFile(fullDir, " Len: ");
+            sdCard.writeFile(fullDir, incCAN0.length, HEX);
+            sdCard.writeFile(fullDir, " Data: ");
             //Serial.print(F("ID: 0x"));
             //Serial.print(incCAN0.id, HEX);
             //Serial.print(F(" Len: "));
@@ -455,13 +456,13 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 
             for (int count = 0; count < incCAN0.length; count++) {
                 Serial.print(incCAN0.data.bytes[count], HEX);
-                SDPrint.writeFile(fullDir, incCAN0.data.bytes[count], HEX);
+                sdCard.writeFile(fullDir, incCAN0.data.bytes[count], HEX);
                 Serial.print(" ");
-                SDPrint.writeFile(fullDir, " ");
+                sdCard.writeFile(fullDir, " ");
             }
             //Serial.print("\r\n");
             //Serial.println("");
-            SDPrint.writeFileln(fullDir);
+            sdCard.writeFileln(fullDir);
         }
     }
 }

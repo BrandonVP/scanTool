@@ -15,14 +15,9 @@
 // Checks a single bit of binary number
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-class SDCard;
-
 class CANBus
 {
 protected:
-	// Allows CAN Bus function to write to SD Card
-	SDCard SDPrint;
-
 	// Def for getMSG()
 	typedef byte buff[8];
 

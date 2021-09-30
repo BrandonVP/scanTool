@@ -14,17 +14,20 @@ Replace uint8_t scroll with var
     End Todo List
 =========================================================*/
 
+#include "CANBusCapture.h"
 #include <SD.h>
 #include <UTouchCD.h>
 #include <memorysaver.h>
 #include <SPI.h>
-
+#include <UTFT.h>
+#include <UTouch.h>
 #include "CANBus.h"
 #include "definitions.h"
 #include "SDCard.h"
 #include <string.h>
 #include "variables.h"
 #include "common.h"
+#include "CANBusCapture.h"
 
 // Harware Objects
 CANBus can1;
@@ -36,6 +39,33 @@ DS3231 rtc(SDA, SCL);
 UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
 //RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
 UTouch  myTouch(2, 6, 3, 4, 5);
+
+// For touch controls
+int x, y;
+
+// Used for page control
+uint8_t controlPage = 0;
+uint8_t page = 0;
+bool hasDrawn = false;
+
+// *Used by background process*
+uint8_t selectedChannelOut = 0;
+uint32_t timer2 = 0;
+bool isSerialOut = false;
+
+// General use variables
+// Any non-background process function can use
+// Initialize to 0 before use
+bool nextState = false;
+bool isFinished = false;
+uint8_t state = 0;
+int16_t counter1 = 0;
+uint16_t var1 = 0;
+uint8_t var2 = 0;
+uint16_t var3 = 0;
+uint32_t var4 = 0;
+uint32_t var5 = 0;
+uint32_t timer1 = 0;
 
 /*
 Uncomment to update the clock then comment out and upload to 
@@ -345,151 +375,8 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 /*=========================================================
     CAN Bus
 ===========================================================*/
-void drawCANBus()
-{
-    switch (graphicLoaderState)
-    {
-    case 0:
-        break;
-    case 1:
-        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-        break;
-    case 2:
-        drawRoundBtn(145, 55, 308, 100, F("CAN0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 3:
-        drawRoundBtn(312, 55, 475, 100, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 4:
-        drawRoundBtn(145, 105, 308, 150, F("CAN1: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 5:
-        drawRoundBtn(312, 105, 475, 150, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 6:
-        drawRoundBtn(145, 155, 308, 200, F("Both: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 7:
-        drawRoundBtn(312, 155, 475, 200, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 8:
-        drawRoundBtn(145, 205, 308, 250, F("CTX0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 9:
-        drawRoundBtn(312, 205, 475, 250, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 10:
-        drawRoundBtn(145, 255, 308, 300, F("CAN0 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 11:
-        drawRoundBtn(312, 255, 475, 300, F("CAN1 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 12:
-        drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
-        break;
-    }
-}
 
-void CANBusButtons()
-{
-    // Touch screen controls
-    if (myTouch.dataAvailable())
-    {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
 
-        // Start Scan
-        if ((x >= 145) && (x <= 308))
-        {
-            if ((y >= 55) && (y <= 100))
-            {
-                waitForIt(145, 55, 308, 100);
-                // CAN0: LCD
-                page = 1;
-                var1 = 60;
-                selectedChannelOut = 1;
-                hasDrawn = false;
-            }
-            if ((y >= 105) && (y <= 150))
-            {
-                waitForIt(145, 105, 308, 150);
-                // CAN1: LCD
-                page = 1;
-                var1 = 60;
-                selectedChannelOut = 2;
-                hasDrawn = false;
-            }
-            if ((y >= 155) && (y <= 200))
-            {
-                waitForIt(145, 155, 308, 200);
-                // Both: LCD
-                page = 1;
-                var1 = 60;
-                selectedChannelOut = 3;
-                hasDrawn = false;
-            }
-            if ((y >= 205) && (y <= 250))
-            {
-                waitForIt(145, 205, 308, 250);
-                // CTX0: LCD
-                page = 1;
-                var1 = 60;
-                selectedChannelOut = 4;
-                hasDrawn = false;
-            }
-            if ((y >= 255) && (y <= 300))
-            {
-                waitForIt(145, 255, 308, 300);
-                // CAN0 RX
-                page = 3;
-                hasDrawn = false;
-            }
-        }
-        if ((x >= 312) && (x <= 475))
-        {
-            if ((y >= 55) && (y <= 100))
-            {
-                waitForIt(312, 55, 475, 100);
-                // CAN0 Serial
-                page = 2;
-                hasDrawn = false;
-                selectedChannelOut = 1;
-            }
-            if ((y >= 105) && (y <= 150))
-            {
-                waitForIt(312, 105, 475, 150);
-                // CAN1 Serial
-                page = 2;
-                hasDrawn = false;
-                selectedChannelOut = 2;
-            }
-            if ((y >= 155) && (y <= 200))
-            {
-                waitForIt(312, 155, 475, 200);
-                // Both Serial
-                page = 2;
-                hasDrawn = false;
-                selectedChannelOut = 3;
-            }
-            if ((y >= 205) && (y <= 250))
-            {
-                waitForIt(312, 205, 475, 250);
-                // CTX0 Serial
-                page = 2;
-                hasDrawn = false;
-                selectedChannelOut = 4;
-            }
-            if ((y >= 255) && (y <= 300))
-            {
-                waitForIt(312, 255, 475, 300);
-                // CTX1 RX
-                page = 4;
-                hasDrawn = false;
-            }
-        }
-    }
-}
 
 /*============== CAN: LCD ==============*/
 void drawReadInCANLCD()
