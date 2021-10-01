@@ -43,7 +43,21 @@ extern uint8_t controlPage;
 extern uint8_t page;
 extern bool hasDrawn;
 
+// TODO: This uses a lot of memory for a simple graphic function
+extern uint32_t waitForItTimer;
+extern uint16_t x1_;
+extern uint16_t y1_;
+extern uint16_t x2_;
+extern uint16_t y2_;
+extern bool isWaitForIt;
+
 extern int x, y;
+
+// Filter range / Filter Mask
+extern uint32_t CAN0Filter;
+extern uint32_t CAN0Mask;
+extern uint32_t CAN1Filter;
+extern uint32_t CAN1Mask;
 
 
 extern const uint32_t hexTable[8];
@@ -52,10 +66,19 @@ extern const uint32_t baudRates[6];
 extern uint8_t selectedChannelOut;
 extern uint8_t graphicLoaderState;
 
+extern char fileList[10][13];
+extern uint8_t arrayIn[80];
+extern uint8_t scroll;
+extern bool hasPID;
+extern uint32_t timer2;
 
 extern void waitForIt(int x1, int y1, int x2, int y2);
 extern void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);
 extern void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);
+extern void waitForItRect(int x1, int y1, int x2, int y2);
 extern int keypadButtons();
 extern void drawKeypad();
+extern void loadBar(int);
+extern void drawErrorMSG(String title, String eMessage1, String eMessage2);
+
 #endif // EXTERN_H

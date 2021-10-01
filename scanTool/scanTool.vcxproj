@@ -126,15 +126,22 @@
     <ClInclude Include="CANBusCapture.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="definitions.h" />
+    <ClInclude Include="ExtraFunctions.h" />
     <ClInclude Include="PIDS.h" />
+    <ClInclude Include="PolarisTools.h" />
     <ClInclude Include="SDCard.h" />
-    <ClInclude Include="variables.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="VehicleTools.h" />
     <ClInclude Include="__vm\.scanTool.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CANBus.cpp" />
     <ClCompile Include="CANBusCapture.cpp" />
+    <ClCompile Include="ExtraFunctions.cpp" />
+    <ClCompile Include="PolarisTools.cpp" />
     <ClCompile Include="SDCard.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="VehicleTools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
