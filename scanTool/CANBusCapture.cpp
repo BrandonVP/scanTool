@@ -62,7 +62,6 @@ void CANBusButtons()
 		x = myTouch.getX();
 		y = myTouch.getY();
 
-		// Start Scan
 		if ((x >= 140) && (x <= 308))
 		{
 			if ((y >= 80) && (y <= 130))
@@ -70,6 +69,9 @@ void CANBusButtons()
 				waitForIt(140, 80, 305, 130);
 				// Capture
 				page = 1;
+				var1 = 0;
+				state = 1;
+				graphicLoaderState = 0;
 				hasDrawn = false;
 			}
 			if ((y >= 135) && (y <= 185))
@@ -129,9 +131,10 @@ void CANBusButtons()
 /*============== CAPTURE ==============*/
 void capture()
 {
-
+	
 }
 
+//
 void drawCapture()
 {
 	switch (graphicLoaderState)
@@ -150,25 +153,58 @@ void drawCapture()
 	case 4:
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
+	case 5:
+		drawSquareBtn(310, 55, 475, 85, F("Selected"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 6:
+		drawSquareBtn(310, 85, 475, 125, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 7:
+		drawSquareBtn(310, 125, 475, 165, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
 	}
 }
 
+//
 void drawCaptureSelected()
 {
-	switch (graphicLoaderState)
+	switch (selectedChannelOut)
 	{
 	case 0:
+		drawSquareBtn(310, 85, 475, 125, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 1:
-		drawSquareBtn(310, 55, 475, 85, F("Selected"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(310, 85, 475, 125, F("CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 2:
 		drawSquareBtn(310, 85, 475, 125, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawSquareBtn(310, 125, 475, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(310, 85, 475, 125, F("CAN0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawSquareBtn(310, 85, 475, 125, F("CAN0/TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		drawSquareBtn(310, 85, 475, 125, F("Bridge0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	}
+	switch (var1)
+	{
+	case 0:
+		drawSquareBtn(310, 125, 475, 165, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 1:
+		drawSquareBtn(310, 125, 475, 165, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 2:
+		drawSquareBtn(310, 125, 475, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 3:
+		drawSquareBtn(310, 125, 475, 165, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	}
+	drawSquareBtn(310, 125, 475, 165, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 void drawCaptureOutput()
@@ -181,92 +217,173 @@ void drawCaptureOutput()
 		drawSquareBtn(135, 55, 300, 285, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 2:
-		drawSquareBtn(135, 55, 300, 85, F("Source"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 55, 300, 85, F("Output"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawSquareBtn(135, 85, 300, 125, F("CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawSquareBtn(135, 125, 300, 165, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 125, 300, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawSquareBtn(135, 165, 300, 205, F("CAN0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 165, 300, 205, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawSquareBtn(135, 205, 300, 245, F("CAN0/TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 7:
-		drawSquareBtn(135, 245, 300, 285, F("Bridge0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 205, 300, 245, F("Back"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	}
 }
 
 void drawCaptureSource()
 {
-	/*
 	switch (graphicLoaderState)
 	{
-	case 0:
-		break;
-	case 1:
-		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-		break;
-	case 2:
-		drawSquareBtn(135, 55, 300, 85, F("Source"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(135, 85, 300, 125, F("CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(135, 125, 300, 165, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(135, 165, 300, 205, F("CAN0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(135, 205, 300, 245, F("CAN0/TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(135, 245, 300, 285, F("Bridge0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 3:
-		
-		//drawSquareBtn(245, 55, 360, 85, F("Capture"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(245, 85, 360, 125, F("CAN0 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(245, 125, 360, 165, F("CAN1 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(245, 165, 360, 205, F("CAN0 TX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(245, 205, 360, 245, F("CAN1 TX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		
-		break;
-	case 4:
-		drawSquareBtn(310, 55, 475, 85, F("Selected"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(310, 85, 475, 125, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawSquareBtn(310, 125, 475, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		
-		//drawSquareBtn(310, 55, 475, 85, F("Output"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(310, 85, 475, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(310, 125, 475, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(310, 165, 475, 205, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//drawSquareBtn(310, 205, 475, 245, F("Back"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		
-		break;
-	case 5:
-
-		break;
 	case 6:
-
 		break;
 	case 7:
-
+		drawSquareBtn(135, 55, 300, 285, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 8:
-		//drawSquareBtn(145, 205, 308, 250, F("CTX0: LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 55, 300, 85, F("Source"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
-		//drawSquareBtn(312, 205, 475, 250, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 85, 300, 125, F("CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 10:
-		drawSquareBtn(310, 200, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 125, 300, 165, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 11:
-		drawSquareBtn(310, 245, 470, 285, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 165, 300, 205, F("CAN0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 12:
-		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		drawSquareBtn(135, 205, 300, 245, F("CAN0/TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 13:
+		drawSquareBtn(135, 245, 300, 285, F("Bridge0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	}
-*/
 }
+
+void CaptureButtons()
+{
+	// Touch screen controls
+	if (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		x = myTouch.getX();
+		y = myTouch.getY();
+
+		if ((x >= 135) && (x <= 300))
+		{
+			if ((y >= 85) && (y <= 125))
+			{
+				waitForIt(135, 85, 300, 125);
+				if (state == 1)
+				{
+					// CAN0
+					selectedChannelOut = 1;
+					state = 2;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+				}
+				else if (state == 2)
+				{
+
+				}
+				drawCaptureSelected();
+			}
+			if ((y >= 125) && (y <= 165))
+			{
+				waitForIt(135, 125, 300, 165);
+				if (state == 1)
+				{
+					// CAN1
+					selectedChannelOut = 2;
+					state = 2;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+				}
+				else if (state == 2)
+				{
+
+				}
+				drawCaptureSelected();
+			}
+			if ((y >= 165) && (y <= 205))
+			{
+				waitForIt(135, 165, 300, 205);
+				if (state == 1)
+				{
+					// CAN0/1
+					selectedChannelOut = 3;
+					state = 2;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+				}
+				else if (state == 2)
+				{
+
+				}
+				drawCaptureSelected();
+			}
+			if ((y >= 205) && (y <= 245))
+			{
+				waitForIt(135, 205, 300, 245);
+				if (state == 1)
+				{
+					// CAN0/TX1
+					selectedChannelOut = 4;
+					state = 2;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+					drawCaptureSelected();
+				}
+				else if (state == 2)
+				{
+					state = 1;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+				}
+				
+			}
+			if ((y >= 245) && (y <= 285))
+			{
+				
+				if (state == 1)
+				{
+					waitForIt(135, 245, 300, 285);
+					// Bridge0/1
+					selectedChannelOut = 5;
+					state = 2;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+					drawCaptureSelected();
+				}
+				else if (state == 2)
+				{
+					
+				}
+			}
+		}
+		if ((x >= 310) && (x <= 470))
+		{
+			if ((y >= 200) && (y <= 240))
+			{
+				waitForIt(310, 200, 470, 240);
+				// Start
+
+			}
+			if ((y >= 245) && (y <= 285))
+			{
+				waitForIt(310, 245, 470, 285);
+				// Stop
+
+			}
+		}
+	}
+}
+
+
 
 /*============== CAN: LCD ==============*/
 void drawReadInCANLCD()

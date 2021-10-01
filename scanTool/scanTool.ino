@@ -501,12 +501,35 @@ void pageControl()
         CANBusButtons();
         break;
     case 1: // Capture
-        if (!hasDrawn)
+        if (!hasDrawn && state == 1)
         {
-            // Draw Page
-            hasDrawn = true;
+            if (graphicLoaderState < 14)
+            {
+                drawCapture();
+                drawCaptureSource();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+                drawCaptureSelected();
+            }
+        }
+        if (!hasDrawn && state == 2)
+        {
+            if (graphicLoaderState < 7)
+            {
+                drawCaptureOutput();
+                graphicLoaderState++;
+            }
+            else
+            {
+                hasDrawn = true;
+                drawCaptureSelected();
+            }
         }
         // Call buttons if any
+        CaptureButtons();
         break;
     case 2: // Playback
         if (!hasDrawn)
