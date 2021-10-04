@@ -17,22 +17,24 @@ released when old page != page, switch to find which vars to release
 	End Todo List
 =========================================================*/
 
+// Libraries
+#include <malloc.h>
+#include <memorysaver.h>
+#include <SD.h>
+#include <SPI.h>
+#include <string.h>
+#include <UTouchCD.h>
+#include <UTFT.h>
+#include <UTouch.h>
+// Source
 #include "ExtraFunctions.h"
 #include "PolarisTools.h"
 #include "common.h"
 #include "CANBus.h"
 #include "definitions.h"
 #include "CANBusCapture.h"
-#include <malloc.h>
-#include <memorysaver.h>
-#include <SD.h>
 #include "SDCard.h"
 #include "Settings.h"
-#include <SPI.h>
-#include <string.h>
-#include <UTouchCD.h>
-#include <UTFT.h>
-#include <UTouch.h>
 #include "VehicleTools.h"
 
 // Harware Objects
@@ -254,7 +256,6 @@ void bmpDraw(char* filename, int x, int y) {
 
 // These read 16- and 32-bit types from the SD card file.
 // BMP data is stored little-endian, Arduino is little-endian too.
-// May need to reverse subscript order if porting elsewhere.
 uint16_t read16(File f) {
 	uint16_t result;
 	((uint8_t*)&result)[0] = f.read(); // LSB
@@ -455,7 +456,7 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 	myGLCD.drawRect(x1, y1, x2, y2);
 }
 
-//Only called once at startup to draw the menu
+// Only called once at startup to draw the menu
 void drawMenu()
 {
 	// Draw Layout
@@ -465,12 +466,12 @@ void drawMenu()
 	// Draw Menu Buttons
 	drawRoundBtn(5, 32, 125, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(5, 88, 125, 140, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(5, 145, 125, 197, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(5, 145, 125, 197, F("PWRTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(5, 202, 125, 254, F("TESTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(5, 259, 125, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-//Manages the different App pages
+// Manages the different App pages
 void pageControl()
 {
 	// Check menu buttons for input

@@ -28,7 +28,7 @@ extern void baudButtons();
 extern void drawBaudScroll();
 extern void drawCurrentBaud();
 extern void drawBaud();
-extern void drawFilterMask();
+extern bool drawFilterMask();
 extern void filterMaskButtons();
 extern uint8_t setFilterMask(uint32_t&);
 extern void filterMask();

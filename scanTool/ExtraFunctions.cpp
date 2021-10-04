@@ -19,28 +19,28 @@ void drawExtraFN()
         drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(145, 80, 308, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 80, 305, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
-        drawRoundBtn(312, 80, 475, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 80, 475, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(145, 135, 308, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 135, 305, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
-        drawRoundBtn(312, 135, 475, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 135, 475, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(145, 190, 308, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 190, 305, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(312, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
-        drawRoundBtn(145, 245, 308, 295, F("Dongle F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 245, 305, 295, F("Dongle F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(312, 245, 475, 295, F("Dongle G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 245, 475, 295, F("Dongle G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -58,64 +58,64 @@ void extraFNButtons()
         y = myTouch.getY();
 
         // Start Scan
-        if ((x >= 145) && (x <= 308))
+        if ((x >= 140) && (x <= 305))
         {
             if ((y >= 80) && (y <= 130))
             {
-                waitForIt(145, 80, 308, 130);
+                waitForIt(140, 80, 305, 130);
                 // Unused
                 //page = 28;
                 //hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
-                waitForIt(145, 135, 308, 185);
+                waitForIt(140, 135, 305, 185);
                 // Unused
                 //page = 30;
                 //hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(145, 190, 308, 240);
+                waitForIt(140, 190, 305, 240);
                 // Unused
                 //page = 32;
                 //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(145, 245, 308, 295);
+                waitForIt(140, 245, 305, 295);
                 // Ford Dongle Simulator
                 page = 34;
                 hasDrawn = false;
                 graphicLoaderState = 0;
             }
         }
-        if ((x >= 312) && (x <= 475))
+        if ((x >= 310) && (x <= 475))
         {
             if ((y >= 80) && (y <= 130))
             {
-                waitForIt(312, 80, 475, 130);
+                waitForIt(310, 80, 475, 130);
                 // Unused
                 //page = 29;
                 //hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
-                waitForIt(312, 135, 475, 185);
+                waitForIt(310, 135, 475, 185);
                 // Unused
                 //page = 31;
                 //hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(312, 190, 475, 240);
+                waitForIt(310, 190, 475, 240);
                 // Unused
                 //page = 33;
                 //hasDrawn = false;
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(312, 245, 475, 295);
+                waitForIt(310, 245, 475, 295);
                 // GM Dongle Simulator
                 page = 35;
                 hasDrawn = false;
@@ -131,7 +131,7 @@ void drawDongleSim()
     switch (graphicLoaderState)
     {
     case 0:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 1:
         drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -318,7 +318,7 @@ void drawDongleSimFord()
     switch (graphicLoaderState)
     {
     case 0:
-        drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 1:
         drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);

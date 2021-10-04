@@ -85,6 +85,7 @@ void CANBusButtons()
 			{
 				waitForIt(140, 190, 305, 240);
 				// Filter Mask
+				graphicLoaderState = 0;
 				page = 4;
 				hasDrawn = false;
 			}
@@ -139,10 +140,24 @@ void drawCapture()
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 2:
-		drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		if (isSerialOut)
+		{
+			drawSquareBtn(310, 185, 470, 240, F("Start"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
 		break;
 	case 3:
-		drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		if (isSerialOut)
+		{
+			drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
 		break;
 	case 4:
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -220,7 +235,7 @@ void drawCaptureOutput()
 		drawSquareBtn(135, 125, 300, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawSquareBtn(135, 165, 300, 205, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 165, 300, 205, F("SD Card"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawSquareBtn(135, 205, 300, 245, F("Back"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -345,11 +360,11 @@ void CaptureButtons()
 					hasDrawn = false;
 					graphicLoaderState = 0;
 				}
-				
+
 			}
 			if ((y >= 245) && (y <= 285))
 			{
-				
+
 				if (state == 1)
 				{
 					waitForIt(135, 245, 300, 285);
@@ -402,7 +417,6 @@ void CaptureButtons()
 		}
 	}
 }
-
 
 
 /*============== CAN: LCD ==============*/
@@ -686,7 +700,7 @@ void sendCANFrame(uint8_t channel)
 	case 9: setData(7);
 		break;
 	}
-	
+
 }
 
 /*============== Baud ==============*/
@@ -784,25 +798,51 @@ void baudButtons()
 }
 
 /*============== Filter Mask ==============*/
-void drawFilterMask()
+bool drawFilterMask()
 {
-	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-
-	drawRoundBtn(145, 70, 200, 120, F("CAN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(205, 70, 340, 120, F("Filter"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(345, 70, 475, 120, F("Mask"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-
-	drawRoundBtn(145, 125, 200, 175, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-	drawRoundBtn(145, 180, 200, 230, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(345, 180, 475, 230, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-	drawRoundBtn(145, 235, 475, 285, F("Open All Traffic"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
-	drawSquareBtn(150, 295, 479, 315, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+	switch (graphicLoaderState)
+	{
+	case 0:
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 2:
+		drawRoundBtn(145, 70, 200, 120, F("CAN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 3:
+		drawRoundBtn(205, 70, 340, 120, F("Filter"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawRoundBtn(345, 70, 475, 120, F("Mask"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		drawRoundBtn(145, 125, 200, 175, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 6:
+		drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 7:
+		drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 8:
+		drawRoundBtn(145, 180, 200, 230, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 9:
+		drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 10:
+		drawRoundBtn(345, 180, 475, 230, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 11:
+		drawRoundBtn(145, 235, 475, 285, F("Open All Traffic"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 12:
+		drawSquareBtn(150, 295, 479, 315, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	}
+	graphicLoaderState++;
+	return true;
 }
 
 void filterMaskButtons()
@@ -854,8 +894,16 @@ void filterMaskButtons()
 			{
 				waitForIt(145, 235, 475, 285);
 				// Open All Traffic
-				can1.startCAN0(0x000, 0x800);
-				can1.startCAN1(0x000, 0x800);
+				CAN0Filter = 000;
+				CAN0Mask = 0xFFF;
+				CAN1Filter = 0x000;
+				CAN1Mask = 0xFFF;
+				can1.startCAN0(CAN0Filter, CAN0Mask);
+				can1.startCAN1(CAN1Filter, CAN1Mask);
+				drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				drawRoundBtn(345, 180, 475, 230, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
 		}
 	}
@@ -899,6 +947,7 @@ uint8_t setFilterMask(uint32_t& value)
 	if (var4 == 0x11)
 	{
 		isFinished = false;
+		graphicLoaderState = 0;
 		state = 0;
 		value = var5;
 		return 0x11;
@@ -906,6 +955,7 @@ uint8_t setFilterMask(uint32_t& value)
 	if (var4 == 0x12)
 	{
 		isFinished = false;
+		graphicLoaderState = 0;
 		state = 0;
 	}
 	return 0;
@@ -917,11 +967,7 @@ void filterMask()
 	switch (state)
 	{
 	case 0:
-		if (!isFinished)
-		{
-			drawFilterMask();
-			isFinished = true;
-		}
+		(!isFinished && graphicLoaderState < 13) ? drawFilterMask() : isFinished = true;
 		filterMaskButtons();
 		break;
 	case 1: temp = setFilterMask(CAN0Filter);

@@ -652,5 +652,22 @@ bool CANBus::SerialOutCAN(uint8_t channel)
             Can0.sendFrame(incCAN1);
         }
     }
+    else if (channel == 5)
+    {
+        if (Can0.available() > 0)
+        {
+            Can0.read(incCAN0);
+            sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+            SerialUSB.print(buffer);
+            Can1.sendFrame(incCAN0);
+        }
+        if (Can1.available() > 0)
+        {
+            Can1.read(incCAN1);
+            sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+            SerialUSB.print(buffer);
+            Can0.sendFrame(incCAN1);
+        }
+    }
     return true;
 }
