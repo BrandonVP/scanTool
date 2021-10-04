@@ -50,6 +50,8 @@ protected:
 	
  public:
 
+	 uint32_t findBaudRate0();
+	 uint32_t findBaudRate1();
 	void getPIDList(uint8_t, uint8_t);
 	void setNextPID(bool);
 	bool getNextPID();

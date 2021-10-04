@@ -54,6 +54,16 @@ void CANBus::setBaud1(uint32_t newBaud)
     Can1.set_baudrate(baud1);
 }
 
+uint32_t CANBus::findBaudRate0()
+{
+    return Can0.beginAutoSpeed();
+}
+
+uint32_t CANBus::findBaudRate1()
+{
+    return Can0.beginAutoSpeed();
+}
+
 void ECUtraffic(CAN_FRAME* incCAN0)
 {
     char buffer[50];

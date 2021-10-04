@@ -11,7 +11,6 @@
 
 extern void drawCANBus();
 extern void CANBusButtons();
-extern void capture();
 extern void drawCapture();
 extern void drawCaptureSelected();
 extern void drawCaptureSource();
@@ -35,5 +34,6 @@ extern void filterMask();
 extern void drawCANLog();
 extern void drawCANLogScroll();
 extern void CANLogButtons();
+extern void findBaud();
 #endif
 

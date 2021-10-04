@@ -45,7 +45,7 @@ void drawCANBus()
 		drawRoundBtn(140, 245, 305, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
-		drawRoundBtn(310, 245, 475, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 245, 475, 295, F("Auto Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 10:
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -122,7 +122,8 @@ void CANBusButtons()
 			if ((y >= 245) && (y <= 295))
 			{
 				//waitForIt(310, 245, 475, 295);
-				// Unused
+				// Find Baud
+				findBaud();
 			}
 		}
 	}
@@ -709,7 +710,7 @@ void drawBaud()
 {
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 	drawSquareBtn(140, 275, 300, 315, F("Set CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(305, 275, 465, 315, F("Set CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawSquareBtn(305, 275, 475, 315, F("Set CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawSquareBtn(305, 60, 475, 100, F("CAN0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 	drawSquareBtn(305, 150, 475, 190, F("CAN1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 }
@@ -788,13 +789,21 @@ void baudButtons()
 			}
 			if ((x >= 305) && (x <= 465))
 			{
-				// CAN2
-				waitForItRect(305, 275, 465, 315);
+				// CAN21
+				waitForItRect(305, 275, 475, 315);
 				can1.setBaud1(var4);
 				drawCurrentBaud();
 			}
 		}
 	}
+}
+
+/*============== Find Baud ==============*/
+uint32_t testTimer = 0;
+void findBaud()
+{
+	can1.setBaud0(can1.findBaudRate0());
+	can1.setBaud1(can1.findBaudRate1());
 }
 
 /*============== Filter Mask ==============*/
