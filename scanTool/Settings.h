@@ -10,5 +10,6 @@
 #endif
 extern void drawSettings();
 extern void settingsButtons();
+extern void memoryUse();
 #endif
 

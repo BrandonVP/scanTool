@@ -64,6 +64,7 @@ extern const uint32_t hexTable[8];
 extern const uint32_t baudRates[6];
 
 extern uint8_t selectedChannelOut;
+extern uint8_t selectedSourceOut;
 extern uint8_t graphicLoaderState;
 
 extern char fileList[10][13];
@@ -71,6 +72,7 @@ extern uint8_t arrayIn[80];
 extern uint8_t scroll;
 extern bool hasPID;
 extern uint32_t timer2;
+extern bool isSerialOut;
 
 extern void waitForIt(int x1, int y1, int x2, int y2);
 extern void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);
@@ -80,5 +82,5 @@ extern int keypadButtons();
 extern void drawKeypad();
 extern void loadBar(int);
 extern void drawErrorMSG(String title, String eMessage1, String eMessage2);
-
+void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);
 #endif // EXTERN_H

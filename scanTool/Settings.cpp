@@ -19,7 +19,7 @@ void drawSettings()
         drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(145, 80, 308, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 80, 308, 130, F("Memory"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
         drawRoundBtn(312, 80, 475, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -63,9 +63,9 @@ void settingsButtons()
             if ((y >= 80) && (y <= 130))
             {
                 waitForIt(145, 80, 308, 130);
-                // Unused
-                //page = 37;
-                //hasDrawn = false;
+                // Memory Use
+                page = 37;
+                hasDrawn = false;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -121,4 +121,14 @@ void settingsButtons()
             }
         }
     }
+}
+
+void memoryUse()
+{
+    uint32_t MaxUsedHeapRAM = 0;
+    uint32_t MaxUsedStackRAM = 0;
+    uint32_t MaxUsedStaticRAM = 0;
+    uint32_t MinfreeRAM = 0;
+
+    saveRamStates(MaxUsedHeapRAM, MaxUsedStackRAM, MaxUsedStaticRAM, MinfreeRAM);
 }
