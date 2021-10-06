@@ -419,11 +419,11 @@ void dongleSimButtonsFord()
         // Engine
         if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
         {
+            const uint16_t id = 0x42F;
             if ((x >= 255) && (x <= 325))
             {
                 waitForIt(255, 105, 325, 150);
                 // Off
-                const uint16_t id = 0x641;
                 uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
@@ -431,16 +431,14 @@ void dongleSimButtonsFord()
             {
                 waitForIt(330, 105, 400, 150);
                 // Acc
-                const uint16_t id = 0x641;
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 405) && (x <= 475))
             {
                 waitForIt(405, 105, 475, 150);
                 // On
-                const uint16_t id = 0x641;
-                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 };
+                uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             timer2 = millis();

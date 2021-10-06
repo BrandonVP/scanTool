@@ -31,7 +31,7 @@ void drawVehicleTools()
         drawRoundBtn(310, 135, 475, 185, F("VIN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(140, 190, 305, 240, F("Scan DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 190, 305, 240, F("Scan DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
         drawRoundBtn(310, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -330,7 +330,7 @@ void PIDGauges()
 {
     bool isWait = true;
 
-    drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 
     myGLCD.setBackColor(menuBtnColor);
     myGLCD.setColor(menuBtnColor);
@@ -469,7 +469,7 @@ void clearDTC()
     // Run once at start
     if (millis() - timer1 > 500 && !isFinished)
     {
-        drawSquareBtn(145, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         drawSquareBtn(150, 150, 479, 170, F("Clearing DTCS..."), themeBackground, themeBackground, menuBtnColor, CENTER);
     }
 

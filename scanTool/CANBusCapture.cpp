@@ -190,13 +190,13 @@ void drawCaptureSelected()
 		drawSquareBtn(310, 85, 475, 125, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawSquareBtn(310, 85, 475, 125, F("CAN0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(310, 85, 475, 125, F("CAN0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawSquareBtn(310, 85, 475, 125, F("CAN0/TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(310, 85, 475, 125, F("CAN0&TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawSquareBtn(310, 85, 475, 125, F("Bridge0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(310, 85, 475, 125, F("Bridge0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	}
 	switch (selectedSourceOut)
