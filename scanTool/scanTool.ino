@@ -74,6 +74,7 @@ uint8_t var2 = 0;
 uint16_t var3 = 0;
 uint32_t var4 = 0;
 uint32_t var5 = 0;
+uint8_t var6 = 0;
 uint32_t timer1 = 0;
 
 // Used for converting keypad input to appropriate hex place
@@ -470,6 +471,7 @@ void drawMenu()
 	drawRoundBtn(5, 202, 125, 254, F("TESTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(5, 259, 125, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
+uint32_t debugtime = 0;
 
 // Manages the different App pages
 void pageControl()
@@ -564,12 +566,13 @@ void pageControl()
 			var1 = 0;
 			var2 = 0;
 			var3 = 0;
+			var4 = 0;
 			state = 0;
 			counter1 = 1;
 			isFinished = false;
 		}
 		// Call buttons if any
-		sendCANFrame(var4);
+		sendCANFrame(var6);
 		break;
 	case 4: // Filter Mask
 		if (!hasDrawn)
@@ -713,8 +716,21 @@ void pageControl()
 		if (!hasDrawn)
 		{
 			// Draw Page
-			hasDrawn = true;
-			drawVIN();
+			if (state < 4 && !can1.VINReady())
+			{
+				state = can1.requestVIN(state, false);
+				if (millis() - debugtime > 200)
+				{
+					//SerialUSB.println(state);
+					debugtime = millis();
+				}
+				
+			}
+			else
+			{
+				hasDrawn = true;
+				drawVIN();
+			}
 		}
 		// Call buttons if any
 		break;

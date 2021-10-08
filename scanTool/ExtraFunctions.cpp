@@ -357,10 +357,10 @@ void drawDongleSimFord()
         drawRoundBtn(145, 205, 250, 250, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 13:
-        drawRoundBtn(255, 205, 325, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 205, 325, 250, F("81"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 14:
-        drawRoundBtn(330, 205, 400, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 205, 400, 250, F("01"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 15:
         drawRoundBtn(405, 205, 475, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -467,27 +467,25 @@ void dongleSimButtonsFord()
         //
         if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
         {
+            const uint16_t id = 0x326;
             if ((x >= 255) && (x <= 325))
             {
                 waitForIt(255, 205, 325, 250);
-                // 10
-                //const uint16_t id = 0x7E8;
-                //uint8_t data[8] = { 0x10, 0x00, 0x00, 0x00, 0x00, 0x31, 0x46, 0x54 };
-                //can1.sendFrame(id, data, 8, selectedChannelOut);
+                // 
+                uint8_t data[8] = { 0x81, 0xA0, 0x42, 0x75, 0x81, 0xA0, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 330) && (x <= 400))
             {
                 waitForIt(330, 205, 400, 250);
-                // 20
-                //const uint16_t id = 0x7E8;
-                //uint8_t data[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
-                //can1.sendFrame(id, data, 8, selectedChannelOut);
+                // 
+                uint8_t data[8] = { 0x01, 0xA0, 0x42, 0x75, 0x81, 0xA0, 0x00, 0x00 };
+                can1.sendFrame(id, data, 8, selectedChannelOut);
             }
             if ((x >= 405) && (x <= 475))
             {
                 waitForIt(405, 205, 475, 250);
-                // 30
-                //const uint16_t id = 0x7E8;
+                // 
                 //uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
                 //can1.sendFrame(id, data, 8, selectedChannelOut);
             }

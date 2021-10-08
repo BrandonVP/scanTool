@@ -113,6 +113,7 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 135, 475, 185);
                 // VIN
+                state = 0;
                 page = 13;
                 hasDrawn = false;
             }
@@ -447,12 +448,11 @@ void PIDGauges()
     return;
 }
 
-/*================ Draw Vin ================*/
+/*=============== Vin ================*/
 void drawVIN()
 {
     const uint16_t rxid = 0x7E8;
     drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    can1.requestVIN(rxid, false);
     drawSquareBtn(150, 150, 479, 170, F("VIN"), themeBackground, themeBackground, menuBtnColor, CENTER);
     drawSquareBtn(150, 180, 479, 200, can1.getVIN(), themeBackground, themeBackground, menuBtnColor, CENTER);
 }

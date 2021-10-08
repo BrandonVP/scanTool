@@ -18,20 +18,22 @@
 class CANBus
 {
 protected:
+	CAN_FRAME incCAN0;
+	CAN_FRAME incCAN1;
+	CAN_FRAME CANOut;
+
+private:
 	// Def for getMSG()
 	typedef byte buff[8];
-
+	char buffer[50];
 	uint32_t baud0 = 500000;
 	uint32_t baud1 = 500000;
+	bool hasVIN = false;
 	bool hasNextPID;
 	String vehicleVIN;
 	char VIN[18];
 	char fullDir[17];
 	char PIDDir[17];
-
-	CAN_FRAME incCAN0;
-	CAN_FRAME incCAN1;
-	CAN_FRAME CANOut;
 
 	const uint8_t PID_bank[0x06][0x20] = {
 		{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
@@ -66,7 +68,7 @@ protected:
 	uint16_t getCANOutID();
 	uint8_t getCANOutData(uint8_t);
 	void sendCANOut(uint8_t, bool);
-	void requestVIN(uint16_t, bool);
+	uint8_t requestVIN(uint16_t, bool);
 	char* getFullDir();
 	bool SerialOutCAN(uint8_t);
 	void startPID();
@@ -77,6 +79,7 @@ protected:
 	uint32_t getBaud0();
 	uint32_t getBaud1();
 	String getVIN();
+	bool VINReady();
 };
 #endif
 

@@ -78,7 +78,7 @@ void CANBusButtons()
 				waitForIt(140, 135, 305, 185);
 				// CAN0 RX
 				page = 3;
-				var4 = 0;
+				var6 = 0;
 				hasDrawn = false;
 			}
 			if ((y >= 190) && (y <= 240))
@@ -109,7 +109,7 @@ void CANBusButtons()
 				waitForIt(310, 135, 475, 185);
 				// CAN1 RX
 				page = 3;
-				var4 = 1;
+				var6 = 1;
 				hasDrawn = false;
 			}
 			if ((y >= 190) && (y <= 240))

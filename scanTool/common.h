@@ -8,11 +8,16 @@
 #include <UTouch.h>
 #include "CANBus.h"
 #include "SDCard.h"
+#include <due_can.h>
 
 // Harware Objects
 extern CANBus can1;
 extern SDCard sdCard;
 extern DS3231 rtc;
+
+extern CAN_FRAME incCAN0;
+extern CAN_FRAME incCAN1;
+extern CAN_FRAME CANOut;
 
 // LCD fonts
 extern uint8_t SmallFont[];
@@ -38,7 +43,7 @@ extern uint16_t var3;
 extern uint32_t var4;
 extern uint32_t var5;
 extern uint32_t timer1;
-
+extern uint8_t var6;
 extern uint8_t controlPage;
 extern uint8_t page;
 extern bool hasDrawn;
