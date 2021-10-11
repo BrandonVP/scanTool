@@ -18,6 +18,7 @@ released when old page != page, switch to find which vars to release
 =========================================================*/
 
 // Libraries
+#include "Variables.h"
 #include <malloc.h>
 #include <memorysaver.h>
 #include <SD.h>
@@ -37,6 +38,7 @@ released when old page != page, switch to find which vars to release
 #include "Settings.h"
 #include "VehicleTools.h"
 
+
 // Harware Objects
 CANBus can1;
 SDCard sdCard;
@@ -52,7 +54,7 @@ UTouch  myTouch(2, 6, 3, 4, 5);
 int x, y;
 
 // Used for page control
-uint8_t controlPage = 0;
+uint8_t nextPage = 0;
 uint8_t page = 0;
 bool hasDrawn = false;
 
@@ -77,12 +79,24 @@ uint32_t var5 = 0;
 uint8_t var6 = 0;
 uint32_t timer1 = 0;
 
+uint8_t g_var8[8];
+uint8_t g_var8Lock = 0;
+uint16_t g_var16[8];
+uint8_t g_var16Lock = 0;
+uint32_t g_var32[8];
+uint8_t g_var32Lock = 0;
+
+
+
+
+
+
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
 
 const uint32_t baudRates[6] = { 1000000, 800000, 500000, 250000, 125000, 100000 };
 
-// TODO: This uses a lot of memory for a simple graphic function
+// 
 uint32_t waitForItTimer = 0;
 uint16_t x1_ = 0;
 uint16_t y1_ = 0;
@@ -481,9 +495,9 @@ void pageControl()
 	switch (page)
 	{
 	case 0: /*========== CANBUS ==========*/
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			if (graphicLoaderState < 11)
 			{
 				drawCANBus();
@@ -494,9 +508,18 @@ void pageControl()
 				hasDrawn = true;
 			}
 		}
+
 		// Call buttons if any
 		CANBusButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 1: // Capture
 		switch (state)
 		{
@@ -524,7 +547,7 @@ void pageControl()
 				hasDrawn = true;
 			}
 			break;
-		case 2:
+		case 2: 
 			if (!hasDrawn && state == 2)
 			{
 				if (graphicLoaderState < 7)
@@ -540,41 +563,76 @@ void pageControl()
 			}
 			break;
 		}
+
 		// Call buttons if any
 		CaptureButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 2: // Playback
+		// Draw Page
 		if (!hasDrawn)
 		{
 			scroll = 0;
 			var1 = 0;
 			hasDrawn = true;
-			// Draw Page
 			drawCANLog();
 			drawCANLogScroll();
 		}
+
 		// Call buttons if any
 		CANLogButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 3: // Send CAN Frame
+		// Draw Page
 		if (!hasDrawn)
 		{
-			hasDrawn = true;
-			// Draw Page
-
+			bool error = false;
 			// Initialize global var to 0
-			var1 = 0;
-			var2 = 0;
-			var3 = 0;
+			(lockVar16(LOCK0)) ? g_var16[0] = 0 : error = true;
+			(lockVar8(LOCK1)) ? g_var8[1] = 0 : error = true;
 			var4 = 0;
 			state = 0;
 			counter1 = 1;
 			isFinished = false;
+			if (error)
+			{
+				SerialUSB.println("Error: Variable locked");
+				nextPage = 0;
+			}
+			hasDrawn = true;
 		}
+
 		// Call buttons if any
-		sendCANFrame(var6);
+		sendCANFrame(g_var8[POS0]);
+
+		// Release variable Locks if page changed
+		if (nextPage != page)
+		{
+			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
+			unlockVar16(LOCK0);
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 4: // Filter Mask
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
@@ -584,54 +642,99 @@ void pageControl()
 			counter1 = 5;
 			isFinished = false;
 		}
+
+		// Call buttons if any
 		filterMask();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 5: // Set Baud
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			var4 = 0;
 			drawBaud();
 			drawBaudScroll();
 			drawCurrentBaud();
 			hasDrawn = true;
 		}
+
 		// Call buttons if any
 		baudButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 6: // SD Capture
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 			//TODO: Write function
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 7: // LCD Capture
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 			drawReadInCANLCD();
 			isSerialOut = false;
 		}
+
 		// Call buttons if any
 		readInCANMsg(selectedChannelOut);
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 8: // Serial Capture
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
 
 	case 9: /*========== VEHTOOL ==========*/
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			if (graphicLoaderState < 11)
 			{
 				drawVehicleTools();
@@ -642,24 +745,42 @@ void pageControl()
 				hasDrawn = true;
 			}
 		}
+
 		// Call buttons if any
 		VehicleToolButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 10: // PIDSCAN
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 			can1.startCAN0(0x7E0, 0x7EF);
 			drawPIDSCAN();
 		}
+
 		// Call buttons if any
 		startPIDSCAN();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 11: // PIDSTRM
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			if (hasPID == true)
 			{
 				can1.startCAN0(0x7E0, 0x7EF);
@@ -674,11 +795,12 @@ void pageControl()
 			}
 			else
 			{
-				controlPage = 9;
+				nextPage = 9;
 				drawErrorMSG("Error", "Please Perform", "PIDSCAN First");
 				hasDrawn = true;
 			}
 		}
+
 		// Call buttons if any
 		if (hasPID == true)
 		{
@@ -701,21 +823,38 @@ void pageControl()
 			scroll = 0;
 			drawPIDStream();
 		}
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 12:
+
+	case 12: // PID Guages
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 			//can1.startPID();
 		}
+
 		// Call buttons if any
 		PIDGauges();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 13:
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			if (state < 4 && !can1.VINReady())
 			{
 				state = can1.requestVIN(state, false);
@@ -732,40 +871,101 @@ void pageControl()
 				drawVIN();
 			}
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 14: // 
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
+			
 			hasDrawn = true;
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 15:
+
+	case 15: // DTC
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
-			hasDrawn = true;
+			if (state == 0)
+			{
+				drawClearDTC();
+				state++;
+			}
+			if (state == 1)
+			{
+				state = DTCButtons();
+			}
+			if (state == 2)
+			{
+				// Initialize state machine variables to 0
+				hasDrawn = true;
+				state = 0;
+				counter1 = 0;
+				timer1 = 0;
+				isFinished = false;
+			}
 		}
+
+		// Call buttons if any
 		clearDTC();
-		// Call buttons if any
+		
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 16:
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 17:
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 		}
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
 
 	case 18: /*========== RZRTOOL ==========*/
@@ -782,72 +982,152 @@ void pageControl()
 				hasDrawn = true;
 			}
 		}
+
 		// Call buttons if any
 		RZRToolButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 19:
+
+	case 19: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 20:
+
+	case 20: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 21:
+
+	case 21: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 22:
+
+	case 22: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 23:
+
+	case 23: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 24:
+
+	case 24: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 25:
+
+	case 25: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 26:
+
+	case 26: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
 
 	case 27: /*========== EXTRAFN ==========*/
@@ -864,61 +1144,124 @@ void pageControl()
 				hasDrawn = true;
 			}
 		}
+
 		// Call buttons if any
 		extraFNButtons();
-		break;
-	case 28:
-		if (!hasDrawn)
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
 		{
-			// Draw Page
-			hasDrawn = true;
+			hasDrawn = false;
+			page = nextPage;
 		}
-		// Call buttons if any
 		break;
-	case 29:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 30:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 31:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 32:
+
+	case 28: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 33:
+
+	case 29: //
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
+	case 30: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 31: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 32: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 33: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
 	case 34: // Ford Dongle
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 			timer2 = 0;
 		}
@@ -927,14 +1270,23 @@ void pageControl()
 			drawDongleSimFord();
 			graphicLoaderState++;
 		}
+
 		// Call buttons if any
 		dongleSimButtonsFord();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
+
 	case 35: // GM Dongle
+		// Draw Page
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			// Draw Page
 			timer2 = 0;
 		}
 		if (graphicLoaderState < 19)
@@ -942,14 +1294,22 @@ void pageControl()
 			drawDongleSim();
 			graphicLoaderState++;
 		}
+
 		// Call buttons if any
 		dongleSimButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
 
 	case 36: /*========== SETTINGS ==========*/
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			if (graphicLoaderState < 11)
 			{
 				drawSettings();
@@ -960,74 +1320,155 @@ void pageControl()
 				hasDrawn = true;
 			}
 		}
+
 		// Call buttons if any
 		settingsButtons();
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 37:
+
+	case 37: // Memory
+		// Draw Page
 		if (!hasDrawn)
 		{
-			// Draw Page
 			memoryUse();
 			hasDrawn = true;
 		}
-		// Call buttons if any
-		break;
-	case 38:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 39:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 40:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 41:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 42:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
-		// Call buttons if any
-		break;
-	case 43:
-		if (!hasDrawn)
-		{
-			// Draw Page
-			hasDrawn = true;
-		}
+
 		// Call buttons if any
 
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
-	case 44:
+
+	case 38: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 39: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 40: //
+		// Draw Page
 		if (!hasDrawn)
 		{
 			// Draw Page
 			hasDrawn = true;
 		}
+
 		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 41: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 42: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 43: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			// Draw Page
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
+		break;
+
+	case 44: //
+		// Draw Page
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
+
+		// Call buttons if any
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			hasDrawn = false;
+			page = nextPage;
+		}
 		break;
 	}
 }
@@ -1266,40 +1707,35 @@ void menuButtons()
 			{
 				// CANBUS
 				waitForItMenu(5, 32, 125, 83);
-				page = 0;
-				hasDrawn = false;
+				nextPage = 0;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 88) && (y <= 140))
 			{
 				// VEHTOOL
 				waitForItMenu(5, 88, 125, 140);
-				page = 9;
-				hasDrawn = false;
+				nextPage = 9;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 145) && (y <= 197))
 			{
 				// RZRTOOL
 				waitForItMenu(5, 145, 125, 197);
-				page = 18;
-				hasDrawn = false;
+				nextPage = 18;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 202) && (y <= 254))
 			{
 				// EXTRAFN
 				waitForItMenu(5, 202, 125, 254);
-				page = 27;
-				hasDrawn = false;
+				nextPage = 27;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 259) && (y <= 312))
 			{
 				// SETTING
 				waitForItMenu(5, 259, 125, 312);
-				page = 36;
-				hasDrawn = false;
+				nextPage = 36;
 				graphicLoaderState = 0;
 			}
 		}
@@ -1338,6 +1774,42 @@ void setup()
 
 	// Draw the Hypertech logo
 	bmpDraw("System/HYPER.bmp", 0, 0);
+
+	/*
+	SerialUSB.println("");
+	SerialUSB.print("Lock 0: ");
+	SerialUSB.println(lockVar8(LOCK0));
+	SerialUSB.print("Lock 0: ");
+	SerialUSB.println(lockVar8(LOCK0));
+	SerialUSB.print("isUnLocked 0: ");
+	SerialUSB.println(isVar8Unlocked(POS0));
+	SerialUSB.print("Unlock 0: ");
+	SerialUSB.println(unlockVar8(LOCK0));
+	SerialUSB.print("Unlock 0: ");
+	SerialUSB.println(unlockVar8(LOCK0));
+	SerialUSB.print("isUnLocked 0: ");
+	SerialUSB.println(isVar8Unlocked(POS0));
+	if (isVar8Unlocked(POS0))
+	{
+		lockVar8(LOCK0);
+		g_var8[0] = 5;
+		SerialUSB.print("g_var8[0]: ");
+		SerialUSB.println(g_var8[0]);
+	}
+
+	if (isVar8Unlocked(POS0))
+	{
+		lockVar8(LOCK0);
+		g_var8[0] = 7;
+		SerialUSB.print("g_var8[0]: ");
+		SerialUSB.println(g_var8[0]);
+	}
+	else
+	{
+		SerialUSB.print("g_var8[0] is locked");
+	}
+	SerialUSB.println(unlockVar8(LOCK0));
+	*/
 }
 
 /*=========================================================

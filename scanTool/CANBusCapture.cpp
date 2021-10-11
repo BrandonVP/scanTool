@@ -68,26 +68,37 @@ void CANBusButtons()
 			{
 				waitForIt(140, 80, 305, 130);
 				// Capture
-				page = 1;
+				nextPage = 1;
 				state = 0;
 				graphicLoaderState = 0;
-				hasDrawn = false;
+				
 			}
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(140, 135, 305, 185);
 				// CAN0 RX
-				page = 3;
-				var6 = 0;
-				hasDrawn = false;
+				if (isVar8Unlocked(POS0))
+				{
+					nextPage = 3;
+					
+					lockVar8(LOCK0);
+					g_var8[0] = 0;
+				}
+				else
+				{
+					// Error 
+					SerialUSB.println("POS0 LOCKED");
+				}
+
+				//var6 = 0;
 			}
 			if ((y >= 190) && (y <= 240))
 			{
 				waitForIt(140, 190, 305, 240);
 				// Filter Mask
 				graphicLoaderState = 0;
-				page = 4;
-				hasDrawn = false;
+				nextPage = 4;
+				
 			}
 			if ((y >= 245) && (y <= 295))
 			{
@@ -101,27 +112,38 @@ void CANBusButtons()
 			{
 				waitForIt(310, 80, 475, 130);
 				// Playback
-				page = 2;
-				hasDrawn = false;
+				nextPage = 2;
 			}
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(310, 135, 475, 185);
 				// CAN1 RX
-				page = 3;
-				var6 = 1;
-				hasDrawn = false;
+				
+				if (isVar8Unlocked(POS0))
+				{
+					nextPage = 3;
+					
+					lockVar8(LOCK0);
+					g_var8[0] = 1;
+				}
+				else
+				{
+					// Error 
+					SerialUSB.println("POS0 LOCKED");
+				}
+				//var6 = 1;
+				
 			}
 			if ((y >= 190) && (y <= 240))
 			{
 				waitForIt(310, 190, 475, 240);
 				// Baud
-				page = 5;
-				hasDrawn = false;
+				nextPage = 5;
+				
 			}
 			if ((y >= 245) && (y <= 295))
 			{
-				//waitForIt(310, 245, 475, 295);
+				waitForIt(310, 245, 475, 295);
 				// Find Baud
 				findBaud();
 			}
@@ -391,8 +413,7 @@ void CaptureButtons()
 				switch (selectedSourceOut)
 				{
 				case 1: // LCD
-					hasDrawn = false;
-					page = 7;
+					nextPage = 7;
 					var1 = 60;
 					break;
 				case 2: // Serial
@@ -428,6 +449,7 @@ void drawReadInCANLCD()
 
 void readInCANMsg(uint8_t channel)
 {
+	DEBUG(channel);
 	myGLCD.setBackColor(VGA_WHITE);
 	myGLCD.setFont(SmallFont);
 	uint8_t rxBuf[8];
@@ -586,39 +608,39 @@ void setData(uint8_t position)
 		sprintf(displayText, "%02X", can1.getCANOutData(position));
 		isFinished = true;
 		counter1 = 1;
-		var2 = 0xFF;
-		var3 = 0;
+		g_var8[1] = 0xFF;
+		g_var16[0] = 0;
 		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	}
 
-	var2 = keypadButtons();
-	if (var2 >= 0x00 && var2 < 0x10 && counter1 >= 0)
+	g_var8[1] = keypadButtons();
+	if (g_var8[1] >= 0x00 && g_var8[1] < 0x10 && counter1 >= 0)
 	{
-		// Var3 = current value + returned keypad value times its hex place
-		var3 = var3 + (var2 * hexTable[counter1]);
-		sprintf(displayText, "%02X", var3);
+		// current value + returned keypad value times its hex place
+		g_var16[0] = g_var16[0] + (g_var8[1] * hexTable[counter1]);
+		sprintf(displayText, "%02X", g_var16[0]);
 		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		if (counter1 >= 0)
 		{
 			counter1--;
 		}
-		var2 = 0xFF;
+		g_var8[1] = 0xFF;
 	}
 	// Clear
-	if (var2 == 0x10)
+	if (g_var8[1] == 0x10)
 	{
 		counter1 = 1;
-		var2 = 0;
-		var3 = 0;
+		g_var8[1] = 0;
+		g_var16[0] = 0;
 		drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	}
-	if (var2 == 0x11)
+	if (g_var8[1] == 0x11)
 	{
-		can1.setDataCANOut(var3, position);
+		can1.setDataCANOut(g_var16[0], position);
 		isFinished = false;
 		state = 0;
 	}
-	if (var2 == 0x12)
+	if (g_var8[1] == 0x12)
 	{
 		isFinished = false;
 		state = 0;
@@ -646,39 +668,39 @@ void sendCANFrame(uint8_t channel)
 			sprintf(displayText, "%03X", can1.getCANOutID());
 			isFinished = true;
 			counter1 = 2;
-			var2 = 0xFF;
+			g_var8[1] = 0xFF;
 			var4 = 0;
 			drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		}
 
-		var2 = keypadButtons();
-		if (var2 >= 0x00 && var2 < 0x10 && counter1 >= 0)
+		g_var8[1] = keypadButtons();
+		if (g_var8[1] >= 0x00 && g_var8[1] < 0x10 && counter1 >= 0)
 		{
-			// Var3 = current value + returned keypad value times its hex place
-			var4 = var4 + (var2 * hexTable[counter1]);
+			// current value + returned keypad value times its hex place
+			var4 = var4 + (g_var8[1] * hexTable[counter1]);
 			sprintf(displayText, "%03X", var4);
 			drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			if (counter1 >= 0)
 			{
 				counter1--;
 			}
-			var2 = 0xFF;
+			g_var8[1] = 0xFF;
 		}
-		if (var2 == 0x10)
+		if (g_var8[1] == 0x10)
 		{
 			counter1 = 2;
-			var2 = 0;
+			g_var8[1] = 0;
 			var4 = 0;
 			drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		}
-		if (var2 == 0x11)
+		if (g_var8[1] == 0x11)
 		{
 			can1.setIDCANOut(var4);
 			drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			isFinished = false;
 			state = 0;
 		}
-		if (var2 == 0x12)
+		if (g_var8[1] == 0x12)
 		{
 			isFinished = false;
 			state = 0;
@@ -799,7 +821,6 @@ void baudButtons()
 }
 
 /*============== Find Baud ==============*/
-uint32_t testTimer = 0;
 void findBaud()
 {
 	can1.setBaud0(can1.findBaudRate0());
@@ -902,13 +923,7 @@ void filterMaskButtons()
 			if ((x >= 145) && (x <= 475))
 			{
 				waitForIt(145, 235, 475, 285);
-				// Open All Traffic
-				CAN0Filter = 000;
-				CAN0Mask = 0xFFF;
-				CAN1Filter = 0x000;
-				CAN1Mask = 0xFFF;
-				can1.startCAN0(CAN0Filter, CAN0Mask);
-				can1.startCAN1(CAN1Filter, CAN1Mask);
+				openAllTraffic();
 				drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 				drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 				drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -916,6 +931,16 @@ void filterMaskButtons()
 			}
 		}
 	}
+}
+
+void openAllTraffic()
+{
+	CAN0Filter = 000;
+	CAN0Mask = 0xFFF;
+	CAN1Filter = 0x000;
+	CAN1Mask = 0xFFF;
+	can1.startCAN0(CAN0Filter, CAN0Mask);
+	can1.startCAN1(CAN1Filter, CAN1Mask);
 }
 
 uint8_t setFilterMask(uint32_t& value)

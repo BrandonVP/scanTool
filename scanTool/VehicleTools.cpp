@@ -65,8 +65,8 @@ void VehicleToolButtons()
             {
                 waitForIt(140, 80, 305, 130);
                 // PIDSCAN
-                page = 10;
-                hasDrawn = false;
+                nextPage = 10;
+                
 
                 // Initialize state machine variables to 0
                 state = 0;
@@ -80,22 +80,20 @@ void VehicleToolButtons()
             {
                 waitForIt(140, 135, 305, 185);
                 // PID Guages
-                page = 12;
-                hasDrawn = false;
+                nextPage = 12;
+                
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(140, 190, 305, 240);
                 // DTC Scan
-                page = 14;
-                hasDrawn = false;
+                nextPage = 14;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
                 // Unused
                 //page = 16;
-                //hasDrawn = false;
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -104,8 +102,8 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // PIDSTRM
-                page = 11;
-                hasDrawn = false;
+                nextPage = 11;
+                
                 state = 0;
                 var1 = 0;
             }
@@ -114,28 +112,24 @@ void VehicleToolButtons()
                 waitForIt(310, 135, 475, 185);
                 // VIN
                 state = 0;
-                page = 13;
-                hasDrawn = false;
+                nextPage = 13;
+                
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
                 // DTC Clear
-                page = 15;
-                hasDrawn = false;
+                nextPage = 15;
+                
 
                 // Initialize state machine variables to 0
                 state = 0;
-                counter1 = 0;
-                timer1 = 0;
-                isFinished = false;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(310, 245, 475, 295);
                 // Unused
                 //page = 17;
-                //hasDrawn = false;
             }
         }
     }
@@ -501,4 +495,40 @@ void clearDTC()
     }
 }
 
+void drawClearDTC()
+{
+    drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(150, 135, 460, 155, F("Turn key to run"), themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawSquareBtn(150, 160, 460, 180, F("with engine off"), themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawRoundBtn(140, 190, 305, 240, F("Scan DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(310, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
 
+uint8_t DTCButtons()
+{
+    // Touch screen controls
+    if (myTouch.dataAvailable())
+    {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
+
+        // Start Scan
+        if ((y >= 190) && (y <= 240))
+        {
+            if ((x >= 140) && (x <= 305))
+            {
+                waitForIt(140, 190, 305, 240);
+                // Scan DTCs
+                
+            }
+            if ((x >= 310) && (x <= 475))
+            {
+                waitForIt(310, 190, 475, 240);
+                // Clear DTCs
+                return 2;
+            }
+        }
+    }
+    return 1;
+}

@@ -64,29 +64,25 @@ void settingsButtons()
             {
                 waitForIt(140, 80, 305, 130);
                 // Memory Use
-                page = 37;
-                hasDrawn = false;
+                nextPage = 37;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(140, 135, 305, 185);
                 // Unused
-                //page = 39;
-                //hasDrawn = false;
+                //nextPage = 39;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(140, 190, 305, 240);
                 // Unused
-                //page = 41;
-                //hasDrawn = false;
+                //nextPage = 41;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
                 // Unused
-                //page = 43;
-                //hasDrawn = false;
+                //nextPage = 43;
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -95,29 +91,25 @@ void settingsButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // Unused
-                //page = 38;
-                //hasDrawn = false;
+                //nextPage = 38;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(310, 135, 475, 185);
                 // Unused
-                //page = 40;
-                //hasDrawn = false;
+                //nextPage = 40;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
                 // Unused
-                //page = 42;
-                //hasDrawn = false;
+                //nextPage = 42;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(310, 245, 475, 295);
                 //Unused
-                //page = 44;
-                //hasDrawn = false;
+                //nextPage = 44;
             }
         }
     }

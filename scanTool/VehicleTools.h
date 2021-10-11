@@ -19,5 +19,7 @@ extern void PIDStreamButtons();
 extern void PIDGauges();
 extern void drawVIN();
 extern void clearDTC();
+extern void drawClearDTC();
+extern uint8_t DTCButtons();
 #endif
 

@@ -1,42 +1,113 @@
-// Used PID functions
-uint8_t arrayIn[80];
+// 
+// 
+// 
 
-uint8_t scroll = 0;
+#include "Variables.h"
 
-// Performing a sucessful PID scan will change this to true
-bool hasPID = false;
+// false if locked
+bool isVar8Unlocked(uint8_t pos)
+{
+	return !((g_var8Lock) & (1 << (pos)));
+}
 
-// Filter range / Filter Mask
-uint32_t CAN0Filter = 0x000;
-uint32_t CAN0Mask = 0xFFF;
-uint32_t CAN1Filter = 0x000;
-uint32_t CAN1Mask = 0xFFF;
+// false if locked
+bool isVar16Unlocked(uint8_t pos)
+{
+	return !((g_var16Lock) & (1 << (pos)));
+}
 
-// General use variables
-// Any non-background process function can use
-// Initialize to 0 before use
-bool nextState = false;
-bool isFinished = false;
-bool isSerialOut = false;
-uint8_t state = 0;
-int16_t counter1 = 0;
-uint16_t var1 = 0;
-uint8_t var2 = 0;
-uint16_t var3 = 0;
-uint32_t var4 = 0;
-uint32_t var5 = 0;
-uint32_t timer1 = 0;
+// false if locked
+bool isVar32Unlocked(uint8_t pos)
+{
+	return !((g_var32Lock) & (1 << (pos)));
+}
 
-// Use to load pages in pieces to prevent blocking while loading entire page
-uint8_t graphicLoaderState = 0;
+bool lockVar8(uint8_t lock)
+{
 
-//
-uint32_t waitForItTimer = 0;
-uint16_t x1_ = 0;
-uint16_t y1_ = 0;
-uint16_t x2_ = 0;
-uint16_t y2_ = 0;
-bool isWaitForIt = false;
+	uint8_t temp = g_var8Lock;
+	SerialUSB.print(temp | lock);
+	SerialUSB.print(" > ");
+	SerialUSB.println(g_var8Lock);
+	if ((temp | lock) > g_var8Lock)
+	{
+		g_var8Lock += lock;
+		SerialUSB.print("Return true");
+		return true;
+	}
+	else
+	{
+		SerialUSB.print("Return false");
+		return false;
+	}
+}
 
-// Used for converting keypad input to appropriate hex place
-const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
+bool unlockVar8(uint8_t unlock)
+{
+	uint8_t temp = g_var8Lock;
+	if ((temp ^ unlock) < g_var8Lock)
+	{
+		g_var8Lock -= unlock;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool lockVar16(uint8_t lock)
+{
+	uint8_t temp = g_var16Lock;
+	if ((temp | lock) > g_var16Lock)
+	{
+		g_var16Lock += lock;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool unlockVar16(uint8_t unlock)
+{
+	uint8_t temp = g_var16Lock;
+	if ((temp ^ unlock) < g_var16Lock)
+	{
+		g_var16Lock -= unlock;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool lockVar32(uint8_t lock)
+{
+	uint8_t temp = g_var32Lock;
+	if ((temp | lock) > g_var32Lock)
+	{
+		g_var32Lock += lock;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool unlockVar32(uint8_t unlock)
+{
+	uint8_t temp = g_var32Lock;
+	if ((temp ^ unlock) < g_var32Lock)
+	{
+		g_var32Lock -= unlock;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

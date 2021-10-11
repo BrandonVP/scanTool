@@ -64,29 +64,25 @@ void RZRToolButtons()
             {
                 waitForIt(140, 80, 305, 130);
                 // Scan DTC
-                //page = 19;
-                //hasDrawn = false;
+                //nextPage = 19;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(140, 135, 305, 185);
                 // Unused
-                //page = 21;
-                //hasDrawn = false;
+                //nextPage = 21;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(140, 190, 305, 240);
                 // Unused
-                //page = 23;
-                //hasDrawn = false;
+                //nextPage = 23;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
                 // Unused
-                //page = 25;
-                //hasDrawn = false;
+                //nextPage = 25;
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -95,29 +91,25 @@ void RZRToolButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // Clear DTC
-                //page = 20;
-                //hasDrawn = false;
+                //nextPage = 20;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(310, 135, 475, 185);
                 // Unused
-                //page = 22;
-                //hasDrawn = false;
+                //nextPage = 22;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
                 // Unused
-                //page = 24;
-                //hasDrawn = false;
+                //nextPage = 24;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(310, 245, 475, 295);
                 // Unused
-                //page = 26;
-                //hasDrawn = false;
+                //nextPage = 26;
             }
         }
     }

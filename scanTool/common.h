@@ -9,6 +9,28 @@
 #include "CANBus.h"
 #include "SDCard.h"
 #include <due_can.h>
+#include "Variables.h"
+
+// Big Endian
+#define LOCK0 0x80
+#define LOCK1 0x40
+#define LOCK2 0x20
+#define LOCK3 0x10
+#define LOCK4 0x08
+#define LOCK5 0x04
+#define LOCK6 0x02
+#define LOCK7 0x01
+
+#define POS0 7
+#define POS1 6
+#define POS2 5
+#define POS3 4
+#define POS4 3
+#define POS5 2
+#define POS6 1
+#define POS7 0
+
+#define DEBUG(x)  SerialUSB.println(x);
 
 // Harware Objects
 extern CANBus can1;
@@ -46,7 +68,10 @@ extern uint32_t timer1;
 extern uint8_t var6;
 extern uint8_t controlPage;
 extern uint8_t page;
+extern uint8_t nextPage;
 extern bool hasDrawn;
+
+
 
 // TODO: This uses a lot of memory for a simple graphic function
 extern uint32_t waitForItTimer;

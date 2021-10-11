@@ -131,6 +131,7 @@
     <ClInclude Include="PolarisTools.h" />
     <ClInclude Include="SDCard.h" />
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="Variables.h" />
     <ClInclude Include="VehicleTools.h" />
     <ClInclude Include="__vm\.scanTool.vsarduino.h" />
   </ItemGroup>
@@ -141,6 +142,7 @@
     <ClCompile Include="PolarisTools.cpp" />
     <ClCompile Include="SDCard.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="variables.cpp" />
     <ClCompile Include="VehicleTools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

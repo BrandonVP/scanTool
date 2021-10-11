@@ -64,29 +64,25 @@ void extraFNButtons()
             {
                 waitForIt(140, 80, 305, 130);
                 // Unused
-                //page = 28;
-                //hasDrawn = false;
+                //nextPage = 28;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(140, 135, 305, 185);
                 // Unused
-                //page = 30;
-                //hasDrawn = false;
+                //nextPage = 30;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(140, 190, 305, 240);
                 // Unused
-                //page = 32;
-                //hasDrawn = false;
+                //nextPage = 32;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
                 // Ford Dongle Simulator
-                page = 34;
-                hasDrawn = false;
+                nextPage = 34;
                 graphicLoaderState = 0;
             }
         }
@@ -96,29 +92,26 @@ void extraFNButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // Unused
-                //page = 29;
-                //hasDrawn = false;
+                //nextPage = 29;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(310, 135, 475, 185);
                 // Unused
-                //page = 31;
-                //hasDrawn = false;
+                //nextPage = 31;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
                 // Unused
-                //page = 33;
-                //hasDrawn = false;
+                //nextPage = 33;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(310, 245, 475, 295);
                 // GM Dongle Simulator
-                page = 35;
-                hasDrawn = false;
+                nextPage = 35;
+                
                 graphicLoaderState = 0;
             }
         }
