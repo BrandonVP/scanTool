@@ -86,11 +86,6 @@ uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
 
-
-
-
-
-
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
 
@@ -106,9 +101,9 @@ bool isWaitForIt = false;
 
 // Filter range / Filter Mask
 uint32_t CAN0Filter = 0x000;
-uint32_t CAN0Mask = 0xFFF;
+uint32_t CAN0Mask = 0x7FF;
 uint32_t CAN1Filter = 0x000;
-uint32_t CAN1Mask = 0xFFF;
+uint32_t CAN1Mask = 0x7FF;
 
 // Holds CAN Bus capture replay filenames
 char fileList[10][13];
@@ -524,6 +519,17 @@ void pageControl()
 		switch (state)
 		{
 		case 0:
+			if (!hasDrawn && graphicLoaderState < 1)
+			{
+				bool error = false;
+				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
+				if (error)
+				{
+					DEBUG_ERROR("Error: Variable locked");
+					nextPage = 0;
+					break;
+				}
+			}
 			if (!hasDrawn && graphicLoaderState < 8)
 			{
 				drawCapture();
@@ -570,6 +576,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar16(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -579,19 +586,53 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			scroll = 0;
-			var1 = 0;
+			bool error = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
+			state = 0;
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 0;
+			}
 			hasDrawn = true;
 			drawCANLog();
 			drawCANLogScroll();
 		}
 
 		// Call buttons if any
-		CANLogButtons();
-
+		if (state == 0)
+		{
+			CANLogButtons();
+		}
+		else if (state == 1)
+		{
+			char fileLocation[20] = "CANLOG/";
+			strcat(fileLocation, fileList[g_var16[POS0] - 1]);
+			uint8_t input = errorMSGButton(2);
+			switch (input)
+			{
+				case 1:
+					state = 0;
+					sdCard.deleteFile(fileLocation);
+					drawCANLogScroll();
+					break;
+				case 2:
+					state = 0;
+					drawCANLogScroll();
+					break;
+				case 3: 
+					state = 0;
+					drawCANLogScroll();
+					break;
+			}
+		}
+		
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(LOCK0);
+			unlockVar16(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -602,16 +643,17 @@ void pageControl()
 		if (!hasDrawn)
 		{
 			bool error = false;
-			// Initialize global var to 0
-			(lockVar16(LOCK0)) ? g_var16[0] = 0 : error = true;
-			(lockVar8(LOCK1)) ? g_var8[1] = 0 : error = true;
-			var4 = 0;
+			// Lock global variables
+			// lockVar8(LOCK0) called from button
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true;
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
+			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			state = 0;
-			counter1 = 1;
 			isFinished = false;
 			if (error)
 			{
-				SerialUSB.println("Error: Variable locked");
+				DEBUG_ERROR("Error: Variable locked");
 				nextPage = 0;
 			}
 			hasDrawn = true;
@@ -626,6 +668,8 @@ void pageControl()
 			unlockVar8(LOCK0);
 			unlockVar8(LOCK1);
 			unlockVar16(LOCK0);
+			unlockVar16(LOCK1);
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -662,6 +706,14 @@ void pageControl()
 			drawBaud();
 			drawBaudScroll();
 			drawCurrentBaud();
+
+			bool error = false;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 0;
+			}
 			hasDrawn = true;
 		}
 
@@ -671,6 +723,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -701,6 +754,8 @@ void pageControl()
 			hasDrawn = true;
 			drawReadInCANLCD();
 			isSerialOut = false;
+			Can0.empty_rx_buff();
+			Can1.empty_rx_buff();
 		}
 
 		// Call buttons if any
@@ -1670,6 +1725,7 @@ uint8_t errorMSGButton(uint8_t returnPage)
 		{
 			if ((y >= 100) && (y <= 130))
 			{
+				// X
 				waitForItRect(365, 100, 415, 130);
 				return 3;
 			}
@@ -1678,11 +1734,13 @@ uint8_t errorMSGButton(uint8_t returnPage)
 		{
 			if ((x >= 155) && (x <= 275))
 			{
+				// Confirm
 				waitForItRect(155, 180, 275, 215);
 				return 1;
 			}
 			if ((x >= 285) && (x <= 405))
 			{
+				// Cancel
 				waitForItRect(285, 180, 405, 215);
 				return 2;
 			}
@@ -1854,3 +1912,12 @@ void loop()
 	serialOut();
 	waitForItBackground();
 }
+
+
+/*
+irqLock();
+{
+	result = removeFromRingBuffer(rxRing, msg) ? 1 : 0;
+}
+irqRelease();
+*/

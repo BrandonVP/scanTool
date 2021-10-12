@@ -15,6 +15,10 @@
 // Checks a single bit of binary number
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
+// Switch between usb ports
+// #define SERIAL_CAPTURE(x) Serial.print(x);
+#define SERIAL_CAPTURE(x) SerialUSB.print(x);
+
 class CANBus
 {
 protected:

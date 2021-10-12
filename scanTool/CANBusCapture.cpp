@@ -10,10 +10,12 @@
 #include "common.h"
 #include "definitions.h"
 
+//#define DEBUG_FILTERMASK
 
 /*=========================================================
 	CAN Bus
 ===========================================================*/
+// Draw CANBus menu buttons
 void drawCANBus()
 {
 	switch (graphicLoaderState)
@@ -53,6 +55,7 @@ void drawCANBus()
 	}
 }
 
+// Buttons to start CANBus programs
 void CANBusButtons()
 {
 	// Touch screen controls
@@ -71,26 +74,22 @@ void CANBusButtons()
 				nextPage = 1;
 				state = 0;
 				graphicLoaderState = 0;
-				
 			}
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(140, 135, 305, 185);
 				// CAN0 RX
-				if (isVar8Unlocked(POS0))
+				if (lockVar8(LOCK0))
 				{
+					graphicLoaderState = 0;
 					nextPage = 3;
-					
-					lockVar8(LOCK0);
-					g_var8[0] = 0;
+					g_var8[POS0] = 0;
 				}
 				else
 				{
 					// Error 
-					SerialUSB.println("POS0 LOCKED");
+					DEBUG_ERROR("POS0 LOCKED");
 				}
-
-				//var6 = 0;
 			}
 			if ((y >= 190) && (y <= 240))
 			{
@@ -98,7 +97,6 @@ void CANBusButtons()
 				// Filter Mask
 				graphicLoaderState = 0;
 				nextPage = 4;
-				
 			}
 			if ((y >= 245) && (y <= 295))
 			{
@@ -118,28 +116,23 @@ void CANBusButtons()
 			{
 				waitForIt(310, 135, 475, 185);
 				// CAN1 RX
-				
-				if (isVar8Unlocked(POS0))
+				if (lockVar8(LOCK0))
 				{
+					graphicLoaderState = 0;
 					nextPage = 3;
-					
-					lockVar8(LOCK0);
-					g_var8[0] = 1;
+					g_var8[POS0] = 1;
 				}
 				else
 				{
 					// Error 
-					SerialUSB.println("POS0 LOCKED");
+					DEBUG_ERROR("POS0 LOCKED");
 				}
-				//var6 = 1;
-				
 			}
 			if ((y >= 190) && (y <= 240))
 			{
 				waitForIt(310, 190, 475, 240);
 				// Baud
 				nextPage = 5;
-				
 			}
 			if ((y >= 245) && (y <= 295))
 			{
@@ -152,7 +145,7 @@ void CANBusButtons()
 }
 
 /*============== CAPTURE ==============*/
-//
+// Draw the stationary capture program buttons
 void drawCapture()
 {
 	switch (graphicLoaderState)
@@ -197,7 +190,7 @@ void drawCapture()
 	}
 }
 
-//
+// Draw current selected capture configuration 
 void drawCaptureSelected()
 {
 	switch (selectedChannelOut)
@@ -236,9 +229,9 @@ void drawCaptureSelected()
 		drawSquareBtn(310, 125, 475, 165, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	}
-	//drawSquareBtn(310, 125, 475, 165, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
+// Draw capture menu
 void drawCaptureOutput()
 {
 	switch (graphicLoaderState)
@@ -266,6 +259,7 @@ void drawCaptureOutput()
 	}
 }
 
+// Draw source menu
 void drawCaptureSource()
 {
 	switch (graphicLoaderState)
@@ -285,17 +279,18 @@ void drawCaptureSource()
 		drawSquareBtn(135, 125, 300, 165, F("CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawSquareBtn(135, 165, 300, 205, F("CAN0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 165, 300, 205, F("CAN0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawSquareBtn(135, 205, 300, 245, F("CAN0/TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 205, 300, 245, F("CAN0&TX1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawSquareBtn(135, 245, 300, 285, F("Bridge0/1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 245, 300, 285, F("Bridge0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	}
 }
 
+// Buttons for capture program
 void CaptureButtons()
 {
 	// Touch screen controls
@@ -383,11 +378,9 @@ void CaptureButtons()
 					hasDrawn = false;
 					graphicLoaderState = 0;
 				}
-
 			}
 			if ((y >= 245) && (y <= 285))
 			{
-
 				if (state == 1)
 				{
 					waitForIt(135, 245, 300, 285);
@@ -414,9 +407,11 @@ void CaptureButtons()
 				{
 				case 1: // LCD
 					nextPage = 7;
-					var1 = 60;
+					g_var16[POS0] = 60;
 					break;
 				case 2: // Serial
+					Can0.empty_rx_buff();
+					Can1.empty_rx_buff();
 					isSerialOut = true;
 					drawSquareBtn(310, 185, 470, 240, F("Start"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -434,22 +429,20 @@ void CaptureButtons()
 				isSerialOut = false;
 				drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 				drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-
 			}
 		}
 	}
 }
 
-
-/*============== CAN: LCD ==============*/
+// Clears page before starting capture
 void drawReadInCANLCD()
 {
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
+// Capture to LCD, max rate without filling buffer is 26ms per message (slow)
 void readInCANMsg(uint8_t channel)
 {
-	DEBUG(channel);
 	myGLCD.setBackColor(VGA_WHITE);
 	myGLCD.setFont(SmallFont);
 	uint8_t rxBuf[8];
@@ -459,55 +452,79 @@ void readInCANMsg(uint8_t channel)
 	{
 		char printString[50];
 		myGLCD.setColor(VGA_WHITE);
-		myGLCD.fillRect(150, (var1 - 5), 479, (var1 + 25));
+		myGLCD.fillRect(150, (g_var16[POS0] - 5), 479, (g_var16[POS0] + 25));
 		myGLCD.setColor(VGA_BLACK);
 		sprintf(printString, "%04X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
-		myGLCD.print(printString, 150, var1);
+		myGLCD.print(printString, 150, g_var16[POS0]);
 
-		if (var1 < 300)
+		if (g_var16[POS0] < 300)
 		{
-			var1 += 15;
+			g_var16[POS0] += 15;
 		}
 		else
 		{
-			var1 = 60;
+			g_var16[POS0] = 60;
 		}
 	}
 	myGLCD.setFont(BigFont);
 }
 
-/*============== CAN: Serial ==============*/
-void drawCANSerial()
-{
-	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-	drawSquareBtn(145, 140, 479, 160, F("View CAN on serial"), themeBackground, themeBackground, menuBtnColor, CENTER);
-}
-
 /*============== Send Frame ==============*/
-// Note: var2 used by send frame function and var1 used by keypad function
+// Draw the send frame page
 void drawSendFrame(uint8_t channel)
 {
-	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-	drawRoundBtn(145, 55, 473, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(145, 150, 473, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-
-	myGLCD.setFont(SmallFont);
-	drawRoundBtn(145, 195, 186, 250, " " + String(can1.getCANOutData(0), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(186, 195, 227, 250, " " + String(can1.getCANOutData(1), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(227, 195, 268, 250, " " + String(can1.getCANOutData(2), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(268, 195, 309, 250, " " + String(can1.getCANOutData(3), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(309, 195, 350, 250, " " + String(can1.getCANOutData(4), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(350, 195, 391, 250, " " + String(can1.getCANOutData(5), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(391, 195, 432, 250, " " + String(can1.getCANOutData(6), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	drawRoundBtn(432, 195, 473, 250, " " + String(can1.getCANOutData(7), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-	myGLCD.setFont(BigFont);
-
-	drawRoundBtn(145, 255, 473, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+	switch (graphicLoaderState)
+	{
+	case 0:
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 2:
+		drawRoundBtn(145, 55, 473, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 3:
+		drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawRoundBtn(145, 150, 473, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		myGLCD.setFont(SmallFont);
+		drawRoundBtn(145, 195, 186, 250, " " + String(can1.getCANOutData(0), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 6:
+		drawRoundBtn(186, 195, 227, 250, " " + String(can1.getCANOutData(1), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 7:
+		drawRoundBtn(227, 195, 268, 250, " " + String(can1.getCANOutData(2), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 8:
+		drawRoundBtn(268, 195, 309, 250, " " + String(can1.getCANOutData(3), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 9:
+		drawRoundBtn(309, 195, 350, 250, " " + String(can1.getCANOutData(4), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 10:
+		drawRoundBtn(350, 195, 391, 250, " " + String(can1.getCANOutData(5), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 11:
+		drawRoundBtn(391, 195, 432, 250, " " + String(can1.getCANOutData(6), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 12:
+		drawRoundBtn(432, 195, 473, 250, " " + String(can1.getCANOutData(7), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		myGLCD.setFont(BigFont);
+		break;
+	case 13:
+		drawRoundBtn(145, 255, 473, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 14:
+		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	}
 }
 
-//
+// Buttons for send frame program
 void sendFrameButtons(uint8_t channel)
 {
 	// Touch screen controls
@@ -607,56 +624,65 @@ void setData(uint8_t position)
 		drawKeypad();
 		sprintf(displayText, "%02X", can1.getCANOutData(position));
 		isFinished = true;
-		counter1 = 1;
-		g_var8[1] = 0xFF;
-		g_var16[0] = 0;
+		g_var16[POS1] = 1;
+		g_var8[POS1] = 0xFF;
+		g_var16[POS0] = 0;
 		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	}
 
-	g_var8[1] = keypadButtons();
-	if (g_var8[1] >= 0x00 && g_var8[1] < 0x10 && counter1 >= 0)
+	// Keypad response
+	g_var8[POS1] = keypadButtons();
+	if (g_var8[POS1] >= 0x00 && g_var8[POS1] < 0x10 && g_var16[POS1] >= 0)
 	{
 		// current value + returned keypad value times its hex place
-		g_var16[0] = g_var16[0] + (g_var8[1] * hexTable[counter1]);
-		sprintf(displayText, "%02X", g_var16[0]);
+		g_var16[POS0] = g_var16[POS0] + (g_var8[POS1] * hexTable[g_var16[POS1]]);
+		sprintf(displayText, "%02X", g_var16[POS0]);
 		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		if (counter1 >= 0)
+		if (g_var16[POS1] >= 0)
 		{
-			counter1--;
+			g_var16[POS1]--;
 		}
-		g_var8[1] = 0xFF;
+		g_var8[POS1] = 0xFF;
 	}
-	// Clear
-	if (g_var8[1] == 0x10)
+	if (g_var8[POS1] == 0x10)
 	{
-		counter1 = 1;
-		g_var8[1] = 0;
-		g_var16[0] = 0;
+		// Clear
+		g_var16[POS1] = 1;
+		g_var8[POS1] = 0;
+		g_var16[POS0] = 0;
 		drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	}
-	if (g_var8[1] == 0x11)
+	if (g_var8[POS1] == 0x11)
 	{
-		can1.setDataCANOut(g_var16[0], position);
+		// Accept
+		can1.setDataCANOut(g_var16[POS0], position);
 		isFinished = false;
 		state = 0;
 	}
-	if (g_var8[1] == 0x12)
+	if (g_var8[POS1] == 0x12)
 	{
+		// Cancel
 		isFinished = false;
 		state = 0;
 	}
 }
 
-//
+// Send CAN Bus frame program
 void sendCANFrame(uint8_t channel)
 {
 	char displayText[10];
 	switch (state)
 	{
-	case 0: // 
+	case 0: // Draw
 		if (!isFinished)
 		{
-			drawSendFrame(1);
+			if (graphicLoaderState < 15)
+			{
+				drawSendFrame(g_var8[POS0]);
+				graphicLoaderState++;
+				break;
+			}
+			graphicLoaderState = 0;
 			isFinished = true;
 		}
 		sendFrameButtons(channel);
@@ -667,40 +693,41 @@ void sendCANFrame(uint8_t channel)
 			drawKeypad();
 			sprintf(displayText, "%03X", can1.getCANOutID());
 			isFinished = true;
-			counter1 = 2;
-			g_var8[1] = 0xFF;
-			var4 = 0;
+			g_var16[POS1] = 2;
+			g_var8[POS1] = 0xFF;
+			g_var32[POS0] = 0;
 			drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		}
 
-		g_var8[1] = keypadButtons();
-		if (g_var8[1] >= 0x00 && g_var8[1] < 0x10 && counter1 >= 0)
+		// Keypad response
+		g_var8[POS1] = keypadButtons();
+		if (g_var8[POS1] >= 0x00 && g_var8[POS1] < 0x10 && g_var16[POS1] >= 0)
 		{
 			// current value + returned keypad value times its hex place
-			var4 = var4 + (g_var8[1] * hexTable[counter1]);
-			sprintf(displayText, "%03X", var4);
+			g_var32[POS0] = g_var32[POS0] + (g_var8[POS1] * hexTable[g_var16[POS1]]);
+			sprintf(displayText, "%03X", g_var32[POS0]);
 			drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			if (counter1 >= 0)
+			if (g_var16[POS1] >= 0)
 			{
-				counter1--;
+				g_var16[POS1]--;
 			}
-			g_var8[1] = 0xFF;
+			g_var8[POS1] = 0xFF;
 		}
-		if (g_var8[1] == 0x10)
+		if (g_var8[POS1] == 0x10)
 		{
-			counter1 = 2;
-			g_var8[1] = 0;
-			var4 = 0;
+			g_var16[POS1] = 2;
+			g_var8[POS1] = 0;
+			g_var32[POS0] = 0;
 			drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		}
-		if (g_var8[1] == 0x11)
+		if (g_var8[POS1] == 0x11)
 		{
-			can1.setIDCANOut(var4);
+			can1.setIDCANOut(g_var32[POS0]);
 			drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			isFinished = false;
 			state = 0;
 		}
-		if (g_var8[1] == 0x12)
+		if (g_var8[POS1] == 0x12)
 		{
 			isFinished = false;
 			state = 0;
@@ -723,11 +750,10 @@ void sendCANFrame(uint8_t channel)
 	case 9: setData(7);
 		break;
 	}
-
 }
 
 /*============== Baud ==============*/
-
+// Draw the stationary baud page buttons
 void drawBaud()
 {
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
@@ -737,12 +763,14 @@ void drawBaud()
 	drawSquareBtn(305, 150, 475, 190, F("CAN1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 }
 
+// Draw the current baud rates
 void drawCurrentBaud()
 {
 	drawSquareBtn(305, 100, 475, 140, String(can1.getBaud0()), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawSquareBtn(305, 190, 475, 230, String(can1.getBaud1()), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
+// Draw the list of baud rates
 void drawBaudScroll()
 {
 	isWaitForIt = false;
@@ -758,6 +786,7 @@ void drawBaudScroll()
 	}
 }
 
+// Buttons for the buad rate program
 void baudButtons()
 {
 	// Touch screen controls
@@ -995,6 +1024,7 @@ uint8_t setFilterMask(uint32_t& value)
 	return 0;
 }
 
+
 void filterMask()
 {
 	uint8_t temp = 0;
@@ -1007,6 +1037,13 @@ void filterMask()
 	case 1: temp = setFilterMask(CAN0Filter);
 		if (temp == 0x11)
 		{
+#if defined DEBUG_FILTERMASK
+			DEBUG("\nFilter: ");
+			DEBUG_HEX(CAN0Filter, 16);
+			DEBUG("\nMask: ");
+			DEBUG_HEX(CAN0Mask, 16);
+			DEBUG("\n");
+#endif
 			can1.setFilterMask0(CAN0Filter, CAN0Mask);
 			temp = 0;
 		}
@@ -1014,6 +1051,13 @@ void filterMask()
 	case 2: temp = setFilterMask(CAN0Mask);
 		if (temp == 0x11)
 		{
+#if defined DEBUG_FILTERMASK
+			DEBUG("\nFilter: ");
+			DEBUG_HEX(CAN0Filter, 16);
+			DEBUG("\nMask: ");
+			DEBUG_HEX(CAN0Mask, 16);
+			DEBUG("\n");
+#endif
 			can1.setFilterMask0(CAN0Filter, CAN0Mask);
 			temp = 0;
 		}
@@ -1021,6 +1065,13 @@ void filterMask()
 	case 3: temp = setFilterMask(CAN1Filter);
 		if (temp == 0x11)
 		{
+#if defined DEBUG_FILTERMASK
+			DEBUG("\nFilter: ");
+			DEBUG_HEX(CAN1Filter, 16);
+			DEBUG("\nMask: ");
+			DEBUG_HEX(CAN1Mask, 16);
+			DEBUG("\n");
+#endif
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
 			temp = 0;
 		}
@@ -1028,6 +1079,13 @@ void filterMask()
 	case 4: temp = setFilterMask(CAN1Mask);
 		if (temp == 0x11)
 		{
+#if defined DEBUG_FILTERMASK
+			DEBUG("\nFilter: ");
+			DEBUG_HEX(CAN1Filter, 16);
+			DEBUG("\nMask: ");
+			DEBUG_HEX(CAN1Mask, 16);
+			DEBUG("\n");
+#endif
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
 			temp = 0;
 		}
@@ -1061,13 +1119,15 @@ void drawCANLogScroll()
 	// Starting y location for list
 	uint16_t y = 60;
 
+	drawSquareBtn(131, 80, 415, 240, "", themeBackground, themeBackground, themeBackground, CENTER);
+
 	// Draw the scroll window
 	for (int i = 0; i < MAXSCROLL; i++)
 	{
-		if ((scroll + i < 10))
+		if ((g_var8[POS0] + i < 10))
 		{
 			char temp[13];
-			sprintf(temp, "%s", fileList[scroll + i]);
+			sprintf(temp, "%s", fileList[g_var8[POS0] + i]);
 			drawSquareBtn(150, y, 410, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
 		}
 		else
@@ -1094,37 +1154,37 @@ void CANLogButtons()
 			{
 				waitForItRect(150, 60, 410, 95);
 				//SerialUSB.println(1 + scroll);
-				var1 = 1 + scroll;
+				g_var16[POS0] = 1 + scroll;
 			}
 			if ((y >= 95) && (y <= 130))
 			{
 				waitForItRect(150, 95, 410, 130);
 				//SerialUSB.println(2 + scroll);
-				var1 = 2 + scroll;
+				g_var16[POS0] = 2 + scroll;
 			}
 			if ((y >= 130) && (y <= 165))
 			{
 				waitForItRect(150, 130, 410, 165);
 				//SerialUSB.println(3 + scroll);
-				var1 = 3 + scroll;
+				g_var16[POS0] = 3 + scroll;
 			}
 			if ((y >= 165) && (y <= 200))
 			{
 				waitForItRect(150, 165, 410, 200);
 				//SerialUSB.println(4 + scroll);
-				var1 = 4 + scroll;
+				g_var16[POS0] = 4 + scroll;
 			}
 			if ((y >= 200) && (y <= 235))
 			{
 				waitForItRect(150, 200, 410, 235);
 				//SerialUSB.println(5 + scroll);
-				var1 = 5 + scroll;
+				g_var16[POS0] = 5 + scroll;
 			}
 			if ((y >= 235) && (y <= 270))
 			{
 				waitForItRect(150, 235, 410, 270);
 				//SerialUSB.println(6 + scroll);
-				var1 = 6 + scroll;
+				g_var16[POS0] = 6 + scroll;
 			}
 		}
 		if ((x >= 420) && (x <= 470))
@@ -1154,7 +1214,7 @@ void CANLogButtons()
 		if ((y >= 275) && (y <= 315))
 		{
 			char fileLoc[20] = "CANLOG/";
-			strcat(fileLoc, fileList[var1 - 1]);
+			strcat(fileLoc, fileList[g_var16[POS0] - 1]);
 			if ((x >= 131) && (x <= 216))
 			{
 				// Play
@@ -1166,7 +1226,7 @@ void CANLogButtons()
 				// Delete
 				waitForItRect(216, 275, 301, 315);
 				drawErrorMSG(F("Confirmation"), F("Permenently"), F("Delete File?"));
-				//sdCard.deleteFile(fileLoc);
+				state = 1;
 			}
 			if ((x >= 301) && (x <= 386))
 			{
@@ -1176,12 +1236,13 @@ void CANLogButtons()
 				sdCard.tempCopy(fileLoc);
 				sdCard.split("canlog/temp.txt", temp);
 				sdCard.deleteFile("canlog/temp.txt");
+				drawCANLogScroll();
 			}
 			if ((x >= 386) && (x <= 479))
 			{
 				// Settings
 				waitForItRect(386, 275, 479, 315);
-				sdCard.readLogFile(fileList[var1]);
+				//sdCard.readLogFile(fileList[g_var16[POS0]]);
 			}
 		}
 	}

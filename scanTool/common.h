@@ -30,7 +30,15 @@
 #define POS6 1
 #define POS7 0
 
-#define DEBUG(x)  SerialUSB.println(x);
+
+//#define DEBUG(x)
+//#define DEBUG(x)  Serial.println(x);
+#define DEBUG_HEX(x, z)  SerialUSB.print(x, z);
+#define DEBUG(x)  SerialUSB.print(x);
+
+//#define DEBUG_ERROR(x)
+//#define DEBUG_ERROR(x)  Serial.println(x);
+#define DEBUG_ERROR(x)  SerialUSB.println(x);
 
 // Harware Objects
 extern CANBus can1;

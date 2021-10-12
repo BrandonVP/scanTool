@@ -17,6 +17,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "107-Arduino-MCP2515-1.2.0",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DS3231-0.0.0", "scanTool\Libraries\DS3231\0.0.0\DS3231\DS3231-0.0.0.vcxitems", "{A84E6EBC-2AC8-4634-A9CD-8A16E2564DFB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7F1E3996-2591-4670-9F07-16BC58BA4F91}"
+	ProjectSection(SolutionItems) = preProject
+		scanTool\Libraries\due_can\due_can.cpp = scanTool\Libraries\due_can\due_can.cpp
+		scanTool\Libraries\due_can\due_can.h = scanTool\Libraries\due_can\due_can.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		scanTool\Libraries\SdFat\2.0.7\SdFat\SdFat-2.0.7.vcxitems*{43513b35-571e-4d49-9ba2-42016d603902}*SharedItemsImports = 9
@@ -43,7 +49,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {F21BAFB0-049D-4A62-B35B-793225608253}
 		VisualSVNWorkingCopyRoot = .
+		SolutionGuid = {F21BAFB0-049D-4A62-B35B-793225608253}
 	EndGlobalSection
 EndGlobal

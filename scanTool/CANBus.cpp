@@ -64,12 +64,13 @@ uint32_t CANBus::findBaudRate1()
 	return Can0.beginAutoSpeed();
 }
 
+// Is this function still used?
 void ECUtraffic(CAN_FRAME* incCAN0)
 {
 	char buffer[50];
 	uint32_t temp = millis();
 	sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN0->id, incCAN0->length, incCAN0->data.bytes[0], incCAN0->data.bytes[1], incCAN0->data.bytes[2], incCAN0->data.bytes[3], incCAN0->data.bytes[4], incCAN0->data.bytes[5], incCAN0->data.bytes[6], incCAN0->data.bytes[7]);
-	SerialUSB.print(buffer);
+	SERIAL_CAPTURE(buffer);
 }
 
 // Set baud rates for both CAN Bus
@@ -152,9 +153,8 @@ void CANBus::sendCANOut(uint8_t channel, bool serialOut)
 	{
 		char buffer[50];
 		uint32_t temp = millis();
-		Can0.read(incCAN0);
 		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
-		SerialUSB.print(buffer);
+		SERIAL_CAPTURE(buffer);
 	}
 }
 
@@ -184,7 +184,7 @@ void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8, bool s
 		uint32_t temp = millis();
 		Can0.read(incCAN0);
 		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
-		SerialUSB.print(buffer);
+		SERIAL_CAPTURE(buffer);
 	}
 }
 
@@ -657,13 +657,13 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	if (config == 1 && Can0.get_rx_buff(incCAN0))
 	{
 		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
-		SerialUSB.print(buffer);
+		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN1
 	else if (config == 2 && Can1.get_rx_buff(incCAN1))
 	{
 		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
-		SerialUSB.print(buffer);
+		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN0 & CAN1
 	else if (config == 3)
@@ -671,12 +671,12 @@ bool CANBus::SerialOutCAN(uint8_t config)
 		if (Can0.get_rx_buff(incCAN0))
 		{
 			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
-			SerialUSB.print(buffer);
+			SERIAL_CAPTURE(buffer);
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
 			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
-			SerialUSB.print(buffer);
+			SERIAL_CAPTURE(buffer);
 		}
 	}
 	// Forward traffic between CAN0-CAN1 and display CAN0
@@ -689,7 +689,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 		if (Can1.get_rx_buff(incCAN1))
 		{
 			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
-			SerialUSB.print(buffer);
+			SERIAL_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
 		}
 	}
@@ -699,13 +699,13 @@ bool CANBus::SerialOutCAN(uint8_t config)
 		if (Can0.get_rx_buff(incCAN0))
 		{
 			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
-			SerialUSB.print(buffer);
+			SERIAL_CAPTURE(buffer);
 			Can1.sendFrame(incCAN0);
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
 			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
-			SerialUSB.print(buffer);
+			SERIAL_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
 		}
 	}

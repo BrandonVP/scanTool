@@ -18,7 +18,6 @@ extern void drawCaptureOutput();
 extern void CaptureButtons();
 extern void drawReadInCANLCD();
 extern void readInCANMsg(uint8_t);
-extern void drawCANSerial();
 extern void drawSendFrame(uint8_t);
 extern void sendFrameButtons(uint8_t);
 extern void setData(uint8_t);

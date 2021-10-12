@@ -185,7 +185,7 @@ uint32_t CANRaw::beginAutoSpeed()
 		speedCounter++;
 	}
 	AUTOBAUD_DEBUG("\nNo speeds worked! Are you sure you're connected to a CAN bus?!\n");
-	//disable();
+	disable();
 	return 0; 
 }
 

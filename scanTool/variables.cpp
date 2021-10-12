@@ -26,18 +26,20 @@ bool lockVar8(uint8_t lock)
 {
 
 	uint8_t temp = g_var8Lock;
-	SerialUSB.print(temp | lock);
-	SerialUSB.print(" > ");
-	SerialUSB.println(g_var8Lock);
+
+	//SerialUSB.print(temp | lock);
+	//SerialUSB.print(" > ");
+	//SerialUSB.println(g_var8Lock);
+
 	if ((temp | lock) > g_var8Lock)
 	{
 		g_var8Lock += lock;
-		SerialUSB.print("Return true");
+		//SerialUSB.print("Return true");
 		return true;
 	}
 	else
 	{
-		SerialUSB.print("Return false");
+		//SerialUSB.print("Return false");
 		return false;
 	}
 }
