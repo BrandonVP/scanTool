@@ -110,6 +110,7 @@ void CANBusButtons()
 			{
 				waitForIt(310, 80, 475, 130);
 				// Playback
+				graphicLoaderState = 0;
 				nextPage = 2;
 			}
 			if ((y >= 135) && (y <= 185))
@@ -801,32 +802,32 @@ void baudButtons()
 			if ((y >= 60) && (y <= 95))
 			{
 				waitForItRect(140, 60, 300, 95);
-				var4 = baudRates[0];
+				g_var32[POS0] = baudRates[0];
 			}
 			if ((y >= 95) && (y <= 130))
 			{
 				waitForItRect(140, 95, 300, 130);
-				var4 = baudRates[1];
+				g_var32[POS0] = baudRates[1];
 			}
 			if ((y >= 130) && (y <= 165))
 			{
 				waitForItRect(140, 130, 300, 165);
-				var4 = baudRates[2];
+				g_var32[POS0] = baudRates[2];
 			}
 			if ((y >= 165) && (y <= 200))
 			{
 				waitForItRect(140, 165, 300, 200);
-				var4 = baudRates[3];
+				g_var32[POS0] = baudRates[3];
 			}
 			if ((y >= 200) && (y <= 235))
 			{
 				waitForItRect(140, 200, 300, 235);
-				var4 = baudRates[4];
+				g_var32[POS0] = baudRates[4];
 			}
 			if ((y >= 235) && (y <= 270))
 			{
 				waitForItRect(140, 235, 300, 270);
-				var4 = baudRates[5];
+				g_var32[POS0] = baudRates[5];
 			}
 		}
 		if ((y >= 275) && (y <= 315))
@@ -835,21 +836,21 @@ void baudButtons()
 			{
 				// CAN0
 				waitForItRect(140, 275, 300, 315);
-				can1.setBaud0(var4);
+				can1.setBaud0(g_var32[POS0]);
 				drawCurrentBaud();
 			}
 			if ((x >= 305) && (x <= 465))
 			{
 				// CAN21
 				waitForItRect(305, 275, 475, 315);
-				can1.setBaud1(var4);
+				can1.setBaud1(g_var32[POS0]);
 				drawCurrentBaud();
 			}
 		}
 	}
 }
 
-/*============== Find Baud ==============*/
+// Auto baud
 void findBaud()
 {
 	can1.setBaud0(can1.findBaudRate0());
@@ -857,6 +858,7 @@ void findBaud()
 }
 
 /*============== Filter Mask ==============*/
+// Draw the filter mask page
 bool drawFilterMask()
 {
 	switch (graphicLoaderState)
@@ -904,6 +906,7 @@ bool drawFilterMask()
 	return true;
 }
 
+// Buttons for the filter mask program
 void filterMaskButtons()
 {
 	// Touch screen controls
@@ -962,6 +965,7 @@ void filterMaskButtons()
 	}
 }
 
+// Open up filter mask to receive all traffic
 void openAllTraffic()
 {
 	CAN0Filter = 000;
@@ -972,51 +976,54 @@ void openAllTraffic()
 	can1.startCAN1(CAN1Filter, CAN1Mask);
 }
 
+// Filter mask program
 uint8_t setFilterMask(uint32_t& value)
 {
-
 	char displayText[10];
 	if (!isFinished)
 	{
 		drawKeypad();
 		isFinished = true;
-		counter1 = 2;
-		var4 = 0xFF;
-		var5 = 0;
+		g_var16[POS0] = 2;
+		g_var32[POS0] = 0xFF;
+		g_var32[POS1] = 0;
 		drawRoundBtn(145, 220, 470, 260, F("000"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	}
 
-	var4 = keypadButtons();
-	if (var4 >= 0x00 && var4 < 0x10 && counter1 >= 0)
+	g_var32[POS0] = keypadButtons();
+	if (g_var32[POS0] >= 0x00 && g_var32[POS0] < 0x10 && g_var16[POS0] >= 0)
 	{
 		// CAN0Filter = current value + returned keypad value times its hex place
-		var5 = var5 + (var4 * hexTable[counter1]);
-		sprintf(displayText, "%03X", var5);
+		g_var32[POS1] = g_var32[POS1] + (g_var32[POS0] * hexTable[g_var16[POS0]]);
+		sprintf(displayText, "%03X", g_var32[POS1]);
 		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		if (counter1 >= 0)
+		if (g_var16[POS0] >= 0)
 		{
-			counter1--;
+			g_var16[POS0]--;
 		}
-		var4 = 0xFF;
+		g_var32[POS0] = 0xFF;
 	}
-	if (var4 == 0x10)
+	if (g_var32[POS0] == 0x10)
 	{
-		counter1 = 2;
-		var4 = 0;
-		var5 = 0;
-		sprintf(displayText, "%03X", var5);
+		// Clear
+		g_var16[POS0] = 2;
+		g_var32[POS0] = 0;
+		g_var32[POS1] = 0;
+		sprintf(displayText, "%03X", g_var32[POS1]);
 		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	}
-	if (var4 == 0x11)
+	if (g_var32[POS0] == 0x11)
 	{
+		// Accept
 		isFinished = false;
 		graphicLoaderState = 0;
 		state = 0;
-		value = var5;
+		value = g_var32[POS1];
 		return 0x11;
 	}
-	if (var4 == 0x12)
+	if (g_var32[POS0] == 0x12)
 	{
+		// Cancel
 		isFinished = false;
 		graphicLoaderState = 0;
 		state = 0;
@@ -1024,7 +1031,7 @@ uint8_t setFilterMask(uint32_t& value)
 	return 0;
 }
 
-
+// Set new filter mask
 void filterMask()
 {
 	uint8_t temp = 0;
@@ -1094,20 +1101,39 @@ void filterMask()
 }
 
 /*============== CAN Playback ==============*/
+// Draw the capture playback page
 void drawCANLog()
 {
-	// clear LCD
-	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	switch (graphicLoaderState)
+	{
+	case 0:
 
-	drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(131, 275, 216, 315, F("Play"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(216, 275, 301, 315, F("Del"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(301, 275, 386, 315, F("Split"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(386, 275, 479, 315, F("Conf"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 2:
+		drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 3:
+		drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawSquareBtn(131, 275, 216, 315, F("Play"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		drawSquareBtn(216, 275, 301, 315, F("Del"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 6:
+		drawSquareBtn(301, 275, 386, 315, F("Split"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 7:
+		drawSquareBtn(386, 275, 479, 315, F("Conf"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	}
 }
 
-//
+// Draw playable filelist
 void drawCANLogScroll()
 {
 	isWaitForIt = false;
@@ -1138,7 +1164,7 @@ void drawCANLogScroll()
 	}
 }
 
-//
+// Buttons for the capture playback program
 void CANLogButtons()
 {
 	// Touch screen controls
@@ -1153,37 +1179,31 @@ void CANLogButtons()
 			if ((y >= 60) && (y <= 95))
 			{
 				waitForItRect(150, 60, 410, 95);
-				//SerialUSB.println(1 + scroll);
 				g_var16[POS0] = 1 + scroll;
 			}
 			if ((y >= 95) && (y <= 130))
 			{
 				waitForItRect(150, 95, 410, 130);
-				//SerialUSB.println(2 + scroll);
 				g_var16[POS0] = 2 + scroll;
 			}
 			if ((y >= 130) && (y <= 165))
 			{
 				waitForItRect(150, 130, 410, 165);
-				//SerialUSB.println(3 + scroll);
 				g_var16[POS0] = 3 + scroll;
 			}
 			if ((y >= 165) && (y <= 200))
 			{
 				waitForItRect(150, 165, 410, 200);
-				//SerialUSB.println(4 + scroll);
 				g_var16[POS0] = 4 + scroll;
 			}
 			if ((y >= 200) && (y <= 235))
 			{
 				waitForItRect(150, 200, 410, 235);
-				//SerialUSB.println(5 + scroll);
 				g_var16[POS0] = 5 + scroll;
 			}
 			if ((y >= 235) && (y <= 270))
 			{
 				waitForItRect(150, 235, 410, 270);
-				//SerialUSB.println(6 + scroll);
 				g_var16[POS0] = 6 + scroll;
 			}
 		}

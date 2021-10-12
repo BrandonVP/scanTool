@@ -586,6 +586,13 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (graphicLoaderState < 8)
+			{
+				drawCANLog();
+				graphicLoaderState++;
+				break;
+			}
+
 			bool error = false;
 			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
@@ -596,7 +603,6 @@ void pageControl()
 				nextPage = 0;
 			}
 			hasDrawn = true;
-			drawCANLog();
 			drawCANLogScroll();
 		}
 
@@ -679,11 +685,18 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			bool error = false;
+			// Lock global variables
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 5 : error = true;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : error = true;
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 0;
+			}
 			hasDrawn = true;
-			var1 = 0;
-			var4 = 0;
 			state = 0;
-			counter1 = 5;
 			isFinished = false;
 		}
 
@@ -693,6 +706,9 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar16(LOCK0);
+			unlockVar32(LOCK0);
+			unlockVar32(LOCK1);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -702,7 +718,6 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			var4 = 0;
 			drawBaud();
 			drawBaudScroll();
 			drawCurrentBaud();
