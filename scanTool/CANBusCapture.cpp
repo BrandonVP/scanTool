@@ -355,8 +355,8 @@ void CaptureButtons()
 				else if (state == 2)
 				{
 					// SD Card
-					selectedSourceOut = 3;
-					drawCaptureSelected();
+					//selectedSourceOut = 3;
+					//drawCaptureSelected();
 				}
 				drawCaptureSelected();
 			}
@@ -855,6 +855,7 @@ void findBaud()
 {
 	can1.setBaud0(can1.findBaudRate0());
 	can1.setBaud1(can1.findBaudRate1());
+	openAllTraffic();
 }
 
 /*============== Filter Mask ==============*/
@@ -969,9 +970,9 @@ void filterMaskButtons()
 void openAllTraffic()
 {
 	CAN0Filter = 000;
-	CAN0Mask = 0xFFF;
+	CAN0Mask = 0x7FF;
 	CAN1Filter = 0x000;
-	CAN1Mask = 0xFFF;
+	CAN1Mask = 0x7FF;
 	can1.startCAN0(CAN0Filter, CAN0Mask);
 	can1.startCAN1(CAN1Filter, CAN1Mask);
 }

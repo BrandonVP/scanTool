@@ -20,8 +20,8 @@
 #include "due_can.h"
 
 //Set the debugging interface for autobaud. You can switch serial ports or cause the calls to be removed entirely
-//#define AUTOBAUD_DEBUG(x)  SerialUSB.print(x);
-#define AUTOBAUD_DEBUG(x)
+#define AUTOBAUD_DEBUG(x)  SerialUSB.print(x);
+//#define AUTOBAUD_DEBUG(x)
 
 /**
 * \brief constructor for the class
@@ -138,7 +138,7 @@ uint32_t CANRaw::set_baudrate(uint32_t ul_baudrate)
 uint32_t CANRaw::beginAutoSpeed()
 {
 	//set a list of speeds to check here. Terminate that list with 0 or you'll have a bad time.
-	uint32_t speeds[] = {250000ul, 500000ul, 1000000ul, 125000ul, 33333ul, 50000ul, 800000ul, 0};
+	uint32_t speeds[] = { 500000, 250000, 125000, 100000, 1000000, 800000, 0};
 	int speedCounter = 0;
 	uint32_t ret;
 
@@ -149,19 +149,9 @@ uint32_t CANRaw::beginAutoSpeed()
 	{
 		AUTOBAUD_DEBUG("\nTrying CAN rate: ");
 		AUTOBAUD_DEBUG(speeds[speedCounter]);
-		ret = init(speeds[speedCounter]);
-		if (ret == 0)
-		{
-			AUTOBAUD_DEBUG("\nCould not init bus at requested speed!\n");
-		}
-		for (int filter = 0; filter < 3; filter++) {
-			setRXFilter(filter, 0, 0, true);
-		}
-		//standard
-		for (int filter = 3; filter < 7; filter++) {
-			setRXFilter(filter, 0, 0, false);
-		}
-        for (int waiting = 0; waiting < 100; waiting++)
+		set_baudrate(speeds[speedCounter]);
+		
+		for (uint8_t j = 0; j < 100; j++)
 		{
 			CAN_FRAME thisFrame;
 			if (rx_avail() > 0) {
@@ -170,6 +160,7 @@ uint32_t CANRaw::beginAutoSpeed()
 			}
 			delay(6);
 		}
+		delay(80);
 		if (numRxFrames > 0) 
 		{
 			AUTOBAUD_DEBUG(" SUCCESS!\n\n");
@@ -185,7 +176,7 @@ uint32_t CANRaw::beginAutoSpeed()
 		speedCounter++;
 	}
 	AUTOBAUD_DEBUG("\nNo speeds worked! Are you sure you're connected to a CAN bus?!\n");
-	disable();
+	disable_autobaud_listen_mode(); //the default is to not be in listen only
 	return 0; 
 }
 
@@ -1243,6 +1234,16 @@ uint16_t CANRaw::available()
 	return val;
 }
 
+/**
+* \empty ring buffer
+*
+*/
+void CANRaw::empty_rx_buff()
+{
+	irqLock();
+	EmptyBuffer(rxRing);
+	irqRelease();
+}
 
 /**
 * \brief Check whether there are received canbus frames in the buffer

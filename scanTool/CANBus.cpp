@@ -9,7 +9,7 @@
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN0(uint32_t start, uint32_t end)
 {
-	Can0.begin(baud0);
+	Can0.begin(500000);
 	Can0.watchForRange(start, end);
 
 	// Do not use extended frames
@@ -22,36 +22,48 @@ void CANBus::startCAN0(uint32_t start, uint32_t end)
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN1(uint32_t start, uint32_t end)
 {
-	Can1.begin(baud1);
+	Can1.begin(500000);
 	Can1.watchForRange(start, end);
 }
 
 // Set Can0 Filter and Mask
 void CANBus::setFilterMask0(uint32_t filter, uint32_t mask)
 {
-	Can0.begin(baud0);
-	Can0.watchFor(filter, mask);
+	for (uint8_t i = 0; i < 7; i++) 
+	{
+		Can0.setRXFilter(i, filter, mask, false);
+	}
 }
 
 // Set Can1 Filter and Mask
 void CANBus::setFilterMask1(uint32_t filter, uint32_t mask)
 {
-	Can1.begin(baud1);
-	Can1.watchFor(filter, mask);
+	for (uint8_t i = 0; i < 7; i++) 
+	{
+		Can1.setRXFilter(i, filter, mask, false);
+	}
 }
 
 // Set baud rate for CAN Bus
 void CANBus::setBaud0(uint32_t newBaud)
 {
-	baud0 = newBaud;
-	Can0.set_baudrate(baud0);
+	Can0.set_baudrate(newBaud);
 }
 
 void CANBus::setBaud1(uint32_t newBaud)
 {
-	baud1 = newBaud;
-	Can0.set_baudrate(baud1);
-	Can1.set_baudrate(baud1);
+	Can1.set_baudrate(newBaud);
+}
+
+// Get the current baud rate
+uint32_t CANBus::getBaud0()
+{
+	return Can0.getBusSpeed();
+}
+
+uint32_t CANBus::getBaud1()
+{
+	return Can1.getBusSpeed();
 }
 
 uint32_t CANBus::findBaudRate0()
@@ -61,7 +73,7 @@ uint32_t CANBus::findBaudRate0()
 
 uint32_t CANBus::findBaudRate1()
 {
-	return Can0.beginAutoSpeed();
+	return Can1.beginAutoSpeed();
 }
 
 // Is this function still used?
@@ -78,17 +90,6 @@ void CANBus::startPID()
 {
 	Can0.setRXFilter(0, 0x7E8, 0x7C8, false);
 	Can0.setCallback(0, ECUtraffic);
-}
-
-// Get the current baud rate
-uint32_t CANBus::getBaud0()
-{
-	return baud0;
-}
-
-uint32_t CANBus::getBaud1()
-{
-	return baud1;
 }
 
 // True if there are still PIDs left to scan 

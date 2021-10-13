@@ -63,7 +63,7 @@
 #define CAN_MAILBOX_RX_OVER           0x02  //! Message overwriting happens or there're messages lost in different receive modes.
 #define CAN_MAILBOX_RX_NEED_RD_AGAIN  0x04  //! Application needs to re-read the data register in Receive with Overwrite mode.
 
-#define SIZE_RX_BUFFER	64 //RX incoming ring buffer is this big
+#define SIZE_RX_BUFFER	256 //RX incoming ring buffer is this big
 #define SIZE_TX_BUFFER	16 //TX ring buffer is this big
 
 	/** Define the timemark mask. */
@@ -165,7 +165,8 @@ public:
 	bool rx_avail();
 	uint16_t available(); //like rx_avail but returns the number of waiting frames
 	uint32_t get_rx_buff(CAN_FRAME &msg);
-	
+	void empty_rx_buff();
+
 	//misc old cruft kept around just in case anyone actually used any of it in older code.
 	//some are used within the functions above. Unless you really know of a good reason to use
 	//any of these you probably should steer clear of them.
@@ -209,7 +210,8 @@ public:
 	void mailbox_set_datalen(uint8_t uc_index, uint8_t dlen);
 	void mailbox_set_datal(uint8_t uc_index, uint32_t val);
 	void mailbox_set_datah(uint8_t uc_index, uint32_t val);
-	void  mailbox_set_rtr (uint8_t mbox,  uint8_t rtr) ;
+	void mailbox_set_rtr (uint8_t mbox,  uint8_t rtr) ;
+	
 
 protected:
   struct ringbuffer_t {
@@ -227,6 +229,7 @@ protected:
   bool addToRingBuffer (ringbuffer_t &ring, const CAN_FRAME &msg);
   bool removeFromRingBuffer (ringbuffer_t &ring, CAN_FRAME &msg);
   inline bool isRingBufferEmpty (ringbuffer_t &ring) { return (ring.head == ring.tail); }
+  inline void EmptyBuffer (ringbuffer_t &ring) { ring.head = ring.tail; }
   uint16_t ringBufferCount (ringbuffer_t &ring);
 
   void irqLock() { NVIC_DisableIRQ(nIRQ); }

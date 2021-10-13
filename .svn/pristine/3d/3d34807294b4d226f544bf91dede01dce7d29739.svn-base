@@ -1,0 +1,46 @@
+0000000000000000000000000000000000000000 3473e43dbb0c4a6119d65bde4042403bf4b18189 Brandon Van Pelt <bvanpelt@hypertech.com> 1619643928 -0500	clone: from https://github.com/BrandonVP/scanTool
+3473e43dbb0c4a6119d65bde4042403bf4b18189 d77a909af3fd8b9c605473be4528c4beda5ad7dc Brandon Van Pelt <bvanpelt@hypertech.com> 1619819814 -0500	commit: progress
+d77a909af3fd8b9c605473be4528c4beda5ad7dc a830f5020ba9ac13a6ca6e7a6ed0a814384803f1 Brandon Van Pelt <bvanpelt@hypertech.com> 1620767545 -0500	commit: finished framework makeover
+a830f5020ba9ac13a6ca6e7a6ed0a814384803f1 cb9843e90bd8f65c93086fa4eea81804ce8e2cdc Brandon Van Pelt <bvanpelt@hypertech.com> 1620847936 -0500	commit: fixed msg popup
+cb9843e90bd8f65c93086fa4eea81804ce8e2cdc c812f3b9991e72c8085739c88a18b9d264df2ae9 Brandon Van Pelt <bvanpelt@hypertech.com> 1621970836 -0500	commit: Updates
+c812f3b9991e72c8085739c88a18b9d264df2ae9 27ba8f89973cd71e821fce1128a97666ab1b7581 Brandon Van Pelt <bvanpelt@hypertech.com> 1624571559 -0500	commit: current
+27ba8f89973cd71e821fce1128a97666ab1b7581 f2757e9cc916b8a2538a91cd1008f28f56d4849f Brandon Van Pelt <bvanpelt@hypertech.com> 1624571819 -0500	commit (merge): c
+f2757e9cc916b8a2538a91cd1008f28f56d4849f cf6bde6da7f5fd90edc5e702378c36dde1cd4846 Brandon Van Pelt <bvanpelt@hypertech.com> 1625154209 -0500	commit: RTC
+cf6bde6da7f5fd90edc5e702378c36dde1cd4846 171bdf1e647a80b130649a7ca99f5e4682743a7c Brandon Van Pelt <bvanpelt@hypertech.com> 1625262222 -0500	commit: current
+171bdf1e647a80b130649a7ca99f5e4682743a7c ba273549fc570453f09b6d51a7a34e207d7562fb Brandon Van Pelt <bvanpelt@hypertech.com> 1625608893 -0500	commit: GMC Auto
+ba273549fc570453f09b6d51a7a34e207d7562fb e28bfcd56bf5d1c47c95e1932c56424d95d40e0f Brandon Van Pelt <bvanpelt@hypertech.com> 1626213571 -0500	commit: Improved read back can log
+e28bfcd56bf5d1c47c95e1932c56424d95d40e0f 70caa00287774b715358b599aff81c025f8ba363 Brandon Van Pelt <bvanpelt@hypertech.com> 1627421843 -0500	commit: combined PID stream methods
+70caa00287774b715358b599aff81c025f8ba363 4562be8d0b4bdf3e274f1e2f5343cbef6a192d76 Brandon Van Pelt <bvanpelt@hypertech.com> 1627587017 -0500	commit: Added dongle Sim
+4562be8d0b4bdf3e274f1e2f5343cbef6a192d76 6f202adb46803bbb8ff2bcb5e11b7d60be0ea0d5 Brandon Van Pelt <bvanpelt@hypertech.com> 1627936659 -0500	commit: Added CAN Bus out functions
+6f202adb46803bbb8ff2bcb5e11b7d60be0ea0d5 b9d3c4a87eea34e179a7959ef7475fe00899a0c3 Brandon Van Pelt <bvanpelt@hypertech.com> 1628873436 -0500	commit: Serial out is now a background process
+b9d3c4a87eea34e179a7959ef7475fe00899a0c3 d04674d4de8fb68807767760bc1561971c46e493 Brandon Van Pelt <bvanpelt@hypertech.com> 1629151031 -0500	commit: Working on send message
+d04674d4de8fb68807767760bc1561971c46e493 1daa1f87ed4a2e20027cdbb6fff5c46a3a9caf4b Brandon Van Pelt <bvanpelt@hypertech.com> 1629228378 -0500	commit: Finished CAN Bus RX
+1daa1f87ed4a2e20027cdbb6fff5c46a3a9caf4b 5baad7bd6c26b7eba888dbee68104ceb04e405b9 Brandon Van Pelt <bvanpelt@hypertech.com> 1629238347 -0500	commit: Replaced filter mask
+5baad7bd6c26b7eba888dbee68104ceb04e405b9 458a122035beb501f1d3920bf16dc6e417bd0446 Brandon Van Pelt <bvanpelt@hypertech.com> 1629307927 -0500	commit: Fixed a lot of bugs
+458a122035beb501f1d3920bf16dc6e417bd0446 1a2a1c1f1833dfabff9a4f07a7167f6ad9de62f4 Brandon Van Pelt <bvanpelt@hypertech.com> 1630102352 -0500	commit: Changed dongle touch deck
+1a2a1c1f1833dfabff9a4f07a7167f6ad9de62f4 033ab3e4b200e5b7d3d29760f0ac6beca0cb09bb Brandon Van Pelt <bvanpelt@hypertech.com> 1630447018 -0500	commit: Adding a Ford dongle deck
+033ab3e4b200e5b7d3d29760f0ac6beca0cb09bb 7484cac5814d648ef123427c239b0def860fcf65 Brandon Van Pelt <bvanpelt@hypertech.com> 1631036185 -0500	commit: Fixed bug in CTX
+7484cac5814d648ef123427c239b0def860fcf65 c456e3b4af232badb46413d235ef6629c0aa9324 Brandon Van Pelt <bvanpelt@hypertech.com> 1631136202 -0500	commit: Bugs / Improvements
+c456e3b4af232badb46413d235ef6629c0aa9324 50256dc4d7173cbd94b4d6ac6dc29f016e7d865d Brandon Van Pelt <bvanpelt@hypertech.com> 1631223439 -0500	commit: Bugs and performance improvements
+50256dc4d7173cbd94b4d6ac6dc29f016e7d865d 66c8f3a82b3d077dd0c052f21d487109ff3c5833 Brandon Van Pelt <bvanpelt@hypertech.com> 1631310648 -0500	commit: Working on reading in file names
+66c8f3a82b3d077dd0c052f21d487109ff3c5833 b2760d71d19285788dabc338457fb5edaac86078 Brandon Van Pelt <bvanpelt@hypertech.com> 1631570677 -0500	commit: Reduced memory use / CAN Capture now plays
+b2760d71d19285788dabc338457fb5edaac86078 f52a411279b76947f16acfca3ed850a09146712c Brandon Van Pelt <bvanpelt@hypertech.com> 1631657480 -0500	commit: Split works
+f52a411279b76947f16acfca3ed850a09146712c 5af03f66b948ec74fa0ad2dd3960045e4a202850 Brandon Van Pelt <bvanpelt@hypertech.com> 1631734418 -0500	commit: Split works!
+5af03f66b948ec74fa0ad2dd3960045e4a202850 dd7c6111167e789c8001687e2a42db4687929b9c Brandon Van Pelt <bvanpelt@hypertech.com> 1631914194 -0500	commit: More baud rate options
+dd7c6111167e789c8001687e2a42db4687929b9c 911e1cf51dd0a7a012b5f36b8a0dad1931d02040 Brandon Van Pelt <bvanpelt@hypertech.com> 1632163586 -0500	commit: cleaned GUI
+911e1cf51dd0a7a012b5f36b8a0dad1931d02040 500cf257e4283e38ddccb2acdf5b32ded2622125 Brandon Van Pelt <bvanpelt@hypertech.com> 1632345960 -0500	commit: Spliting dongle sim
+500cf257e4283e38ddccb2acdf5b32ded2622125 3b36a7544b803a388ff0481a90bff83691918ca4 Brandon Van Pelt <bvanpelt@hypertech.com> 1632425321 -0500	commit: Split dongle simulator
+3b36a7544b803a388ff0481a90bff83691918ca4 0c654365aeb3964bfd3e306b09149508b208207f Brandon Van Pelt <bvanpelt@hypertech.com> 1632759781 -0500	commit: Fixed bug in CAN0 RX
+0c654365aeb3964bfd3e306b09149508b208207f a6afb691c8f264074a9be97d756fc44271459e75 Brandon Van Pelt <bvanpelt@hypertech.com> 1632951501 -0500	commit: Working on breaking main into smaller files and sharing hardware objects
+a6afb691c8f264074a9be97d756fc44271459e75 a18ccee1e188cf354b834e9a18a61282bf5c7daf Brandon Van Pelt <bvanpelt@hypertech.com> 1633013448 -0500	commit: moving canbus to its own file
+a18ccee1e188cf354b834e9a18a61282bf5c7daf e5a070f7b541b840e528997f1793c723bf3bf9b2 Brandon Van Pelt <bvanpelt@hypertech.com> 1633038136 -0500	commit: update
+e5a070f7b541b840e528997f1793c723bf3bf9b2 102b5f5b429f2dcebcb7150feb7dcf2fc10a9f93 Brandon Van Pelt <bvanpelt@hypertech.com> 1633122741 -0500	commit: Split Complete
+102b5f5b429f2dcebcb7150feb7dcf2fc10a9f93 e98bd186ef55b51d36f6f2433da2e0cbe867b4a9 Brandon Van Pelt <bvanpelt@hypertech.com> 1633126660 -0500	commit: capture in progress
+e98bd186ef55b51d36f6f2433da2e0cbe867b4a9 e62c4c2e8c23aad32f4b639ac18027c9a8c36d87 Brandon Van Pelt <bvanpelt@hypertech.com> 1633369259 -0500	commit: Capture is working
+e62c4c2e8c23aad32f4b639ac18027c9a8c36d87 d0ea373bb49a0d816e33f84a75ddd9d6a712efd9 Brandon Van Pelt <bvanpelt@hypertech.com> 1633381361 -0500	commit: Fixed a few bugs
+d0ea373bb49a0d816e33f84a75ddd9d6a712efd9 2196aec5045ade184ac1f243be7394cd6c9d6979 Brandon Van Pelt <bvanpelt@hypertech.com> 1633384685 -0500	commit: Added Auto Baud
+2196aec5045ade184ac1f243be7394cd6c9d6979 9c22cf7aebe40241589ec2fb33ae375d349df064 Brandon Van Pelt <bvanpelt@hypertech.com> 1633556030 -0500	commit: Fixed some GUI bugs
+9c22cf7aebe40241589ec2fb33ae375d349df064 99556394547da2bf1fc74888d01856db9f3a8892 Brandon Van Pelt <bvanpelt@hypertech.com> 1633730764 -0500	commit: Performance improvement / bugs / VIN
+99556394547da2bf1fc74888d01856db9f3a8892 9522cc5b627b0c19d311bbf42d4bcc3d9460a23e Brandon Van Pelt <bvanpelt@hypertech.com> 1633989976 -0500	commit: added variables with locks
+9522cc5b627b0c19d311bbf42d4bcc3d9460a23e 16c5c8d0b644f11d05e1da3cc3c57ce53315b71f Brandon Van Pelt <bvanpelt@hypertech.com> 1634067108 -0500	commit: framework changes
+16c5c8d0b644f11d05e1da3cc3c57ce53315b71f cdc60605aa96a06c36938930bb65029601d2c67c Brandon Van Pelt <bvanpelt@hypertech.com> 1634070932 -0500	commit: Capture finished
