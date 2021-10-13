@@ -10,9 +10,6 @@
 Read Vehicle DTCs
 Read / Clear RZR DTCs
 Replace uint8_t scroll with var
-
-8 Var array[9], extra var for bit lock
-released when old page != page, switch to find which vars to release
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -61,36 +58,8 @@ bool hasDrawn = false;
 // *Used by background process*
 uint8_t selectedChannelOut = 0;
 uint8_t selectedSourceOut = 0;
-uint32_t timer2 = 0;
+uint32_t updateClock = 0;
 bool isSerialOut = false;
-
-// General use variables
-// Any non-background process function can use
-// Initialize to 0 before use
-bool nextState = false;
-bool isFinished = false;
-uint8_t state = 0;
-int16_t counter1 = 0;
-uint16_t var1 = 0;
-uint8_t var2 = 0;
-uint16_t var3 = 0;
-uint32_t var4 = 0;
-uint32_t var5 = 0;
-uint8_t var6 = 0;
-uint32_t timer1 = 0;
-
-uint8_t g_var8[8];
-uint8_t g_var8Lock = 0;
-uint16_t g_var16[8];
-uint8_t g_var16Lock = 0;
-uint32_t g_var32[8];
-uint8_t g_var32Lock = 0;
-
-// Used for converting keypad input to appropriate hex place
-const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
-
-const uint32_t baudRates[6] = { 1000000, 800000, 500000, 250000, 125000, 100000 };
-
 // 
 uint32_t waitForItTimer = 0;
 uint16_t x1_ = 0;
@@ -98,6 +67,35 @@ uint16_t y1_ = 0;
 uint16_t x2_ = 0;
 uint16_t y2_ = 0;
 bool isWaitForIt = false;
+
+// General use variables
+// Any non-background process function can use
+// Initialize to 0 before use
+bool nextState = false;
+bool isFinished = false;
+uint8_t state = 0;
+uint8_t g_var8[8];
+uint8_t g_var8Lock = 0;
+uint16_t g_var16[8];
+uint8_t g_var16Lock = 0;
+uint32_t g_var32[8];
+uint8_t g_var32Lock = 0;
+
+
+// TODO: Get rid of these variables
+int16_t counter1 = 0;
+uint16_t var1 = 0;
+uint32_t timer1 = 0;
+uint32_t timer2 = 0;
+
+// TODO: Replace scroll with var
+uint8_t scroll = 0;
+
+// Used for converting keypad input to appropriate hex place
+const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
+
+// List of baud rates for Baud page
+const uint32_t baudRates[6] = { 1000000, 800000, 500000, 250000, 125000, 100000 };
 
 // Filter range / Filter Mask
 uint32_t CAN0Filter = 0x000;
@@ -114,16 +112,13 @@ bool hasPID = false;
 // Holds PIDS for the pidscan function
 uint8_t arrayIn[80];
 
-// TODO: Replace scroll with var
-uint8_t scroll = 0;
-
 // Use to load pages in pieces to prevent blocking while loading entire page
 uint8_t graphicLoaderState = 0;
 
 /*
 Uncomment to update the clock then comment out and upload to
 the device a second time to prevent updating time to last time
-device was on every at every startup.
+device was on at every startup.
 */
 //#define UPDATE_CLOCK
 
@@ -831,7 +826,8 @@ void pageControl()
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
-			can1.startCAN0(0x7E0, 0x7EF);
+			can1.setFilterMask0(0x7E0, 0x1F0);
+			//can1.startCAN0(0x7E0, 0x7EF);
 			drawPIDSCAN();
 		}
 
@@ -852,7 +848,8 @@ void pageControl()
 		{
 			if (hasPID == true)
 			{
-				can1.startCAN0(0x7E0, 0x7EF);
+				can1.setFilterMask0(0x7E0, 0x1F0);
+				//can1.startCAN0(0x7E0, 0x7EF);
 				for (int i = 0; i < 100; i++)
 				{
 					arrayIn[i] = 0x00;
@@ -1884,11 +1881,11 @@ void setup()
 // Displays time on menu
 void updateTime()
 {
-	if (millis() - timer2 > 1000)
+	if (millis() - updateClock > 1000)
 	{
 		char time[40];
 		drawRoundBtn(5, 5, 125, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
-		timer2 = millis();
+		updateClock = millis();
 	}
 }
 
