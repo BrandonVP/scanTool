@@ -35,12 +35,10 @@ Replace uint8_t scroll with var
 #include "Settings.h"
 #include "VehicleTools.h"
 
-
 // Harware Objects
 CANBus can1;
 SDCard sdCard;
 DS3231 rtc(SDA, SCL);
-
 // LCD display
 //(byte model, int RS, int WR, int CS, int RST, int SER)
 UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
@@ -60,6 +58,7 @@ uint8_t selectedChannelOut = 0;
 uint8_t selectedSourceOut = 0;
 uint32_t updateClock = 0;
 bool isSerialOut = false;
+bool isSDOut = false;
 // 
 uint32_t waitForItTimer = 0;
 uint16_t x1_ = 0;
@@ -69,27 +68,14 @@ uint16_t y2_ = 0;
 bool isWaitForIt = false;
 
 // General use variables
-// Any non-background process function can use
-// Initialize to 0 before use
-bool nextState = false;
-bool isFinished = false;
 uint8_t state = 0;
+bool isFinished = false;
 uint8_t g_var8[8];
 uint8_t g_var8Lock = 0;
 uint16_t g_var16[8];
 uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
-
-
-// TODO: Get rid of these variables
-int16_t counter1 = 0;
-uint16_t var1 = 0;
-uint32_t timer1 = 0;
-uint32_t timer2 = 0;
-
-// TODO: Replace scroll with var
-uint8_t scroll = 0;
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
@@ -411,7 +397,7 @@ void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String butt
 }
 
 // Function complete load bar
-void loadBar(int progress)
+bool loadBar(int progress)
 {
 	if (progress >= DONE)
 	{
@@ -419,11 +405,12 @@ void loadBar(int progress)
 		//myGLCD.setColor(menuBtnColor);
 		//myGLCD.fillRect(200, 200, 400, 220);
 
-		return;
+		return true;
 	}
 	drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
 	myGLCD.setColor(menuBtnColor);
 	myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
+	return false;
 }
 
 // Function to highlight buttons when clicked
@@ -589,6 +576,7 @@ void pageControl()
 
 			bool error = false;
 			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true;
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
 			state = 0;
 			if (error)
@@ -632,6 +620,7 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
 			unlockVar16(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
@@ -712,10 +701,6 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			drawBaud();
-			drawBaudScroll();
-			drawCurrentBaud();
-
 			bool error = false;
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			if (error)
@@ -723,6 +708,9 @@ void pageControl()
 				DEBUG_ERROR("Error: Variable locked");
 				nextPage = 0;
 			}
+			drawBaud();
+			drawBaudScroll();
+			drawCurrentBaud();
 			hasDrawn = true;
 		}
 
@@ -778,10 +766,14 @@ void pageControl()
 		}
 		break;
 
-	case 8: // Serial Capture
+	case 8: // SD Capture
 		// Draw Page
 		if (!hasDrawn)
 		{
+			isSerialOut = false;
+			Can0.empty_rx_buff();
+			Can1.empty_rx_buff();
+			isSDOut = true;
 			hasDrawn = true;
 		}
 
@@ -825,10 +817,34 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			hasDrawn = true;
-			can1.setFilterMask0(0x7E0, 0x1F0);
+			if (hasPID)
+			{
+				page = 9;
+				break;
+			}
+
+			// Lock global variables
+			bool error = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true;
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
+			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 9;
+			}
+
+			// Initialize state machine variables to 0
+			state = 0;
+
+			//can1.setFilterMask0(0x7E0, 0x7F0);
 			//can1.startCAN0(0x7E0, 0x7EF);
 			drawPIDSCAN();
+			loadBar(g_var8[POS1]++);
+			isSerialOut = false;
+			hasDrawn = true;
 		}
 
 		// Call buttons if any
@@ -837,6 +853,11 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
+			unlockVar16(LOCK0);
+			unlockVar16(LOCK1);
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -848,14 +869,28 @@ void pageControl()
 		{
 			if (hasPID == true)
 			{
+				state = 0;
+				// Lock global variables
+				bool error = false;
+				(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
+				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
+				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
+				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+				if (error)
+				{
+					DEBUG_ERROR("Error: Variable locked");
+					nextPage = 9;
+				}
+
+				isSerialOut = false;
 				can1.setFilterMask0(0x7E0, 0x1F0);
-				//can1.startCAN0(0x7E0, 0x7EF);
-				for (int i = 0; i < 100; i++)
+
+				for (int i = 0; i < 80; i++)
 				{
 					arrayIn[i] = 0x00;
 				}
 				sdCard.readFile(can1.getFullDir(), arrayIn);
-				scroll = 0;
+				
 				drawPIDStream();
 				hasDrawn = true;
 			}
@@ -876,23 +911,28 @@ void pageControl()
 		{
 			errorMSGButton(9);
 		}
-		if ((state == 1) && (counter1 < PIDSAMPLES) && (millis() - timer1 > 1000))
+		if ((state == 1) && (g_var16[POS1] < PIDSAMPLES) && (millis() - g_var32[POS0] > 1000))
 		{
-			can1.PIDStream(CAN_PID_ID, arrayIn[var1], true);
-			counter1++;
-			drawErrorMSG("Samples", String(counter1), "Saved to SD");
-			timer1 = millis();
+			can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
+			g_var16[POS1]++;
+			drawErrorMSG("Samples", String(g_var16[POS1]), "Saved to SD");
+			g_var32[POS0] = millis();
 		}
-		if ((counter1 == PIDSAMPLES) && (state == 1) && (millis() - timer1 > 2000))
+		if ((g_var16[POS1] == PIDSAMPLES) && (state == 1) && (millis() - g_var32[POS0] > 2000))
 		{
 			state = 0;
-			scroll = 0;
+			g_var8[POS0] = 0;
 			drawPIDStream();
+			g_var32[POS0] = millis(); //
 		}
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(LOCK0);
+			unlockVar16(LOCK0);
+			unlockVar16(LOCK1);
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -917,12 +957,13 @@ void pageControl()
 		}
 		break;
 
-	case 13:
+	case 13: // VIN
 		// Draw Page
 		if (!hasDrawn)
 		{
 			if (state < 4 && !can1.VINReady())
 			{
+				isSerialOut = false;
 				state = can1.requestVIN(state, false);
 			}
 			else
@@ -975,11 +1016,19 @@ void pageControl()
 			}
 			if (state == 2)
 			{
+				// Lock global variables
+				bool error = false;
+				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
+				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+				if (error)
+				{
+					DEBUG_ERROR("Error: Variable locked");
+					nextPage = 9;
+				}
+
 				// Initialize state machine variables to 0
 				hasDrawn = true;
 				state = 0;
-				counter1 = 0;
-				timer1 = 0;
 				isFinished = false;
 			}
 		}
@@ -990,6 +1039,8 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar16(LOCK1);
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1322,8 +1373,16 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			// Lock global variables
+			bool error = false;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 9;
+			}
+
 			hasDrawn = true;
-			timer2 = 0;
 		}
 		if (graphicLoaderState < 19)
 		{
@@ -1337,6 +1396,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1346,8 +1406,16 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			// Lock global variables
+			bool error = false;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 9;
+			}
+
 			hasDrawn = true;
-			timer2 = 0;
 		}
 		if (graphicLoaderState < 19)
 		{
@@ -1361,6 +1429,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1895,6 +1964,12 @@ void serialOut()
 	(isSerialOut) && (can1.SerialOutCAN(selectedChannelOut));
 }
 
+// Sends CAN Bus traffic to serial as a background process
+void SDCardOut()
+{
+	(isSDOut) && (can1.SDOutCAN(selectedChannelOut));
+}
+
 // Unselects menu button after touch
 void waitForItBackground()
 {
@@ -1906,15 +1981,22 @@ void waitForItBackground()
 	}
 }
 
+uint32_t testtimers = 0;
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
+	if (millis() - testtimers > 1000)
+	{
+		SerialUSB.println(Can0.available());
+		testtimers = millis();
+	}
 	// GUI
 	pageControl();
 
 	// Background Processes
 	updateTime();
 	serialOut();
+	SDCardOut();
 	waitForItBackground();
 }
 

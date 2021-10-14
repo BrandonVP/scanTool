@@ -252,7 +252,7 @@ void drawCaptureOutput()
 		drawSquareBtn(135, 125, 300, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawSquareBtn(135, 165, 300, 205, F("SD Card"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 165, 300, 205, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawSquareBtn(135, 205, 300, 245, F("Back"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -318,7 +318,6 @@ void CaptureButtons()
 				{
 					// LCD
 					selectedSourceOut = 1;
-					drawCaptureSelected();
 				}
 				drawCaptureSelected();
 			}
@@ -337,7 +336,6 @@ void CaptureButtons()
 				{
 					// Serial
 					selectedSourceOut = 2;
-					drawCaptureSelected();
 				}
 				drawCaptureSelected();
 			}
@@ -355,8 +353,7 @@ void CaptureButtons()
 				else if (state == 2)
 				{
 					// SD Card
-					//selectedSourceOut = 3;
-					//drawCaptureSelected();
+					selectedSourceOut = 3;
 				}
 				drawCaptureSelected();
 			}
@@ -404,6 +401,7 @@ void CaptureButtons()
 			{
 				waitForIt(310, 185, 470, 240);
 				// Start
+				SerialUSB.println(selectedSourceOut);
 				switch (selectedSourceOut)
 				{
 				case 1: // LCD
@@ -418,6 +416,10 @@ void CaptureButtons()
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 					break;
 				case 3: // SD Card
+					can1.incCaptureFile();
+					Can0.empty_rx_buff();
+					Can1.empty_rx_buff();
+					isSDOut = true;
 					drawSquareBtn(310, 185, 470, 240, F("Start"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 					break;
@@ -428,6 +430,7 @@ void CaptureButtons()
 				waitForIt(310, 245, 470, 300);
 				// Stop
 				isSerialOut = false;
+				isSDOut = false;
 				drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 				drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 			}
@@ -1180,32 +1183,32 @@ void CANLogButtons()
 			if ((y >= 60) && (y <= 95))
 			{
 				waitForItRect(150, 60, 410, 95);
-				g_var16[POS0] = 1 + scroll;
+				g_var16[POS0] = 1 + g_var8[POS1];
 			}
 			if ((y >= 95) && (y <= 130))
 			{
 				waitForItRect(150, 95, 410, 130);
-				g_var16[POS0] = 2 + scroll;
+				g_var16[POS0] = 2 + g_var8[POS1];
 			}
 			if ((y >= 130) && (y <= 165))
 			{
 				waitForItRect(150, 130, 410, 165);
-				g_var16[POS0] = 3 + scroll;
+				g_var16[POS0] = 3 + g_var8[POS1];
 			}
 			if ((y >= 165) && (y <= 200))
 			{
 				waitForItRect(150, 165, 410, 200);
-				g_var16[POS0] = 4 + scroll;
+				g_var16[POS0] = 4 + g_var8[POS1];
 			}
 			if ((y >= 200) && (y <= 235))
 			{
 				waitForItRect(150, 200, 410, 235);
-				g_var16[POS0] = 5 + scroll;
+				g_var16[POS0] = 5 + g_var8[POS1];
 			}
 			if ((y >= 235) && (y <= 270))
 			{
 				waitForItRect(150, 235, 410, 270);
-				g_var16[POS0] = 6 + scroll;
+				g_var16[POS0] = 6 + g_var8[POS1];
 			}
 		}
 		if ((x >= 420) && (x <= 470))
@@ -1213,9 +1216,9 @@ void CANLogButtons()
 			if ((y >= 80) && (y <= 160))
 			{
 				waitForItRect(420, 80, 470, 160);
-				if (scroll > 0)
+				if (g_var8[POS1] > 0)
 				{
-					scroll--;
+					g_var8[POS1]--;
 					drawCANLogScroll();
 				}
 			}
@@ -1225,9 +1228,9 @@ void CANLogButtons()
 			if ((y >= 160) && (y <= 240))
 			{
 				waitForItRect(420, 160, 470, 240);
-				if (scroll < 100)
+				if (g_var8[POS1] < 100)
 				{
-					scroll++;
+					g_var8[POS1]++;
 					drawCANLogScroll();
 				}
 			}

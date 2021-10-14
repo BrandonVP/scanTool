@@ -30,6 +30,8 @@
 #define POS6 1
 #define POS7 0
 
+#define ECU_RX 0x7E8
+#define PID_LIST_TX 0x7DF
 
 //#define DEBUG(x)
 //#define DEBUG(x)  Serial.println(x);
@@ -63,17 +65,8 @@ extern UTouch  myTouch;
 // General use variables
 // Any non-background process function can use
 // Initialize to 0 before use
-extern bool nextState;
 extern bool isFinished;
 extern uint8_t state;
-extern int16_t counter1;
-extern uint16_t var1;
-extern uint8_t var2;
-extern uint16_t var3;
-extern uint32_t var4;
-extern uint32_t var5;
-extern uint32_t timer1;
-extern uint8_t var6;
 extern uint8_t controlPage;
 extern uint8_t page;
 extern uint8_t nextPage;
@@ -111,6 +104,7 @@ extern uint8_t scroll;
 extern bool hasPID;
 extern uint32_t timer2;
 extern bool isSerialOut;
+extern bool isSDOut;
 
 extern void waitForIt(int x1, int y1, int x2, int y2);
 extern void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);
@@ -118,7 +112,7 @@ extern void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, Stri
 extern void waitForItRect(int x1, int y1, int x2, int y2);
 extern int keypadButtons();
 extern void drawKeypad();
-extern void loadBar(int);
+extern bool loadBar(int);
 extern void drawErrorMSG(String title, String eMessage1, String eMessage2);
 void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);
 #endif // EXTERN_H

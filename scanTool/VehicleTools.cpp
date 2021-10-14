@@ -66,15 +66,6 @@ void VehicleToolButtons()
                 waitForIt(140, 80, 305, 130);
                 // PIDSCAN
                 nextPage = 10;
-                
-
-                // Initialize state machine variables to 0
-                state = 0;
-                isFinished = false;
-                nextState = true;
-                timer1 = 0;
-                counter1 = 0;
-                var1 = 0;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -104,8 +95,7 @@ void VehicleToolButtons()
                 // PIDSTRM
                 nextPage = 11;
                 
-                state = 0;
-                var1 = 0;
+               
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -145,48 +135,38 @@ void drawPIDSCAN()
 
 void startPIDSCAN()
 {
-    // state
-    // set mask filter 07E8
-    // send request
-    // poll response
-
-    // Run once at start
-    if ((millis() - timer1 > 200) && !isFinished)
+    switch (state)
     {
-        loadBar(state);
-
-        // Get vehicle vin, will be saved in can1 object
-        const uint16_t rxid = 0x7E8;
-        can1.requestVIN(rxid, true);
-
-        loadBar(state++);
-    }
-
-    // Cycle though all available banks of PIDS
-    if (nextState && (millis() - timer1 >= 100))
-    {
-        // Get PID list with current range and bank
-        can1.getPIDList(var1, counter1);
-        var1 = var1 + 0x20;
-        counter1++;
-
-        loadBar(state++);
-
-        // Check last bit to see if there are more PIDs in the next bank
-        nextState = can1.getNextPID();
-
-        timer1 = millis();
-    }
-
-    // Finished
-    if (!nextState && !isFinished)
-    {
+    case 0: // Start request VIN state machine that ends with state 5
+        (g_var8[POS0] < 5) ? g_var8[POS0] = can1.requestVIN(g_var8[POS0], true) : loadBar(++state);
+        break;
+    case 1: // Send PID request message
+        state = can1.getPIDList(state, g_var16[POS0], g_var16[POS1]);
+        break;
+    case 2: // Wait for response
+        state = can1.getPIDList(state, g_var16[POS0], g_var16[POS1]);
+        break;
+    case 3: // Reponsed received and there is another PID bank to request
+        g_var16[POS0] = g_var16[POS0] + 0x20;
+        g_var16[POS1]++;
+        // Change state back to PID request message
+        state = 1;
+        state = can1.getPIDList(state, g_var16[POS0], g_var16[POS1]);
+        loadBar(++g_var8[POS1]);
+        break;
+    case 4:
+        // Fill remaining loadBar
         loadBar(DONE);
 
         // Activate the PIDSTRM page 
         hasPID = true;
 
-        isFinished = true;
+        // Move to final state
+        state = 5;
+        break;
+    case 5:
+        // Finished
+        break;
     }
 }
 
@@ -203,9 +183,9 @@ void drawPIDStreamScroll()
     for (int i = 0; i < MAXSCROLL; i++)
     {
         char intOut[4] = "0x";
-        itoa(arrayIn[scroll + 1], temp, 16);
+        itoa(arrayIn[g_var8[POS0] + 1], temp, 16);
         strcat(intOut, temp);
-        if (scroll < sizeof(arrayIn) && arrayIn[scroll + 1] > 0)
+        if (g_var8[POS0] < sizeof(arrayIn) && arrayIn[g_var8[POS0] + 1] > 0)
         {
             drawSquareBtn(150, y, 410, y + 35, intOut, menuBackground, menuBtnBorder, menuBtnText, LEFT);
         }
@@ -214,7 +194,7 @@ void drawPIDStreamScroll()
             drawSquareBtn(150, y, 410, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
         }
         y = y + 35;
-        scroll++;
+        g_var8[POS0]++;
     }
 }
 
@@ -244,38 +224,38 @@ void PIDStreamButtons()
             if ((y >= 60) && (y <= 95))
             {
                 waitForItRect(150, 60, 410, 95);
-                Serial.println(1 + scroll);
-                var1 = 1 + scroll;
+                SerialUSB.println(1 + g_var8[POS0]);
+                g_var16[POS0] = 1 + g_var8[POS0];
             }
             if ((y >= 95) && (y <= 130))
             {
                 waitForItRect(150, 95, 410, 130);
-                Serial.println(2 + scroll);
-                var1 = 2 + scroll;
+                SerialUSB.println(2 + g_var8[POS0]);
+                g_var16[POS0] = 2 + g_var8[POS0];
             }
             if ((y >= 130) && (y <= 165))
             {
                 waitForItRect(150, 130, 410, 165);
-                Serial.println(3 + scroll);
-                var1 = 3 + scroll;
+                SerialUSB.println(3 + g_var8[POS0]);
+                g_var16[POS0] = 3 + g_var8[POS0];
             }
             if ((y >= 165) && (y <= 200))
             {
                 waitForItRect(150, 165, 410, 200);
-                Serial.println(4 + scroll);
-                var1 = 4 + scroll;
+                Serial.println(4 + g_var8[POS0]);
+                g_var16[POS0] = 4 + g_var8[POS0];
             }
             if ((y >= 200) && (y <= 235))
             {
                 waitForItRect(150, 200, 410, 235);
-                Serial.println(5 + scroll);
-                var1 = 5 + scroll;
+                SerialUSB.println(5 + g_var8[POS0]);
+                g_var16[POS0] = 5 + g_var8[POS0];
             }
             if ((y >= 235) && (y <= 270))
             {
                 waitForItRect(150, 235, 410, 270);
-                Serial.println(6 + scroll);
-                var1 = 6 + scroll;
+                SerialUSB.println(6 + g_var8[POS0]);
+                g_var16[POS0] = 6 + g_var8[POS0];
             }
         }
         if ((x >= 420) && (x <= 470))
@@ -283,9 +263,9 @@ void PIDStreamButtons()
             if ((y >= 80) && (y <= 160))
             {
                 waitForItRect(420, 80, 470, 160);
-                if (scroll > 0)
+                if (g_var8[POS0] > 0)
                 {
-                    scroll = scroll - 6;
+                    g_var8[POS0] = g_var8[POS0] - 12;
                     drawPIDStreamScroll();
                 }
             }
@@ -295,9 +275,8 @@ void PIDStreamButtons()
             if ((y >= 160) && (y <= 240))
             {
                 waitForItRect(420, 160, 470, 240);
-                if (scroll < 100)
+                if (g_var8[POS0] < 100)
                 {
-                    scroll = scroll + 6;
                     drawPIDStreamScroll();
                 }
             }
@@ -306,14 +285,14 @@ void PIDStreamButtons()
         {
             if ((y >= 275) && (y <= 315))
             {
-                if (var1 != 0)
+                if (g_var16[POS0] != 0)
                 {
                     waitForItRect(150, 275, 410, 315);
                     Serial.print("Sending PID: ");
-                    Serial.println(arrayIn[var1 + 1]);
+                    Serial.println(arrayIn[g_var16[POS0] + 1]);
                     state = 1;
-                    counter1 = 0;
-                    timer1 = 0;
+                    g_var16[POS1] = 0;
+                    g_var32[POS0] = 0;
                 }
             }
         }
@@ -461,7 +440,7 @@ void drawVIN()
 void clearDTC()
 {
     // Run once at start
-    if (millis() - timer1 > 500 && !isFinished)
+    if (millis() - g_var32[POS0] > 500 && !isFinished)
     {
         drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         drawSquareBtn(150, 150, 479, 170, F("Clearing DTCS..."), themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -470,18 +449,18 @@ void clearDTC()
     // Cycle through clear messages
     if (state < 7)
     {
-        if (millis() - timer1 >= 400)
+        if (millis() - g_var32[POS0] >= 400)
         {
             uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
             byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
 
             can1.sendFrame(IDc[state], MSGc, 8, selectedChannelOut);
-            counter1++;
-            timer1 = millis();
+            g_var16[POS1]++;
+            g_var32[POS0] = millis();
         }
-        if (counter1 == 3)
+        if (g_var16[POS1] == 3)
         {
-            counter1 = 0;
+            g_var16[POS1] = 0;
             loadBar(1 + state++);
         }
     }

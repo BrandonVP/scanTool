@@ -196,7 +196,7 @@ void dongleSimButtons()
         y = myTouch.getY();
 
         // VIN
-        if ((y >= 55) && (y <= 100) && millis() - timer2 > 20)
+        if ((y >= 55) && (y <= 100) && millis() - g_var32[POS0] > 20)
         {
             if ((x >= 255) && (x <= 325))
             {
@@ -225,7 +225,7 @@ void dongleSimButtons()
         }
 
         // Engine GM
-        if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
+        if ((y >= 105) && (y <= 150) && millis() - g_var32[POS0] > 20)
         {
             const uint16_t id = 0x0C9;
             if ((x >= 255) && (x <= 325))
@@ -252,7 +252,7 @@ void dongleSimButtons()
         }
 
         // ECU GM
-        if ((y >= 155) && (y <= 200) && millis() - timer2 > 20)
+        if ((y >= 155) && (y <= 200) && millis() - g_var32[POS0] > 20)
         {
             if ((x >= 255) && (x <= 362))
             {
@@ -273,7 +273,7 @@ void dongleSimButtons()
         }
 
         // BCM
-        if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
+        if ((y >= 205) && (y <= 250) && millis() - g_var32[POS0] > 20)
         {
             const uint16_t id = 0x641;
             if ((x >= 255) && (x <= 325))
@@ -296,7 +296,7 @@ void dongleSimButtons()
             }
         }
         // Reset Dongle
-        if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
+        if ((y >= 255) && (y <= 300) && millis() - g_var32[POS0] > 20)
         {
             if ((x >= 255) && (x <= 475))
             {
@@ -383,7 +383,7 @@ void dongleSimButtonsFord()
         y = myTouch.getY();
 
         // VIN G
-        if ((y >= 55) && (y <= 100) && millis() - timer2 > 20)
+        if ((y >= 55) && (y <= 100) && millis() - g_var32[POS0] > 20)
         {
             if ((x >= 255) && (x <= 325))
             {
@@ -409,10 +409,10 @@ void dongleSimButtonsFord()
                 uint8_t data[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
+            g_var32[POS0] = millis();
         }
         // Engine
-        if ((y >= 105) && (y <= 150) && millis() - timer2 > 20)
+        if ((y >= 105) && (y <= 150) && millis() - g_var32[POS0] > 20)
         {
             const uint16_t id = 0x42F;
             if ((x >= 255) && (x <= 325))
@@ -436,10 +436,10 @@ void dongleSimButtonsFord()
                 uint8_t data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00 };
                 can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
+            g_var32[POS0] = millis();
         }
         //
-        if ((y >= 155) && (y <= 200) && millis() - timer2 > 20)
+        if ((y >= 155) && (y <= 200) && millis() - g_var32[POS0] > 20)
         {
             if ((x >= 255) && (x <= 362))
             {
@@ -457,10 +457,10 @@ void dongleSimButtonsFord()
                 //uint8_t data[8] = { 0x02, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
                 //can1.sendFrame(id, data, 8, selectedChannelOut);
             }
-            timer2 = millis();
+            g_var32[POS0] = millis();
         }
         //
-        if ((y >= 205) && (y <= 250) && millis() - timer2 > 20)
+        if ((y >= 205) && (y <= 250) && millis() - g_var32[POS0] > 20)
         {
             const uint16_t id = 0x326;
             if ((x >= 255) && (x <= 325))
@@ -486,14 +486,14 @@ void dongleSimButtonsFord()
             }
         }
         // Reset Dongle
-        if ((y >= 255) && (y <= 300) && millis() - timer2 > 20)
+        if ((y >= 255) && (y <= 300) && millis() - g_var32[POS0] > 20)
         {
             if ((x >= 255) && (x <= 475))
             {
                 waitForIt(255, 255, 475, 300);
                 resetDongle();
             }
-            timer2 = millis();
+            g_var32[POS0] = millis();
         }
     }
 }

@@ -18,6 +18,7 @@
 // Switch between usb ports
 // #define SERIAL_CAPTURE(x) Serial.print(x);
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
+#define SD_CAPTURE(x) sdCard.writeFile("capture.txt", x);
 
 class CANBus
 {
@@ -31,11 +32,12 @@ private:
 	typedef byte buff[8];
 	char buffer[50];
 	bool hasVIN = false;
-	bool hasNextPID;
 	String vehicleVIN;
 	char VIN[18];
 	char fullDir[17];
 	char PIDDir[17];
+	char capture_filename[10] = { 'C', 'a', 'p', '0', '0', '.', 't', 'x', 't' };
+	uint8_t captureNumber = 0;
 
 	const uint8_t PID_bank[0x06][0x20] = 
 	{
@@ -56,9 +58,7 @@ private:
 public:
 	uint32_t findBaudRate0();
 	uint32_t findBaudRate1();
-	void getPIDList(uint8_t, uint8_t);
-	void setNextPID(bool);
-	bool getNextPID();
+	uint8_t getPIDList(uint8_t, uint8_t, uint8_t);
 	bool LCDOutCAN(buff&, uint8_t&, uint32_t&, uint8_t);
 	void sendFrame(uint32_t, byte*, uint8_t, bool);
 	void startCAN0(uint32_t, uint32_t);
@@ -73,6 +73,7 @@ public:
 	uint8_t requestVIN(uint16_t, bool);
 	char* getFullDir();
 	bool SerialOutCAN(uint8_t);
+	bool SDOutCAN(uint8_t);
 	void startPID();
 	int PIDStream(uint16_t, uint8_t, bool);
 	int PIDStreamGauge(uint16_t, uint8_t);
@@ -82,5 +83,6 @@ public:
 	uint32_t getBaud1();
 	String getVIN();
 	bool VINReady();
+	void incCaptureFile();
 };
 #endif
