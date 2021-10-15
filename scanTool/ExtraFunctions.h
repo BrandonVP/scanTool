@@ -15,5 +15,7 @@ extern void dongleSimButtons();
 extern void drawDongleSimFord();
 extern void dongleSimButtonsFord();
 extern void resetDongle();
+extern void drawMSGSpam();
+extern void drawOBDSimulator();
 #endif
 

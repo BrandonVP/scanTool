@@ -20,10 +20,10 @@ void drawExtraFN()
         drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(140, 80, 305, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 80, 305, 130, F("OBD Sim"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
-        drawRoundBtn(310, 80, 475, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 80, 475, 130, F("MSG Spam"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
         drawRoundBtn(140, 135, 305, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -65,8 +65,8 @@ void extraFNButtons()
             if ((y >= 80) && (y <= 130))
             {
                 waitForIt(140, 80, 305, 130);
-                // Unused
-                //nextPage = 28;
+                // OBD Simulator
+                nextPage = 28;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -93,8 +93,8 @@ void extraFNButtons()
             if ((y >= 80) && (y <= 130))
             {
                 waitForIt(310, 80, 475, 130);
-                // Unused
-                //nextPage = 29;
+                // Message Spam
+                nextPage = 29;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -118,6 +118,29 @@ void extraFNButtons()
             }
         }
     }
+}
+
+// Draw the OBD Simulator page
+void drawOBDSimulator()
+{
+    drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawSquareBtn(131, 120, 479, 140, F("OBD Simulator Started"), themeBackground, themeBackground, menuBtnColor, CENTER);
+ }
+
+// Draw the Message Spam page
+void drawMSGSpam()
+{
+    drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+    drawRoundBtn(135, 115, 250, 175, F("Min ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 115, 320, 175, F("7FF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(135, 180, 250, 240, F("Max ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(255, 180, 320, 240, F("000"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(320, 90, 479, 110, F("Delay(ms)"), themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawRoundBtn(325, 150, 410, 205, F("30"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(415, 115, 475, 175, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(415, 180, 475, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(135, 255, 305, 305, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(310, 255, 475, 305, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // Draw test deck for Terminator (GM)

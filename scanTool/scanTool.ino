@@ -1267,14 +1267,16 @@ void pageControl()
 		}
 		break;
 
-	case 28: //
+	case 28: // OBD CAN Simulator
 		// Draw Page
 		if (!hasDrawn)
 		{
+			drawOBDSimulator();
 			hasDrawn = true;
 		}
 
 		// Call buttons if any
+		entry();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1284,10 +1286,11 @@ void pageControl()
 		}
 		break;
 
-	case 29: //
+	case 29: // Message Spam
 		// Draw Page
 		if (!hasDrawn)
 		{
+			drawMSGSpam();
 			hasDrawn = true;
 		}
 
@@ -1906,42 +1909,6 @@ void setup()
 
 	// Draw the Hypertech logo
 	bmpDraw("System/HYPER.bmp", 0, 0);
-
-	/*
-	SerialUSB.println("");
-	SerialUSB.print("Lock 0: ");
-	SerialUSB.println(lockVar8(LOCK0));
-	SerialUSB.print("Lock 0: ");
-	SerialUSB.println(lockVar8(LOCK0));
-	SerialUSB.print("isUnLocked 0: ");
-	SerialUSB.println(isVar8Unlocked(POS0));
-	SerialUSB.print("Unlock 0: ");
-	SerialUSB.println(unlockVar8(LOCK0));
-	SerialUSB.print("Unlock 0: ");
-	SerialUSB.println(unlockVar8(LOCK0));
-	SerialUSB.print("isUnLocked 0: ");
-	SerialUSB.println(isVar8Unlocked(POS0));
-	if (isVar8Unlocked(POS0))
-	{
-		lockVar8(LOCK0);
-		g_var8[0] = 5;
-		SerialUSB.print("g_var8[0]: ");
-		SerialUSB.println(g_var8[0]);
-	}
-
-	if (isVar8Unlocked(POS0))
-	{
-		lockVar8(LOCK0);
-		g_var8[0] = 7;
-		SerialUSB.print("g_var8[0]: ");
-		SerialUSB.println(g_var8[0]);
-	}
-	else
-	{
-		SerialUSB.print("g_var8[0] is locked");
-	}
-	SerialUSB.println(unlockVar8(LOCK0));
-	*/
 }
 
 /*=========================================================
@@ -1985,11 +1952,13 @@ uint32_t testtimers = 0;
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
+	/* SD Card testing
 	if (millis() - testtimers > 1000)
 	{
 		SerialUSB.println(Can0.available());
 		testtimers = millis();
 	}
+	*/
 	// GUI
 	pageControl();
 

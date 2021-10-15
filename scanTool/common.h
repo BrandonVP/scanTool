@@ -10,6 +10,7 @@
 #include "SDCard.h"
 #include <due_can.h>
 #include "Variables.h"
+#include "OBD_CAN_SIMULATOR.h"
 
 // Big Endian
 #define LOCK0 0x80
