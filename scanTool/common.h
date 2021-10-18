@@ -62,7 +62,6 @@ extern UTFT myGLCD;
 //RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
 extern UTouch  myTouch;
 
-
 // General use variables
 // Any non-background process function can use
 // Initialize to 0 before use
@@ -73,16 +72,6 @@ extern uint8_t page;
 extern uint8_t nextPage;
 extern bool hasDrawn;
 
-
-
-// TODO: This uses a lot of memory for a simple graphic function
-extern uint32_t waitForItTimer;
-extern uint16_t x1_;
-extern uint16_t y1_;
-extern uint16_t x2_;
-extern uint16_t y2_;
-extern bool isWaitForIt;
-
 extern int x, y;
 
 // Filter range / Filter Mask
@@ -90,7 +79,6 @@ extern uint32_t CAN0Filter;
 extern uint32_t CAN0Mask;
 extern uint32_t CAN1Filter;
 extern uint32_t CAN1Mask;
-
 
 extern const uint32_t hexTable[8];
 extern const uint32_t baudRates[6];

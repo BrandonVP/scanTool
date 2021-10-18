@@ -9,7 +9,12 @@
 ===========================================================
 Read Vehicle DTCs
 Read / Clear RZR DTCs
-Replace uint8_t scroll with var
+keyboard function
+numpad (dec)
+Switch to FATSD
+-RTC Time stamps
+File naming
+Organize / move output variables into a settings structure
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -59,13 +64,6 @@ uint8_t selectedSourceOut = 0;
 uint32_t updateClock = 0;
 bool isSerialOut = false;
 bool isSDOut = false;
-// 
-uint32_t waitForItTimer = 0;
-uint16_t x1_ = 0;
-uint16_t y1_ = 0;
-uint16_t x2_ = 0;
-uint16_t y2_ = 0;
-bool isWaitForIt = false;
 
 // General use variables
 uint8_t state = 0;
@@ -413,28 +411,16 @@ bool loadBar(int progress)
 	return false;
 }
 
-// Function to highlight buttons when clicked
-void waitForItMenu(int x1, int y1, int x2, int y2)
-{
-	waitForItTimer = millis();
-
-	if (!isWaitForIt)
-	{
-		myGLCD.setColor(themeBackground);
-		myGLCD.drawRoundRect(x1, y1, x2, y2);
-		x1_ = x1;
-		y1_ = y1;
-		x2_ = x2;
-		y2_ = y2;
-		isWaitForIt = true;
-	}
-}
 void waitForIt(int x1, int y1, int x2, int y2)
 {
 	myGLCD.setColor(themeBackground);
 	myGLCD.drawRoundRect(x1, y1, x2, y2);
 	while (myTouch.dataAvailable())
+	{
 		myTouch.read();
+		backgroundProcess();
+	}
+
 	myGLCD.setColor(menuBtnBorder);
 	myGLCD.drawRoundRect(x1, y1, x2, y2);
 }
@@ -443,7 +429,10 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 	myGLCD.setColor(themeBackground);
 	myGLCD.drawRect(x1, y1, x2, y2);
 	while (myTouch.dataAvailable())
+	{
 		myTouch.read();
+		backgroundProcess();
+	}
 	myGLCD.setColor(menuBtnBorder);
 	myGLCD.drawRect(x1, y1, x2, y2);
 }
@@ -534,7 +523,7 @@ void pageControl()
 				hasDrawn = true;
 			}
 			break;
-		case 2: 
+		case 2:
 			if (!hasDrawn && state == 2)
 			{
 				if (graphicLoaderState < 7)
@@ -600,22 +589,22 @@ void pageControl()
 			uint8_t input = errorMSGButton(2);
 			switch (input)
 			{
-				case 1:
-					state = 0;
-					sdCard.deleteFile(fileLocation);
-					drawCANLogScroll();
-					break;
-				case 2:
-					state = 0;
-					drawCANLogScroll();
-					break;
-				case 3: 
-					state = 0;
-					drawCANLogScroll();
-					break;
+			case 1:
+				state = 0;
+				sdCard.deleteFile(fileLocation);
+				drawCANLogScroll();
+				break;
+			case 2:
+				state = 0;
+				drawCANLogScroll();
+				break;
+			case 3:
+				state = 0;
+				drawCANLogScroll();
+				break;
 			}
 		}
-		
+
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
@@ -890,7 +879,7 @@ void pageControl()
 					arrayIn[i] = 0x00;
 				}
 				sdCard.readFile(can1.getFullDir(), arrayIn);
-				
+
 				drawPIDStream();
 				hasDrawn = true;
 			}
@@ -987,7 +976,7 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			
+
 			hasDrawn = true;
 		}
 
@@ -1035,7 +1024,7 @@ void pageControl()
 
 		// Call buttons if any
 		clearDTC();
-		
+
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
@@ -1290,15 +1279,63 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			drawMSGSpam();
-			hasDrawn = true;
+			if (graphicLoaderState == 1)
+			{
+				// Lock global variables
+				bool error = false;
+				(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Stop/start (bool)
+				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // ID
+				(lockVar16(LOCK1)) ? g_var16[POS1] = 0x7FF : error = true; // Max
+				(lockVar16(LOCK2)) ? g_var16[POS2] = 0x000 : error = true; // Min
+				(lockVar16(LOCK3)) ? g_var16[POS3] = 30 : error = true; // Interval (ms)
+				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true; // Timer
+				if (error)
+				{
+					DEBUG_ERROR("Error: Variable locked");
+					nextPage = 27;
+				}
+			}
+			
+			switch (graphicLoaderState)
+			{
+			case 0:
+				break;
+			case 1:
+				// Above ^^
+				break;
+			case 2:
+				drawMSGSpam();
+				break;
+			case 3:
+				drawMSGSpamMin();
+				break;
+			case 4:
+				drawMSGSpamMax();
+				break;
+			case 5:
+				drawMSGInterval();
+				break;
+			case 6:
+				hasDrawn = true;
+				break;
+			}
+			graphicLoaderState++;
+			return;
 		}
 
 		// Call buttons if any
+		MSGSpam();
+		sendMSGButtons();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(LOCK0);
+			unlockVar16(LOCK0);
+			unlockVar16(LOCK1);
+			unlockVar16(LOCK2);
+			unlockVar16(LOCK3);
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1841,35 +1878,35 @@ void menuButtons()
 			if ((y >= 32) && (y <= 83))
 			{
 				// CANBUS
-				waitForItMenu(5, 32, 125, 83);
+				waitForIt(5, 32, 125, 83);
 				nextPage = 0;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 88) && (y <= 140))
 			{
 				// VEHTOOL
-				waitForItMenu(5, 88, 125, 140);
+				waitForIt(5, 88, 125, 140);
 				nextPage = 9;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 145) && (y <= 197))
 			{
 				// RZRTOOL
-				waitForItMenu(5, 145, 125, 197);
+				waitForIt(5, 145, 125, 197);
 				nextPage = 18;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 202) && (y <= 254))
 			{
 				// EXTRAFN
-				waitForItMenu(5, 202, 125, 254);
+				waitForIt(5, 202, 125, 254);
 				nextPage = 27;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 259) && (y <= 312))
 			{
 				// SETTING
-				waitForItMenu(5, 259, 125, 312);
+				waitForIt(5, 259, 125, 312);
 				nextPage = 36;
 				graphicLoaderState = 0;
 			}
@@ -1937,22 +1974,20 @@ void SDCardOut()
 	(isSDOut) && (can1.SDOutCAN(selectedChannelOut));
 }
 
-// Unselects menu button after touch
-void waitForItBackground()
+// Able to call background process from blocked loop
+void backgroundProcess()
 {
-	if (isWaitForIt && millis() - waitForItTimer > 50)
-	{
-		myGLCD.setColor(menuBtnBorder);
-		myGLCD.drawRoundRect(x1_, y1_, x2_, y2_);
-		isWaitForIt = false;
-	}
+	updateTime();
+	serialOut();
+	SDCardOut();
 }
 
 uint32_t testtimers = 0;
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
-	/* SD Card testing
+	// SD Card testing
+	/*
 	if (millis() - testtimers > 1000)
 	{
 		SerialUSB.println(Can0.available());
@@ -1963,10 +1998,7 @@ void loop()
 	pageControl();
 
 	// Background Processes
-	updateTime();
-	serialOut();
-	SDCardOut();
-	waitForItBackground();
+	backgroundProcess();
 }
 
 

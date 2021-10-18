@@ -18,7 +18,7 @@
 // Switch between usb ports
 // #define SERIAL_CAPTURE(x) Serial.print(x);
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
-#define SD_CAPTURE(x) sdCard.writeFile("capture.txt", x);
+#define SD_CAPTURE(x) sdCard.writeFileS("capture.txt", x);
 
 class CANBus
 {

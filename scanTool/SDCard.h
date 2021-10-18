@@ -21,6 +21,7 @@ class SDCard
 	 File myFile;
 	 typedef char MyArray[10][13];
  public:
+	 void writeFileS(char* filename, char* incoming);
 	bool startSD();
 	void createDRIVE(char*);
 	void readFile(char* filename, uint8_t* arrayIn);

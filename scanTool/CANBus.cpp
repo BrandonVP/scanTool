@@ -692,7 +692,6 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	return true;
 }
 
-
 // Displays CAN traffic on Serial out
 bool CANBus::SDOutCAN(uint8_t config)
 {

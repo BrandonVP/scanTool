@@ -422,6 +422,7 @@ void CaptureButtons()
 					isSDOut = true;
 					drawSquareBtn(310, 185, 470, 240, F("Start"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+					sdCard.writeFile("capture.txt", "");
 					break;
 				}
 			}
@@ -777,8 +778,6 @@ void drawCurrentBaud()
 // Draw the list of baud rates
 void drawBaudScroll()
 {
-	isWaitForIt = false;
-
 	// Starting y location for list
 	uint16_t y = 60;
 
@@ -1140,7 +1139,6 @@ void drawCANLog()
 // Draw playable filelist
 void drawCANLogScroll()
 {
-	isWaitForIt = false;
 	File root1;
 	root1 = SD.open("/");
 
@@ -1149,15 +1147,15 @@ void drawCANLogScroll()
 	// Starting y location for list
 	uint16_t y = 60;
 
-	drawSquareBtn(131, 80, 415, 240, "", themeBackground, themeBackground, themeBackground, CENTER);
+	//drawSquareBtn(131, 80, 415, 240, "", themeBackground, themeBackground, themeBackground, CENTER);
 
 	// Draw the scroll window
-	for (int i = 0; i < MAXSCROLL; i++)
+	for (uint8_t i = 0; i < MAXSCROLL; i++)
 	{
 		if ((g_var8[POS0] + i < 10))
 		{
 			char temp[13];
-			sprintf(temp, "%s", fileList[g_var8[POS0] + i]);
+			sprintf(temp, "%s", fileList[(g_var8[POS0] + i)]);
 			drawSquareBtn(150, y, 410, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
 		}
 		else
@@ -1183,32 +1181,32 @@ void CANLogButtons()
 			if ((y >= 60) && (y <= 95))
 			{
 				waitForItRect(150, 60, 410, 95);
-				g_var16[POS0] = 1 + g_var8[POS1];
+				g_var16[POS0] = 0 + g_var8[POS0];
 			}
 			if ((y >= 95) && (y <= 130))
 			{
 				waitForItRect(150, 95, 410, 130);
-				g_var16[POS0] = 2 + g_var8[POS1];
+				g_var16[POS0] = 1 + g_var8[POS0];
 			}
 			if ((y >= 130) && (y <= 165))
 			{
 				waitForItRect(150, 130, 410, 165);
-				g_var16[POS0] = 3 + g_var8[POS1];
+				g_var16[POS0] = 2 + g_var8[POS0];
 			}
 			if ((y >= 165) && (y <= 200))
 			{
 				waitForItRect(150, 165, 410, 200);
-				g_var16[POS0] = 4 + g_var8[POS1];
+				g_var16[POS0] = 3 + g_var8[POS0];
 			}
 			if ((y >= 200) && (y <= 235))
 			{
 				waitForItRect(150, 200, 410, 235);
-				g_var16[POS0] = 5 + g_var8[POS1];
+				g_var16[POS0] = 4 + g_var8[POS0];
 			}
 			if ((y >= 235) && (y <= 270))
 			{
 				waitForItRect(150, 235, 410, 270);
-				g_var16[POS0] = 6 + g_var8[POS1];
+				g_var16[POS0] = 5 + g_var8[POS0];
 			}
 		}
 		if ((x >= 420) && (x <= 470))
@@ -1216,9 +1214,9 @@ void CANLogButtons()
 			if ((y >= 80) && (y <= 160))
 			{
 				waitForItRect(420, 80, 470, 160);
-				if (g_var8[POS1] > 0)
+				if (g_var8[POS0] > 0)
 				{
-					g_var8[POS1]--;
+					g_var8[POS0]--;
 					drawCANLogScroll();
 				}
 			}
@@ -1228,9 +1226,9 @@ void CANLogButtons()
 			if ((y >= 160) && (y <= 240))
 			{
 				waitForItRect(420, 160, 470, 240);
-				if (g_var8[POS1] < 100)
+				if (g_var8[POS0] < 100)
 				{
-					g_var8[POS1]++;
+					g_var8[POS0]++;
 					drawCANLogScroll();
 				}
 			}
@@ -1238,12 +1236,18 @@ void CANLogButtons()
 		if ((y >= 275) && (y <= 315))
 		{
 			char fileLoc[20] = "CANLOG/";
-			strcat(fileLoc, fileList[g_var16[POS0] - 1]);
+			strcat(fileLoc, fileList[g_var16[POS0]]);
 			if ((x >= 131) && (x <= 216))
 			{
 				// Play
 				waitForItRect(131, 275, 216, 315);
+				drawSquareBtn(131, 275, 216, 315, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				delay(200);
 				sdCard.readLogFile(fileLoc);
+				delay(200);
+				myTouch.read();
+				drawSquareBtn(131, 275, 216, 315, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+
 			}
 			if ((x >= 216) && (x <= 301))
 			{

@@ -59,7 +59,6 @@ void extraFNButtons()
         x = myTouch.getX();
         y = myTouch.getY();
 
-        // Start Scan
         if ((x >= 140) && (x <= 305))
         {
             if ((y >= 80) && (y <= 130))
@@ -94,6 +93,7 @@ void extraFNButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // Message Spam
+                graphicLoaderState = 0;
                 nextPage = 29;
             }
             if ((y >= 135) && (y <= 185))
@@ -120,6 +120,8 @@ void extraFNButtons()
     }
 }
 
+/*============== OBD Simulator ==============*/
+
 // Draw the OBD Simulator page
 void drawOBDSimulator()
 {
@@ -127,21 +129,123 @@ void drawOBDSimulator()
     drawSquareBtn(131, 120, 479, 140, F("OBD Simulator Started"), themeBackground, themeBackground, menuBtnColor, CENTER);
  }
 
+/*============== Message Spam ==============*/
+
 // Draw the Message Spam page
 void drawMSGSpam()
 {
     drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(135, 115, 250, 175, F("Min ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 115, 320, 175, F("7FF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(135, 180, 250, 240, F("Max ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(255, 180, 320, 240, F("000"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(320, 90, 479, 110, F("Delay(ms)"), themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawRoundBtn(325, 150, 410, 205, F("30"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(135, 180, 250, 240, F("Min"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(135, 115, 250, 175, F("Max"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(300, 90, 479, 110, F("Interval(ms)"), themeBackground, themeBackground, menuBtnColor, CENTER);
     drawRoundBtn(415, 115, 475, 175, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(415, 180, 475, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(135, 255, 305, 305, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(310, 255, 475, 305, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
+
+void drawMSGSpamMin()
+{
+    drawRoundBtn(255, 180, 320, 240, String(g_var16[POS2], 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER); 
+}
+
+void drawMSGSpamMax()
+{
+    drawRoundBtn(255, 115, 320, 175, String(g_var16[POS1], 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
+
+void drawMSGInterval()
+{
+    drawRoundBtn(325, 150, 410, 205, String(g_var16[POS3]), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+}
+
+void incID()
+{
+    // Current ID is greater than max ID
+    if (g_var16[POS0] < g_var16[POS1])
+    {
+        // Increment ID
+        g_var16[POS0] = g_var16[POS0] + 0x001;
+    }
+    else
+    {
+        // Else set id to min value
+        g_var16[POS0] = g_var16[POS2];
+    }
+}
+
+void sendMSGButtons()
+{
+    if (myTouch.dataAvailable())
+    {
+        myTouch.read();
+        x = myTouch.getX();
+        y = myTouch.getY();
+
+        if ((y >= 255) && (y <= 305))
+        {
+            if ((x >= 135) && (x <= 305))
+            {
+                waitForIt(135, 255, 305, 305);
+                // Start
+                g_var8[POS0] = true;
+            }
+            if ((x >= 310) && (x <= 475))
+            {
+                waitForIt(310, 255, 475, 305);
+                // Stop
+                g_var8[POS0] = false;
+            }
+        }
+        if ((x >= 415) && (x <= 475))
+        {
+            if ((y >= 115) && (y <= 175))
+            {
+                //waitForIt(415, 115, 475, 175);
+                // Up
+                g_var16[POS3]++;
+                drawMSGInterval();
+                delay(50);
+            }
+            if ((y >= 180) && (y <= 240))
+            {
+                //waitForIt(415, 180, 475, 240);
+                // Down
+                if (g_var16[POS3] > 0)
+                {
+                    g_var16[POS3]--;
+                    drawMSGInterval();
+                    delay(50);
+                }
+            }
+        }
+    }
+}
+
+void sendMSG()
+{
+    uint8_t dataOut1[8] = { 0x5F, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x21, 0x5F };
+    uint8_t dataOut2[8] = { 0x42, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x00, 0x00 };
+    uint8_t dataOut3[8] = { 0x42, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D };
+    uint8_t dataOut4[8] = { 0x42, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xFF };
+    uint8_t dataOut5[8] = { 0x42, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
+    uint8_t dataOut6[8] = { 0x42, 0xBC, 0xEF, 0xDA, 0xCE, 0xAF, 0xEB, 0xCD };
+    uint8_t dataOut7[8] = { 0x42, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22 };
+    uint8_t dataOut8[8] = { 0x42, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11 };
+
+    can1.sendFrame(g_var16[POS0], dataOut1, 8, false);
+}
+
+void MSGSpam()
+{
+    if (g_var8[POS0] == 1 && millis() - g_var32[POS0] > g_var16[POS3])
+    {
+        sendMSG();
+        incID();
+        g_var32[POS0] = millis();
+    }
+}
+/*============== Dongle Simulator ==============*/
 
 // Draw test deck for Terminator (GM)
 void drawDongleSim()
