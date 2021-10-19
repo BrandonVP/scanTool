@@ -103,5 +103,5 @@ extern int keypadButtons();
 extern void drawKeypad();
 extern bool loadBar(int);
 extern void drawErrorMSG(String title, String eMessage1, String eMessage2);
-void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);
+extern void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);
 #endif // EXTERN_H

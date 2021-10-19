@@ -5,10 +5,11 @@
 #include "VehicleTools.h"
 #include "common.h"
 #include "definitions.h"
-
+#include "CANBus.h"
 /*=========================================================
     Vehicle Tools
 ===========================================================*/
+// Draw Vehicle tools menu buttons
 void drawVehicleTools()
 {
     switch (graphicLoaderState)
@@ -48,7 +49,7 @@ void drawVehicleTools()
     }
 }
 
-// TODO: Odd even button page assignments are swapped
+// Buttons to start Vehicle tool programs
 void VehicleToolButtons()
 {
     // Touch screen controls
@@ -101,6 +102,7 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 135, 475, 185);
                 // VIN
+                can1.setFilterMask0(0x7E8, 0x7FF);
                 state = 0;
                 nextPage = 13;
                 
@@ -111,7 +113,6 @@ void VehicleToolButtons()
                 // DTC Clear
                 nextPage = 15;
                 
-
                 // Initialize state machine variables to 0
                 state = 0;
             }
@@ -209,7 +210,7 @@ void drawPIDStream()
     drawRoundBtn(150, 275, 410, 315, F("Stream PID"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-//
+// Buttons for the PID Stream program
 void PIDStreamButtons()
 {
     // Touch screen controls
@@ -483,6 +484,7 @@ void drawClearDTC()
     drawRoundBtn(310, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
+// Buttons for the DTC program
 uint8_t DTCButtons()
 {
     // Touch screen controls

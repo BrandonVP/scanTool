@@ -19,6 +19,9 @@ Organize / move output variables into a settings structure
 	End Todo List
 =========================================================*/
 
+//#define DEBUG_KEYBOARD(x)  SerialUSB.println(x);
+#define DEBUG_KEYBOARD(x)
+
 // Libraries
 #include "Variables.h"
 #include <malloc.h>
@@ -260,31 +263,6 @@ uint32_t read32(File f) {
 	return result;
 }
 
-// Custom bitmap
-void print_icon(int x, int y, const unsigned char icon[]) {
-	myGLCD.setColor(menuBtnColor);
-	myGLCD.setBackColor(themeBackground);
-	int i = 0, row, column, bit, temp;
-	int constant = 1;
-	for (row = 0; row < 40; row++) {
-		for (column = 0; column < 5; column++) {
-			temp = icon[i];
-			for (bit = 7; bit >= 0; bit--) {
-
-				if (temp & constant) {
-					myGLCD.drawPixel(x + (column * 8) + (8 - bit), y + row);
-				}
-				else {
-
-				}
-				temp >>= 1;
-			}
-			i++;
-		}
-	}
-}
-
-
 extern char _end;
 extern "C" char* sbrk(int i);
 // https://forum.arduino.cc/t/getting-heap-size-stack-size-and-free-ram-from-due/678195/5
@@ -324,132 +302,6 @@ void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t M
 	drawRoundBtn(135, 245, 310, 295, F("FREE RAM"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(315, 245, 475, 295, String(MinfreeRAM), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
-}
-
-
-/*****************************************************
-*           Draw Round/Square Button                 *
-*                                                    *
-*  Description:   Draws shapes with/without text     *
-*  Parameters: int: x start, y start, x stop, y stop *
-*              String: Button text                   *
-*              Hex value: Background Color           *
-*              Hex value: Border of shape            *
-*              Hex value: Color of text              *
-*              int: Alignment of text #defined as    *
-*                   LEFT, CENTER, RIGHT              *
-*****************************************************/
-void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
-	int size, temp, offset;
-
-	myGLCD.setColor(backgroundColor);
-	myGLCD.fillRoundRect(x_start, y_start, x_stop, y_stop); // H_Start, V_Start, H_Stop, V_Stop
-	myGLCD.setColor(btnBorderColor);
-	myGLCD.drawRoundRect(x_start, y_start, x_stop, y_stop);
-	myGLCD.setColor(btnTxtColor); // text color
-	myGLCD.setBackColor(backgroundColor); // text background
-	switch (align)
-	{
-	case 1:
-		myGLCD.print(button, x_start + 5, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
-		break;
-	case 2:
-		size = button.length();
-		temp = ((x_stop - x_start) / 2);
-		offset = x_start + (temp - (8 * size));
-		myGLCD.print(button, offset, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
-		break;
-	case 3:
-		// Currently hotwired for deg text only
-		myGLCD.print(button, x_start + 55, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
-		break;
-	default:
-		break;
-	}
-}
-void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
-	int size, temp, offset;
-	myGLCD.setColor(backgroundColor);
-	myGLCD.fillRect(x_start, y_start, x_stop, y_stop); // H_Start, V_Start, H_Stop, V_Stop
-	myGLCD.setColor(btnBorderColor);
-	myGLCD.drawRect(x_start, y_start, x_stop, y_stop);
-	myGLCD.setColor(btnTxtColor); // text color
-	myGLCD.setBackColor(backgroundColor); // text background
-	switch (align)
-	{
-	case 1:
-		myGLCD.print(button, x_start + 5, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
-		break;
-	case 2:
-		size = button.length();
-		temp = ((x_stop - x_start) / 2);
-		offset = x_start + (temp - (8 * size));
-		myGLCD.print(button, offset, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
-		break;
-	case 3:
-		//align left
-		break;
-	default:
-		break;
-	}
-}
-
-// Function complete load bar
-bool loadBar(int progress)
-{
-	if (progress >= DONE)
-	{
-		drawSquareBtn(200, 200, 400, 220, F("Finished"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//myGLCD.setColor(menuBtnColor);
-		//myGLCD.fillRect(200, 200, 400, 220);
-
-		return true;
-	}
-	drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
-	myGLCD.setColor(menuBtnColor);
-	myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
-	return false;
-}
-
-void waitForIt(int x1, int y1, int x2, int y2)
-{
-	myGLCD.setColor(themeBackground);
-	myGLCD.drawRoundRect(x1, y1, x2, y2);
-	while (myTouch.dataAvailable())
-	{
-		myTouch.read();
-		backgroundProcess();
-	}
-
-	myGLCD.setColor(menuBtnBorder);
-	myGLCD.drawRoundRect(x1, y1, x2, y2);
-}
-void waitForItRect(int x1, int y1, int x2, int y2)
-{
-	myGLCD.setColor(themeBackground);
-	myGLCD.drawRect(x1, y1, x2, y2);
-	while (myTouch.dataAvailable())
-	{
-		myTouch.read();
-		backgroundProcess();
-	}
-	myGLCD.setColor(menuBtnBorder);
-	myGLCD.drawRect(x1, y1, x2, y2);
-}
-
-// Only called once at startup to draw the menu
-void drawMenu()
-{
-	// Draw Layout
-	drawSquareBtn(0, 0, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-	drawSquareBtn(0, 0, 130, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
-
-	// Draw Menu Buttons
-	drawRoundBtn(5, 32, 125, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(5, 88, 125, 140, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(5, 145, 125, 197, F("UTVTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(5, 202, 125, 254, F("TESTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(5, 259, 125, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // Manages the different App pages
@@ -918,6 +770,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			can1.setFilterMask0(0x0, 0x0);
 			unlockVar8(LOCK0);
 			unlockVar16(LOCK0);
 			unlockVar16(LOCK1);
@@ -967,6 +820,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			can1.setFilterMask0(0x0, 0x0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1345,11 +1199,13 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			drawkeyboard();
 			hasDrawn = true;
 		}
 
 		// Call buttons if any
-
+		keyboardButtons();
+		
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
@@ -1642,6 +1498,221 @@ void pageControl()
 	}
 }
 
+// the setup function runs once when you press reset or power the board
+void setup()
+{
+	Serial.begin(115200);
+	SerialUSB.begin(CAN_BPS_500K);
+
+	can1.startCAN0(0x000, 0x7FF);
+	can1.startCAN1(0x000, 0x7FF);
+
+	(sdCard.startSD()) ? Serial.println("SD Running") : Serial.println("SD failed");
+
+	// Initialize the rtc object
+	rtc.begin();
+#if defined UPDATE_CLOCK
+	rtc.setDOW(FRIDAY);
+	rtc.setTime(__TIME__);
+	rtc.setDate(__DATE__);
+#endif
+	// LCD  and touch screen settings
+	myGLCD.InitLCD();
+	myGLCD.clrScr();
+
+	myTouch.InitTouch();
+	myTouch.setPrecision(PREC_MEDIUM);
+
+	myGLCD.setFont(BigFont);
+	myGLCD.setBackColor(0, 0, 255);
+
+	// Only drawn at startup
+	drawMenu();
+
+	// Draw the Hypertech logo
+	bmpDraw("System/HYPER.bmp", 0, 0);
+}
+
+
+/*=========================================================
+	Buttons / Keypads
+===========================================================*/
+/*****************************************************
+*           Draw Round/Square Button                 *
+*                                                    *
+*  Description:   Draws shapes with/without text     *
+*  Parameters: int: x start, y start, x stop, y stop *
+*              String: Button text                   *
+*              Hex value: Background Color           *
+*              Hex value: Border of shape            *
+*              Hex value: Color of text              *
+*              int: Alignment of text #defined as    *
+*                   LEFT, CENTER, RIGHT              *
+*****************************************************/
+void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
+	int size, temp, offset;
+
+	myGLCD.setColor(backgroundColor);
+	myGLCD.fillRoundRect(x_start, y_start, x_stop, y_stop); // H_Start, V_Start, H_Stop, V_Stop
+	myGLCD.setColor(btnBorderColor);
+	myGLCD.drawRoundRect(x_start, y_start, x_stop, y_stop);
+	myGLCD.setColor(btnTxtColor); // text color
+	myGLCD.setBackColor(backgroundColor); // text background
+	switch (align)
+	{
+	case 1:
+		myGLCD.print(button, x_start + 5, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
+		break;
+	case 2:
+		size = button.length();
+		temp = ((x_stop - x_start) / 2);
+		offset = x_start + (temp - (8 * size));
+		myGLCD.print(button, offset, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
+		break;
+	case 3:
+		// Currently hotwired for deg text only
+		myGLCD.print(button, x_start + 55, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
+		break;
+	default:
+		break;
+	}
+}
+void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align) {
+	int size, temp, offset;
+	myGLCD.setColor(backgroundColor);
+	myGLCD.fillRect(x_start, y_start, x_stop, y_stop); // H_Start, V_Start, H_Stop, V_Stop
+	myGLCD.setColor(btnBorderColor);
+	myGLCD.drawRect(x_start, y_start, x_stop, y_stop);
+	myGLCD.setColor(btnTxtColor); // text color
+	myGLCD.setBackColor(backgroundColor); // text background
+	switch (align)
+	{
+	case 1:
+		myGLCD.print(button, x_start + 5, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
+		break;
+	case 2:
+		size = button.length();
+		temp = ((x_stop - x_start) / 2);
+		offset = x_start + (temp - (8 * size));
+		myGLCD.print(button, offset, y_start + ((y_stop - y_start) / 2) - 8); // hor, ver
+		break;
+	case 3:
+		//align left
+		break;
+	default:
+		break;
+	}
+}
+
+// Function complete load bar
+bool loadBar(int progress)
+{
+	if (progress >= DONE)
+	{
+		drawSquareBtn(200, 200, 400, 220, F("Finished"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		//myGLCD.setColor(menuBtnColor);
+		//myGLCD.fillRect(200, 200, 400, 220);
+
+		return true;
+	}
+	drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
+	myGLCD.setColor(menuBtnColor);
+	myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
+	return false;
+}
+
+void waitForIt(int x1, int y1, int x2, int y2)
+{
+	myGLCD.setColor(themeBackground);
+	myGLCD.drawRoundRect(x1, y1, x2, y2);
+	while (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		backgroundProcess();
+	}
+
+	myGLCD.setColor(menuBtnBorder);
+	myGLCD.drawRoundRect(x1, y1, x2, y2);
+}
+void waitForItRect(int x1, int y1, int x2, int y2)
+{
+	myGLCD.setColor(themeBackground);
+	myGLCD.drawRect(x1, y1, x2, y2);
+	while (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		backgroundProcess();
+	}
+	myGLCD.setColor(menuBtnBorder);
+	myGLCD.drawRect(x1, y1, x2, y2);
+}
+
+// Only called once at startup to draw the menu
+void drawMenu()
+{
+	// Draw Layout
+	drawSquareBtn(0, 0, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	drawSquareBtn(0, 0, 130, 319, "", menuBackground, menuBackground, menuBackground, CENTER);
+
+	// Draw Menu Buttons
+	drawRoundBtn(5, 32, 125, 83, F("CANBUS"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(5, 88, 125, 140, F("VEHTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(5, 145, 125, 197, F("UTVTOOL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(5, 202, 125, 254, F("TESTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(5, 259, 125, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
+
+// Button functions for main menu
+void menuButtons()
+{
+	// Touch screen controls
+	if (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		x = myTouch.getX();
+		y = myTouch.getY();
+
+		if ((x >= 5) && (x <= 125))
+		{
+			if ((y >= 32) && (y <= 83))
+			{
+				// CANBUS
+				waitForIt(5, 32, 125, 83);
+				nextPage = 0;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 88) && (y <= 140))
+			{
+				// VEHTOOL
+				waitForIt(5, 88, 125, 140);
+				nextPage = 9;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 145) && (y <= 197))
+			{
+				// RZRTOOL
+				waitForIt(5, 145, 125, 197);
+				nextPage = 18;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 202) && (y <= 254))
+			{
+				// EXTRAFN
+				waitForIt(5, 202, 125, 254);
+				nextPage = 27;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 259) && (y <= 312))
+			{
+				// SETTING
+				waitForIt(5, 259, 125, 312);
+				nextPage = 36;
+				graphicLoaderState = 0;
+			}
+		}
+	}
+}
+
 // User input keypad
 void drawKeypad()
 {
@@ -1813,6 +1884,354 @@ int keypadButtons()
 	return 0xFF;
 }
 
+// User input keypad
+void drawkeyboard()
+{
+	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	//SerialUSB.println("");
+	uint16_t posY = 56;
+	uint8_t numPad = 0x00;
+
+	const char keyboardInput[36] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+									 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+									 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+									 'u', 'v', 'w', 'x', 'y', 'z' };
+	uint8_t count = 0;
+
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		int posX = 135;
+		for (uint8_t j = 0; j < 10; j++)
+		{
+			if (count < 36)
+			{
+				drawRoundBtn(posX, posY, posX + 32, posY + 40, String(keyboardInput[count]), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				/*
+				SerialUSB.print(posX);
+				SerialUSB.print(" , ");
+				SerialUSB.print(posY);
+				SerialUSB.print(" , ");
+				SerialUSB.print((posX + 32));
+				SerialUSB.print(" , ");
+				SerialUSB.println((posY + 40));
+				*/
+				posX += 34;
+				count++;
+			}
+		}
+		posY += 43;
+	}
+	drawRoundBtn(340, 185, 474, 225, F("<--"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(135, 230, 240, 270, F("Input:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(245, 230, 475, 270, F("filename"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(135, 275, 305, 315, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(310, 275, 475, 315, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
+
+// User input keyboard
+int keyboardButtons()
+{
+	// Touch screen controls
+	if (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		x = myTouch.getX();
+		y = myTouch.getY();
+
+		if ((y >= 56) && (y <= 96))
+		{
+			if ((x >= 135) && (x <= 167))
+			{
+				waitForIt(135, 56, 167, 96);
+				// 0
+				DEBUG_KEYBOARD("0");
+				return 0xE0;
+			}
+			if ((x >= 169) && (x <= 201))
+			{
+				waitForIt(169, 56, 201, 96);
+				// 1
+				DEBUG_KEYBOARD("1");
+				return 0xE1;
+			}
+			if ((x >= 203) && (x <= 235))
+			{
+				waitForIt(203, 56, 235, 96);
+				// 2
+				DEBUG_KEYBOARD("2");
+				return 0xE2;
+			}
+			if ((x >= 237) && (x <= 269))
+			{
+				waitForIt(237, 56, 269, 96);
+				// 3
+				DEBUG_KEYBOARD("3");
+				return 0xE3;
+			}
+			if ((x >= 271) && (x <= 303))
+			{
+				waitForIt(271, 56, 303, 96);
+				// 4
+				DEBUG_KEYBOARD("4");
+				return 0xE4;
+			}
+			if ((x >= 305) && (x <= 337))
+			{
+				waitForIt(305, 56, 337, 96);
+				// 5
+				DEBUG_KEYBOARD("5");
+				return 0xE5;
+			}
+			if ((x >= 339) && (x <= 371))
+			{
+				waitForIt(339, 56, 371, 96);
+				// 6
+				DEBUG_KEYBOARD("6");
+				return 0xE6;
+			}
+			if ((x >= 373) && (x <= 405))
+			{
+				waitForIt(373, 56, 405, 96);
+				// 7
+				DEBUG_KEYBOARD("7");
+				return 0xE7;
+			}
+			if ((x >= 407) && (x <= 439))
+			{
+				waitForIt(407, 56, 439, 96);
+				// 8
+				DEBUG_KEYBOARD("8");
+				return 0xE8;
+			}
+			if ((x >= 441) && (x <= 473))
+			{
+				waitForIt(441, 56, 473, 96);
+				// 9
+				DEBUG_KEYBOARD("9");
+				return 0xE9;
+			}
+		}
+		if ((y >= 99) && (y <= 139))
+		{
+			if ((x >= 135) && (x <= 167))
+			{
+				waitForIt(135, 99, 167, 139);
+				// a
+				DEBUG_KEYBOARD("a");
+				return 1;
+			}
+			if ((x >= 169) && (x <= 201))
+			{
+				waitForIt(169, 99, 201, 139);
+				// b
+				DEBUG_KEYBOARD("b");
+				return 2;
+			}
+			if ((x >= 203) && (x <= 235))
+			{
+				waitForIt(203, 99, 235, 139);
+				// c
+				DEBUG_KEYBOARD("c");
+				return 3;
+			}
+			if ((x >= 237) && (x <= 269))
+			{
+				waitForIt(237, 99, 269, 139);
+				// d
+				DEBUG_KEYBOARD("d");
+				return 4;
+			}
+			if ((x >= 271) && (x <= 303))
+			{
+				waitForIt(271, 99, 303, 139);
+				// e
+				DEBUG_KEYBOARD("e");
+				return 5;
+			}
+			if ((x >= 305) && (x <= 337))
+			{
+				waitForIt(305, 99, 337, 139);
+				// f
+				DEBUG_KEYBOARD("f");
+				return 6;
+			}
+			if ((x >= 339) && (x <= 371))
+			{
+				waitForIt(339, 99, 371, 139);
+				// g
+				DEBUG_KEYBOARD("g");
+				return 7;
+			}
+			if ((x >= 373) && (x <= 405))
+			{
+				waitForIt(373, 99, 405, 139);
+				// h
+				DEBUG_KEYBOARD("h");
+				return 8;
+			}
+			if ((x >= 407) && (x <= 439))
+			{
+				waitForIt(407, 99, 439, 139);
+				// i
+				DEBUG_KEYBOARD("i");
+				return 9;
+			}
+			if ((x >= 441) && (x <= 473))
+			{
+				waitForIt(441, 99, 473, 139);
+				// j
+				DEBUG_KEYBOARD("j");
+				return 10;
+			}
+		}
+		if ((y >= 142) && (y <= 182))
+		{
+			if ((x >= 135) && (x <= 167))
+			{
+				waitForIt(135, 142, 167, 182);
+				// k
+				DEBUG_KEYBOARD("k");
+				return 11;
+			}
+			if ((x >= 169) && (x <= 201))
+			{
+				waitForIt(169, 142, 201, 182);
+				// l
+				DEBUG_KEYBOARD("l");
+				return 12;
+			}
+			if ((x >= 203) && (x <= 235))
+			{
+				waitForIt(203, 142, 235, 182);
+				// m
+				DEBUG_KEYBOARD("m");
+				return 13;
+			}
+			if ((x >= 237) && (x <= 269))
+			{
+				waitForIt(237, 142, 269, 182);
+				// n
+				DEBUG_KEYBOARD("n");
+				return 14;
+			}
+			if ((x >= 271) && (x <= 303))
+			{
+				waitForIt(271, 142, 303, 182);
+				// o
+				DEBUG_KEYBOARD("o");
+				return 15;
+			}
+			if ((x >= 305) && (x <= 337))
+			{
+				waitForIt(305, 142, 337, 182);
+				// p
+				DEBUG_KEYBOARD("p");
+				return 16;
+			}
+			if ((x >= 339) && (x <= 371))
+			{
+				waitForIt(339, 142, 371, 182);
+				// q
+				DEBUG_KEYBOARD("q");
+				return 17;
+			}
+			if ((x >= 373) && (x <= 405))
+			{
+				waitForIt(373, 142, 405, 182);
+				// r
+				DEBUG_KEYBOARD("r");
+				return 18;
+			}
+			if ((x >= 407) && (x <= 439))
+			{
+				waitForIt(407, 142, 439, 182);
+				// s
+				DEBUG_KEYBOARD("s");
+				return 19;
+			}
+			if ((x >= 441) && (x <= 473))
+			{
+				waitForIt(441, 142, 473, 182);
+				// t
+				DEBUG_KEYBOARD("t");
+				return 20;
+			}
+		}
+		if ((y >= 185) && (y <= 225))
+		{
+			if ((x >= 135) && (x <= 167))
+			{
+				waitForIt(135, 185, 167, 225);
+				// u
+				DEBUG_KEYBOARD("u");
+				return 21;
+			}
+			if ((x >= 169) && (x <= 201))
+			{
+				waitForIt(169, 185, 201, 225);
+				// v
+				DEBUG_KEYBOARD("v");
+				return 22;
+			}
+			
+			if ((x >= 203) && (x <= 235))
+			{
+				waitForIt(203, 185, 235, 225);
+				// w
+				DEBUG_KEYBOARD("w");
+				return 23;
+			}
+			if ((x >= 237) && (x <= 269))
+			{
+				waitForIt(237, 185, 269, 225);
+				// x
+				DEBUG_KEYBOARD("x");
+				return 24;
+			}
+			if ((x >= 271) && (x <= 303))
+			{
+				waitForIt(271, 185, 303, 225);
+				// y
+				DEBUG_KEYBOARD("y");
+				return 25;
+			}
+			if ((x >= 305) && (x <= 337))
+			{
+				waitForIt(305, 185, 337, 225);
+				// z
+				DEBUG_KEYBOARD("z");
+				return 26;
+			}
+			if ((x >= 340) && (x <= 474))
+			{
+				waitForIt(340, 185, 474, 225);
+				// Backspace
+				DEBUG_KEYBOARD("Backspace");
+				return 0xF2;
+			}
+		}
+		if ((y >= 275) && (y <= 315))
+		{
+			if ((x >= 135) && (x <= 305))
+			{
+				waitForIt(135, 275, 305, 315);
+				// Accept
+				DEBUG_KEYBOARD("Accept");
+				return 0xF1;
+
+			}
+			if ((x >= 310) && (x <= 475))
+			{
+				waitForIt(310, 275, 475, 315);
+				// Cancel
+				DEBUG_KEYBOARD("Cancel");
+				return 0xF0;
+			}
+		}
+	}
+	return 0xFF;
+}
+
 // Error Message function
 void drawErrorMSG(String title, String eMessage1, String eMessage2)
 {
@@ -1863,91 +2282,6 @@ uint8_t errorMSGButton(uint8_t returnPage)
 	return 0;
 }
 
-// Button functions for main menu
-void menuButtons()
-{
-	// Touch screen controls
-	if (myTouch.dataAvailable())
-	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
-		if ((x >= 5) && (x <= 125))
-		{
-			if ((y >= 32) && (y <= 83))
-			{
-				// CANBUS
-				waitForIt(5, 32, 125, 83);
-				nextPage = 0;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 88) && (y <= 140))
-			{
-				// VEHTOOL
-				waitForIt(5, 88, 125, 140);
-				nextPage = 9;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 145) && (y <= 197))
-			{
-				// RZRTOOL
-				waitForIt(5, 145, 125, 197);
-				nextPage = 18;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 202) && (y <= 254))
-			{
-				// EXTRAFN
-				waitForIt(5, 202, 125, 254);
-				nextPage = 27;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 259) && (y <= 312))
-			{
-				// SETTING
-				waitForIt(5, 259, 125, 312);
-				nextPage = 36;
-				graphicLoaderState = 0;
-			}
-		}
-	}
-}
-
-// the setup function runs once when you press reset or power the board
-void setup()
-{
-	Serial.begin(115200);
-	SerialUSB.begin(CAN_BPS_500K);
-
-	can1.startCAN0(0x000, 0x800);
-	can1.startCAN1(0x000, 0x800);
-
-	(sdCard.startSD()) ? Serial.println("SD Running") : Serial.println("SD failed");
-
-	// Initialize the rtc object
-	rtc.begin();
-#if defined UPDATE_CLOCK
-	rtc.setDOW(FRIDAY);
-	rtc.setTime(__TIME__);
-	rtc.setDate(__DATE__);
-#endif
-	// LCD  and touch screen settings
-	myGLCD.InitLCD();
-	myGLCD.clrScr();
-
-	myTouch.InitTouch();
-	myTouch.setPrecision(PREC_MEDIUM);
-
-	myGLCD.setFont(BigFont);
-	myGLCD.setBackColor(0, 0, 255);
-
-	drawMenu();
-
-	// Draw the Hypertech logo
-	bmpDraw("System/HYPER.bmp", 0, 0);
-}
-
 /*=========================================================
 	Background Processes
 ===========================================================*/
@@ -1982,6 +2316,10 @@ void backgroundProcess()
 	SDCardOut();
 }
 
+
+/*=========================================================
+	Main loop
+===========================================================*/
 uint32_t testtimers = 0;
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()

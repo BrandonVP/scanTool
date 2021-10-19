@@ -401,7 +401,6 @@ void CaptureButtons()
 			{
 				waitForIt(310, 185, 470, 240);
 				// Start
-				SerialUSB.println(selectedSourceOut);
 				switch (selectedSourceOut)
 				{
 				case 1: // LCD

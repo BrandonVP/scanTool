@@ -26,7 +26,7 @@ void drawExtraFN()
         drawRoundBtn(310, 80, 475, 130, F("MSG Spam"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(140, 135, 305, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 135, 305, 185, F("Test"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
         drawRoundBtn(310, 135, 475, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -71,7 +71,8 @@ void extraFNButtons()
             {
                 waitForIt(140, 135, 305, 185);
                 // Unused
-                //nextPage = 30;
+                nextPage = 30;
+                hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -135,9 +136,9 @@ void drawOBDSimulator()
 void drawMSGSpam()
 {
     drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawRoundBtn(135, 180, 250, 240, F("Min"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(135, 115, 250, 175, F("Max"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(300, 90, 479, 110, F("Interval(ms)"), themeBackground, themeBackground, menuBtnColor, CENTER);
+    drawRoundBtn(135, 180, 240, 240, F("Min:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(135, 115, 240, 175, F("Max:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+    drawSquareBtn(290, 90, 479, 110, F("Interval(ms)"), themeBackground, themeBackground, menuBtnColor, CENTER);
     drawRoundBtn(415, 115, 475, 175, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(415, 180, 475, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
     drawRoundBtn(135, 255, 305, 305, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -146,12 +147,12 @@ void drawMSGSpam()
 
 void drawMSGSpamMin()
 {
-    drawRoundBtn(255, 180, 320, 240, String(g_var16[POS2], 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER); 
+    drawRoundBtn(245, 180, 320, 240, String(g_var16[POS2], 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER); 
 }
 
 void drawMSGSpamMax()
 {
-    drawRoundBtn(255, 115, 320, 175, String(g_var16[POS1], 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    drawRoundBtn(245, 115, 320, 175, String(g_var16[POS1], 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
 void drawMSGInterval()
@@ -201,21 +202,19 @@ void sendMSGButtons()
         {
             if ((y >= 115) && (y <= 175))
             {
-                //waitForIt(415, 115, 475, 175);
+                waitForIt(415, 115, 475, 175);
                 // Up
                 g_var16[POS3]++;
                 drawMSGInterval();
-                delay(50);
             }
             if ((y >= 180) && (y <= 240))
             {
-                //waitForIt(415, 180, 475, 240);
+                waitForIt(415, 180, 475, 240);
                 // Down
                 if (g_var16[POS3] > 0)
                 {
                     g_var16[POS3]--;
                     drawMSGInterval();
-                    delay(50);
                 }
             }
         }

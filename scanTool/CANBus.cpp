@@ -235,7 +235,6 @@ uint8_t CANBus::requestVIN(uint16_t state, bool saveSD)
 	switch (state)
 	{
 	case 0:
-		setFilterMask0(0x7E8, 0x7FF);
 		sendFrame(0x7E0, ReadVIN1st);
 		return ++state;
 		break;
