@@ -1178,8 +1178,11 @@ void pageControl()
 		}
 
 		// Call buttons if any
-		MSGSpam();
-		sendMSGButtons();
+		if (state == 0)
+		{
+			MSGSpam();
+			sendMSGButtons();
+		}
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1716,7 +1719,7 @@ void menuButtons()
 // User input keypad
 void drawKeypad()
 {
-	drawSquareBtn(145, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 	drawSquareBtn(180, 57, 460, 77, F("Keypad"), themeBackground, themeBackground, menuBtnColor, CENTER);
 
 	uint16_t posY = 80;

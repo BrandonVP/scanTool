@@ -95,6 +95,7 @@ void extraFNButtons()
                 waitForIt(310, 80, 475, 130);
                 // Message Spam
                 graphicLoaderState = 0;
+                state = 0;
                 nextPage = 29;
             }
             if ((y >= 135) && (y <= 185))
@@ -196,6 +197,19 @@ void sendMSGButtons()
                 waitForIt(310, 255, 475, 305);
                 // Stop
                 g_var8[POS0] = false;
+            }
+        }
+        if ((x >= 245) && (x <= 320))
+        {
+            if ((y >= 180) && (y <= 240))
+            {
+                waitForIt(245, 180, 320, 240);
+                // Min
+            }
+            if ((y >= 115) && (y <= 175))
+            {
+                waitForIt(245, 115, 320, 175);
+                // Max
             }
         }
         if ((x >= 415) && (x <= 475))
