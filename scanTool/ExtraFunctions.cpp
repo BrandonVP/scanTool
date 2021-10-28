@@ -26,13 +26,13 @@ bool drawExtraFN()
         drawRoundBtn(310, 80, 475, 130, F("MSG Spam"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(140, 135, 305, 185, F("Test"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 135, 305, 185, F("Keyboard"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
-        drawRoundBtn(310, 135, 475, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 135, 475, 185, F("Keypad H"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(140, 190, 305, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 190, 305, 240, F("Keypad D"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
         drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -74,15 +74,15 @@ void extraFNButtons()
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(140, 135, 305, 185);
-                // Unused
+                // Keyboard
                 nextPage = 30;
                 hasDrawn = false;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(140, 190, 305, 240);
-                // Unused
-                //nextPage = 32;
+                // Keypad D
+                nextPage = 32;
             }
             if ((y >= 245) && (y <= 295))
             {
@@ -105,8 +105,8 @@ void extraFNButtons()
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(310, 135, 475, 185);
-                // Unused
-                //nextPage = 31;
+                // Keypad H
+                nextPage = 31;
             }
             if ((y >= 190) && (y <= 240))
             {
@@ -203,17 +203,28 @@ void sendMSGButtons()
                 g_var8[POS0] = false;
             }
         }
+        if ((x >= 325) && (x <= 410))
+        {
+            if ((y >= 150) && (y <= 205))
+            {
+                waitForIt(325, 150, 410, 205);
+                // Interval
+                state = 1;
+            }
+        }
         if ((x >= 245) && (x <= 320))
         {
             if ((y >= 180) && (y <= 240))
             {
                 waitForIt(245, 180, 320, 240);
                 // Min
+                state = 2;
             }
             if ((y >= 115) && (y <= 175))
             {
                 waitForIt(245, 115, 320, 175);
                 // Max
+                state = 3;
             }
         }
         if ((x >= 415) && (x <= 475))

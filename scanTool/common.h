@@ -94,6 +94,7 @@ extern bool hasPID;
 extern uint32_t timer2;
 extern bool isSerialOut;
 extern bool isSDOut;
+extern bool isMSGSpam;
 
 extern void waitForIt(int x1, int y1, int x2, int y2);
 extern void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);

@@ -67,6 +67,7 @@ uint8_t selectedSourceOut = 0;
 uint32_t updateClock = 0;
 bool isSerialOut = false;
 bool isSDOut = false;
+bool isMSGSpam = false;
 
 // General use variables
 uint8_t state = 0;
@@ -78,6 +79,7 @@ uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
 char keyboardInput[10] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+uint8_t keypadInput[3] = {0, 0, 0};
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
@@ -1135,11 +1137,12 @@ void pageControl()
 			{
 				// Lock global variables
 				bool error = false;
-				(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Stop/start (bool)
+				(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // Keypad index
 				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // ID
 				(lockVar16(LOCK1)) ? g_var16[POS1] = 0x7FF : error = true; // Max
 				(lockVar16(LOCK2)) ? g_var16[POS2] = 0x000 : error = true; // Min
 				(lockVar16(LOCK3)) ? g_var16[POS3] = 30 : error = true; // Interval (ms)
+				(lockVar16(LOCK4)) ? g_var16[POS4] = 30 : error = true; // Keypad total
 				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true; // Timer
 				if (error)
 				{
@@ -1180,16 +1183,89 @@ void pageControl()
 		{
 			MSGSpam();
 			sendMSGButtons();
+			if (state == 1)
+			{
+				drawKeypadDec();
+				g_var8[POS1] = 0;
+				g_var16[POS4] = 0;
+				keypadInput[0] = 0;
+				keypadInput[1] = 0;
+				keypadInput[2] = 0;
+			}
+			if (state == 2 || state == 3)
+			{
+				drawKeypad();
+				g_var8[POS1] = 0;
+				g_var16[POS4] = 0;
+				keypadInput[0] = 0;
+				keypadInput[1] = 0;
+				keypadInput[2] = 0;
+			}
+		}
+		if (state == 1)
+		{
+			MSGSpam();
+			uint8_t input = keypadControllerDec(g_var8[POS1], g_var16[POS4]);
+			if (input == 0xF1)
+			{
+				g_var16[POS3] = g_var16[POS4];
+				state = 0;
+				hasDrawn = false;
+				graphicLoaderState = 2;
+			}
+			if (input == 0xF0)
+			{
+				state = 0;
+				hasDrawn = false;
+				graphicLoaderState = 2;
+			}
+		}
+		if (state == 2)
+		{
+			MSGSpam();
+			uint8_t input = keypadController(g_var8[POS1], g_var16[POS4]);
+			if (input == 0xF1)
+			{
+				g_var16[POS2] = g_var16[POS4];
+				state = 0;
+				hasDrawn = false;
+				graphicLoaderState = 2;
+			}
+			if (input == 0xF0)
+			{
+				state = 0;
+				hasDrawn = false;
+				graphicLoaderState = 2;
+			}
+		}
+		if (state == 3)
+		{
+			MSGSpam();
+			uint8_t input = keypadController(g_var8[POS1], g_var16[POS4]);
+			if (input == 0xF1)
+			{
+				g_var16[POS1] = g_var16[POS4];
+				state = 0;
+				hasDrawn = false;
+				graphicLoaderState = 2;
+			}
+			if (input == 0xF0)
+			{
+				state = 0;
+				hasDrawn = false;
+				graphicLoaderState = 2;
+			}
 		}
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
 			unlockVar16(LOCK0);
 			unlockVar16(LOCK1);
 			unlockVar16(LOCK2);
 			unlockVar16(LOCK3);
+			unlockVar16(LOCK4);
 			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
@@ -1221,8 +1297,17 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			drawKeypad();
 			hasDrawn = true;
+			g_var8[POS0] = 0;
+			g_var8[POS1] = 0;
+			g_var16[POS0] = 0;
+			keypadInput[0] = 0;
+			keypadInput[1] = 0;
+			keypadInput[2] = 0;
 		}
+
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
 
 		// Call buttons if any
 
@@ -1238,8 +1323,17 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			drawKeypadDec();
 			hasDrawn = true;
+			g_var8[POS0] = 0;
+			g_var8[POS1] = 0;
+			g_var16[POS0] = 0;
+			keypadInput[0] = 0;
+			keypadInput[1] = 0;
+			keypadInput[2] = 0;
 		}
+
+		g_var8[POS0] = keypadControllerDec(g_var8[POS1], g_var16[POS0]);
 
 		// Call buttons if any
 
@@ -1717,12 +1811,11 @@ void menuButtons()
 	}
 }
 
+/*============== Hex Keypad ==============*/
 // User input keypad
 void drawKeypad()
 {
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-	drawSquareBtn(180, 57, 460, 77, F("Keypad"), themeBackground, themeBackground, menuBtnColor, CENTER);
-
 	uint16_t posY = 80;
 	uint8_t numPad = 0x00;
 
@@ -1740,8 +1833,9 @@ void drawKeypad()
 		}
 		posY += 45;
 	}
-	drawRoundBtn(365, 170, 470, 210, F("Clear"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-
+	drawRoundBtn(365, 170, 470, 210, F("<---"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(145, 220, 250, 260, F("Input:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(255, 220, 470, 260, F(" "), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(145, 270, 305, 310, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(315, 270, 470, 310, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
@@ -1861,7 +1955,7 @@ int keypadButtons()
 				return 0x0F;
 
 			}
-			// Clear
+			// Backspace
 			if ((x >= 365) && (x <= 470))
 			{
 				waitForIt(365, 170, 470, 210);
@@ -1888,6 +1982,257 @@ int keypadButtons()
 	return 0xFF;
 }
 
+/*
+* No change returns 0xFF
+* Accept returns 0xF1
+* Cancel returns 0xF0
+* Value contained in total
+*/
+uint8_t keypadController(uint8_t& index, uint16_t& total)
+{
+	uint8_t input = keypadButtons();
+	if (input >= 0x00 && input < 0x10 && index < 3)
+	{
+		keypadInput[2] = keypadInput[1];
+		keypadInput[1] = keypadInput[0];
+		keypadInput[0] = input;
+		total = keypadInput[0] * hexTable[0] + keypadInput[1] * hexTable[1] + keypadInput[2] * hexTable[2];
+		drawRoundBtn(255, 220, 470, 260, String(total, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		++index;
+		return 0xFF;
+	}
+	if (input == 0x10)
+	{
+		switch (index)
+		{
+		case 1:
+			keypadInput[0] = 0;
+			break;
+		case 2:
+			keypadInput[0] = keypadInput[1];
+			keypadInput[1] = 0;
+			break;
+		case 3: 
+			keypadInput[0] = keypadInput[1];
+			keypadInput[1] = keypadInput[2];
+			keypadInput[2] = 0;
+			break;
+		}
+		total = keypadInput[0] * hexTable[0] + keypadInput[1] * hexTable[1] + keypadInput[2] * hexTable[2];
+		drawRoundBtn(255, 220, 470, 260, String(total, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		(index > 0) ? --index : 0;
+		return 0xFF;
+	}
+	if (input == 0x11)
+	{
+		return 0xF1;
+	}
+	else if (input == 0x12)
+	{
+		return 0xF0;
+	}
+	return input;
+}
+
+/*============== Decimal Keypad ==============*/
+// User input keypad
+void drawKeypadDec()
+{
+	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	uint16_t posY = 125;
+	uint8_t numPad = 0x00;
+
+	for (uint8_t i = 0; i < 2; i++)
+	{
+		int posX = 145;
+		for (uint8_t j = 0; j < 6; j++)
+		{
+			if (numPad < 0x10)
+			{
+				drawRoundBtn(posX, posY, posX + 50, posY + 40, String(numPad, HEX), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				posX += 55;
+				numPad++;
+			}
+		}
+		posY += 45;
+	}
+	drawRoundBtn(365, 170, 470, 210, F("<---"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(145, 220, 250, 260, F("Input:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(255, 220, 470, 260, F(" "), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(145, 270, 305, 310, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(315, 270, 470, 310, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+}
+
+// User input keypad
+int keypadButtonsDec()
+{
+	// Touch screen controls
+	if (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		x = myTouch.getX();
+		y = myTouch.getY();
+
+		if ((y >= 125) && (y <= 165))
+		{
+			// 0
+			if ((x >= 145) && (x <= 195))
+			{
+				waitForIt(145, 125, 195, 165);
+				return 0x00;
+			}
+			// 1
+			if ((x >= 200) && (x <= 250))
+			{
+				waitForIt(200, 125, 250, 165);
+				return 0x01;
+			}
+			// 2
+			if ((x >= 255) && (x <= 305))
+			{
+				waitForIt(255, 125, 305, 165);
+				return 0x02;
+			}
+			// 3
+			if ((x >= 310) && (x <= 360))
+			{
+				waitForIt(310, 125, 360, 165);
+				return 0x03;
+			}
+			// 4
+			if ((x >= 365) && (x <= 415))
+			{
+				waitForIt(365, 125, 415, 165);
+				return 0x04;
+			}
+			// 5
+			if ((x >= 420) && (x <= 470))
+			{
+				waitForIt(420, 125, 470, 165);
+				return 0x05;
+			}
+		}
+		if ((y >= 170) && (y <= 210))
+		{
+			// 6
+			if ((x >= 145) && (x <= 195))
+			{
+				waitForIt(145, 170, 195, 210);
+				return 0x06;
+			}
+			// 7
+			if ((x >= 200) && (x <= 250))
+			{
+				waitForIt(200, 170, 250, 210);
+				return 0x07;
+			}
+			// 8
+			if ((x >= 255) && (x <= 305))
+			{
+				waitForIt(255, 170, 305, 210);
+				return 0x08;
+			}
+			// 9
+			if ((x >= 310) && (x <= 360))
+			{
+				waitForIt(310, 170, 360, 210);
+				return 0x09;
+
+			}
+			// Backspace
+			if ((x >= 365) && (x <= 470))
+			{
+				waitForIt(365, 170, 470, 210);
+				return 0x10;
+			}
+		}
+		if ((y >= 270) && (y <= 310))
+		{
+			// Accept
+			if ((x >= 145) && (x <= 305))
+			{
+				waitForIt(145, 270, 305, 310);
+				return 0x11;
+
+			}
+			// Cancel
+			if ((x >= 315) && (x <= 470))
+			{
+				waitForIt(315, 270, 470, 310);
+				return 0x12;
+			}
+		}
+	}
+	return 0xFF;
+}
+
+/*
+* No change returns 0xFF
+* Accept returns 0xF1
+* Cancel returns 0xF0
+* Value contained in total
+*/
+uint8_t keypadControllerDec(uint8_t& index, uint16_t& total)
+{
+	uint8_t input = keypadButtonsDec();
+	if (input >= 0x00 && input < 0x10 && index < 4)
+	{
+		keypadInput[3] = keypadInput[2];
+		keypadInput[2] = keypadInput[1];
+		keypadInput[1] = keypadInput[0];
+		keypadInput[0] = input;
+		total = keypadInput[0] * 1 + keypadInput[1] * 10 + keypadInput[2] * 100 + keypadInput[3] * 1000;
+		drawRoundBtn(255, 220, 470, 260, String(total), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		++index;
+		return 0xFF;
+	}
+	if (input == 0x10)
+	{
+		switch (index)
+		{
+		case 1:
+			keypadInput[0] = 0;
+			break;
+		case 2:
+			keypadInput[0] = keypadInput[1];
+			keypadInput[1] = 0;
+			break;
+		case 3:
+			keypadInput[0] = keypadInput[1];
+			keypadInput[1] = keypadInput[2];
+			keypadInput[2] = 0;
+			break;
+		case 4:
+			keypadInput[0] = keypadInput[1];
+			keypadInput[1] = keypadInput[2];
+			keypadInput[2] = keypadInput[3];
+			keypadInput[3] = 0;
+			break;
+		case 5:
+			keypadInput[0] = keypadInput[1];
+			keypadInput[1] = keypadInput[2];
+			keypadInput[2] = keypadInput[3];
+			keypadInput[3] = keypadInput[4];
+			keypadInput[4] = 0;
+			break;
+		}
+		total = keypadInput[0] * 1 + keypadInput[1] * 10 + keypadInput[2] * 100 + keypadInput[3] * 1000;
+		drawRoundBtn(255, 220, 470, 260, String(total), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		(index > 0) ? --index : 0;
+		return 0xFF;
+	}
+	if (input == 0x11)
+	{
+		return 0xF1;
+	}
+	else if (input == 0x12)
+	{
+		return 0xF0;
+	}
+	return input;
+}
+ 
+/*============== Keyboard ==============*/
 // User input keypad
 void drawkeyboard()
 {
@@ -1910,7 +2255,7 @@ void drawkeyboard()
 			if (count < 36)
 			{
 				drawRoundBtn(posX, posY, posX + 32, posY + 40, String(keyboardInput[count]), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				/*
+				/* Print out button coords
 				SerialUSB.print(posX);
 				SerialUSB.print(" , ");
 				SerialUSB.print(posY);
@@ -2236,19 +2581,18 @@ int keyboardButtons()
 	return 0xFF;
 }
 
+/*
+* No change returns 0xFF
+* Accept returns 0xF1
+* Cancel returns 0xF0
+* Value contained in global keyboardInput
+*/
 uint8_t keyboardController(uint8_t &index)
 {
 	uint8_t input = keyboardButtons();
 	if (input > 0x29 && input < 0x7B)
 	{
-		SerialUSB.print("index: ");
-		SerialUSB.println(index);
-		SerialUSB.print("input: ");
-		SerialUSB.println(input, 16);
 		keyboardInput[index] = input;
-		SerialUSB.print("Array index: ");
-		SerialUSB.println(keyboardInput[index]);
-		SerialUSB.println("Array full: ");
 		for (int i = 0; i < 10; i++)
 		{
 			SerialUSB.println(keyboardInput[i]);
@@ -2265,13 +2609,9 @@ uint8_t keyboardController(uint8_t &index)
 		return 0xFF;
 	}
 	return input;
-	// Num = 
-	// no change return 0xFF
-	// Accept 0xF1 return 1
-	// Cancel 0xF0 return 0
-	// Backspace 0xF2 
 }
 
+/*============== Error Message ==============*/
 // Error Message function
 void drawErrorMSG(String title, String eMessage1, String eMessage2)
 {
@@ -2348,13 +2688,24 @@ void SDCardOut()
 	(isSDOut) && (can1.SDOutCAN(selectedChannelOut));
 }
 
+// Future feature
+void msgSpamOut()
+{
+	if (isMSGSpam)
+	{
+		MSGSpam();
+	}
+}
+
 // Able to call background process from blocked loop
 void backgroundProcess()
 {
 	updateTime();
 	serialOut();
 	SDCardOut();
+	//msgSpamOut();
 }
+
 
 
 /*=========================================================
