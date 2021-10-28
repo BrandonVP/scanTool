@@ -10,7 +10,7 @@
     Extra Functions
 ===========================================================*/
 // Draw buttons to start extra function programs
-void drawExtraFN()
+bool drawExtraFN()
 {
     switch (graphicLoaderState)
     {
@@ -46,7 +46,11 @@ void drawExtraFN()
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
+    case 11: 
+        return false;
+        break;
     }
+    return true;
 }
 
 // Buttons to start extra function programs
@@ -261,68 +265,74 @@ void MSGSpam()
 /*============== Dongle Simulator ==============*/
 
 // Draw test deck for Terminator (GM)
-void drawDongleSim()
+bool drawDongleSim()
 {
     switch (graphicLoaderState)
     {
     case 0:
-        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 1:
-        drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
-        drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
-        drawRoundBtn(145, 105, 250, 150, F("0x09C"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 105, 250, 150, F("0x09C"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
-        drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(145, 155, 250, 200, F("ECU"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
-        drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 155, 250, 200, F("ECU"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 11:
-        drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 155, 362, 200, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 12:
-        drawRoundBtn(145, 205, 250, 250, F("BCM"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(368, 155, 475, 200, F("Reject"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 13:
-        drawRoundBtn(255, 205, 325, 250, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 205, 250, 250, F("BCM"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 14:
-        drawRoundBtn(330, 205, 400, 250, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 205, 325, 250, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 15:
-        drawRoundBtn(405, 205, 475, 250, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 205, 400, 250, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 16:
-        drawRoundBtn(145, 255, 250, 300, F("Reset"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 205, 475, 250, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 17:
-        drawRoundBtn(255, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 255, 250, 300, F("Reset"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 18:
+        drawRoundBtn(255, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 19:
         drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
+    case 20:
+        return false;
+        break;
     }
+    return true;
 }
 
 //  Test deck buttons for Terminator (GM)
@@ -448,68 +458,74 @@ void dongleSimButtons()
 }
 
 // Draw test deck for Terminator (Ford)
-void drawDongleSimFord()
+bool drawDongleSimFord()
 {
     switch (graphicLoaderState)
     {
     case 0:
-        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 1:
-        drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 55, 250, 100, F("VIN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
-        drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 55, 325, 100, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
-        drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 55, 400, 100, F("2"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 5:
-        drawRoundBtn(145, 105, 250, 150, F("Engine"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 55, 475, 100, F("3"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 105, 250, 150, F("Engine"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 105, 325, 150, F("Off"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
-        drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 105, 400, 150, F("Acc"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(145, 155, 250, 200, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 105, 475, 150, F("On"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
-        drawRoundBtn(255, 155, 362, 200, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 155, 250, 200, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 11:
-        drawRoundBtn(368, 155, 475, 200, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 155, 362, 200, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 12:
-        drawRoundBtn(145, 205, 250, 250, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(368, 155, 475, 200, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 13:
-        drawRoundBtn(255, 205, 325, 250, F("81"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 205, 250, 250, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 14:
-        drawRoundBtn(330, 205, 400, 250, F("01"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(255, 205, 325, 250, F("81"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 15:
-        drawRoundBtn(405, 205, 475, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(330, 205, 400, 250, F("01"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 16:
-        drawRoundBtn(145, 255, 250, 300, F("Reset"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(405, 205, 475, 250, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 17:
-        drawRoundBtn(255, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(145, 255, 250, 300, F("Reset"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 18:
+        drawRoundBtn(255, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 19:
         drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
+    case 20:
+        return false;
+        break;
     }
+    return true;
 }
 
 // Test deck buttons for Terminator (Ford)

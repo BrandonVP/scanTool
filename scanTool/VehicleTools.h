@@ -8,8 +8,7 @@
 #else
 	#include "WProgram.h"
 #endif
-
-extern void drawVehicleTools();
+extern bool drawVehicleTools();
 extern void VehicleToolButtons();
 extern void drawPIDSCAN();
 extern void startPIDSCAN();

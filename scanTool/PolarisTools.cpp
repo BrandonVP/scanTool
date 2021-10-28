@@ -10,7 +10,7 @@
     Polaris Tools
 ===========================================================*/
 // Draw UTV program page
-void drawRZRTOOL()
+bool drawRZRTOOL()
 {
     switch (graphicLoaderState)
     {
@@ -46,7 +46,11 @@ void drawRZRTOOL()
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
+    case 11:
+        return false;
+        break;
     }
+    return true;
 }
 
 // Buttons to start UTV programs

@@ -8,7 +8,7 @@
 #else
 	#include "WProgram.h"
 #endif
-extern void drawRZRTOOL();
+extern bool drawRZRTOOL();
 extern void RZRToolButtons();
 #endif
 

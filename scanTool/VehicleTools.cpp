@@ -10,7 +10,7 @@
     Vehicle Tools
 ===========================================================*/
 // Draw Vehicle tools menu buttons
-void drawVehicleTools()
+bool drawVehicleTools()
 {
     switch (graphicLoaderState)
     {
@@ -46,7 +46,11 @@ void drawVehicleTools()
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
+    case 11:
+        return false;
+        break;
     }
+    return true;
 }
 
 // Buttons to start Vehicle tool programs

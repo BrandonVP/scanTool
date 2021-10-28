@@ -77,6 +77,7 @@ uint16_t g_var16[8];
 uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
+char keyboardInput[10] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
@@ -315,9 +316,8 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			if (graphicLoaderState < 11)
+			if (drawCANBus())
 			{
-				drawCANBus();
 				graphicLoaderState++;
 			}
 			else
@@ -352,9 +352,8 @@ void pageControl()
 					break;
 				}
 			}
-			if (!hasDrawn && graphicLoaderState < 8)
+			if (!hasDrawn && drawCapture())
 			{
-				drawCapture();
 				graphicLoaderState++;
 			}
 			else
@@ -365,9 +364,8 @@ void pageControl()
 			}
 			break;
 		case 1:
-			if (!hasDrawn && graphicLoaderState < 8)
+			if (!hasDrawn && drawCaptureSource())
 			{
-				drawCaptureSource();
 				graphicLoaderState++;
 			}
 			else
@@ -378,9 +376,8 @@ void pageControl()
 		case 2:
 			if (!hasDrawn && state == 2)
 			{
-				if (graphicLoaderState < 7)
+				if (drawCaptureOutput())
 				{
-					drawCaptureOutput();
 					graphicLoaderState++;
 				}
 				else
@@ -408,9 +405,8 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			if (graphicLoaderState < 8)
+			if (drawCANLog())
 			{
-				drawCANLog();
 				graphicLoaderState++;
 				break;
 			}
@@ -542,6 +538,12 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (drawBaud())
+			{
+				graphicLoaderState++;
+				break;
+			}
+
 			bool error = false;
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			if (error)
@@ -549,7 +551,6 @@ void pageControl()
 				DEBUG_ERROR("Error: Variable locked");
 				nextPage = 0;
 			}
-			drawBaud();
 			drawBaudScroll();
 			drawCurrentBaud();
 			hasDrawn = true;
@@ -632,9 +633,8 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			if (graphicLoaderState < 11)
+			if (drawVehicleTools())
 			{
-				drawVehicleTools();
 				graphicLoaderState++;
 			}
 			else
@@ -926,9 +926,8 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			if (graphicLoaderState < 11)
+			if (drawRZRTOOL())
 			{
-				drawRZRTOOL();
 				graphicLoaderState++;
 			}
 			else
@@ -1088,9 +1087,8 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			if (graphicLoaderState < 11)
+			if (drawExtraFN())
 			{
-				drawExtraFN();
 				graphicLoaderState++;
 			}
 			else
@@ -1204,10 +1202,12 @@ void pageControl()
 		{
 			drawkeyboard();
 			hasDrawn = true;
+			g_var8[POS0] = 0;
+			g_var8[POS1] = 0;
 		}
 
 		// Call buttons if any
-		keyboardButtons();
+		g_var8[POS0] = keyboardController(g_var8[POS1]);
 		
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1272,6 +1272,12 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (drawDongleSimFord())
+			{
+				graphicLoaderState++;
+				break;
+			}
+
 			// Lock global variables
 			bool error = false;
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
@@ -1280,15 +1286,9 @@ void pageControl()
 				DEBUG_ERROR("Error: Variable locked");
 				nextPage = 9;
 			}
-
 			hasDrawn = true;
 		}
-		if (graphicLoaderState < 19)
-		{
-			drawDongleSimFord();
-			graphicLoaderState++;
-		}
-
+		
 		// Call buttons if any
 		dongleSimButtonsFord();
 
@@ -1305,6 +1305,12 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (drawDongleSim())
+			{
+				graphicLoaderState++;
+				break;
+			}
+
 			// Lock global variables
 			bool error = false;
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
@@ -1315,11 +1321,6 @@ void pageControl()
 			}
 
 			hasDrawn = true;
-		}
-		if (graphicLoaderState < 19)
-		{
-			drawDongleSim();
-			graphicLoaderState++;
 		}
 
 		// Call buttons if any
@@ -1948,70 +1949,70 @@ int keyboardButtons()
 				waitForIt(135, 56, 167, 96);
 				// 0
 				DEBUG_KEYBOARD("0");
-				return 0xE0;
+				return 0x30;
 			}
 			if ((x >= 169) && (x <= 201))
 			{
 				waitForIt(169, 56, 201, 96);
 				// 1
 				DEBUG_KEYBOARD("1");
-				return 0xE1;
+				return 0x31;
 			}
 			if ((x >= 203) && (x <= 235))
 			{
 				waitForIt(203, 56, 235, 96);
 				// 2
 				DEBUG_KEYBOARD("2");
-				return 0xE2;
+				return 0x32;
 			}
 			if ((x >= 237) && (x <= 269))
 			{
 				waitForIt(237, 56, 269, 96);
 				// 3
 				DEBUG_KEYBOARD("3");
-				return 0xE3;
+				return 0x33;
 			}
 			if ((x >= 271) && (x <= 303))
 			{
 				waitForIt(271, 56, 303, 96);
 				// 4
 				DEBUG_KEYBOARD("4");
-				return 0xE4;
+				return 0x34;
 			}
 			if ((x >= 305) && (x <= 337))
 			{
 				waitForIt(305, 56, 337, 96);
 				// 5
 				DEBUG_KEYBOARD("5");
-				return 0xE5;
+				return 0x35;
 			}
 			if ((x >= 339) && (x <= 371))
 			{
 				waitForIt(339, 56, 371, 96);
 				// 6
 				DEBUG_KEYBOARD("6");
-				return 0xE6;
+				return 0x36;
 			}
 			if ((x >= 373) && (x <= 405))
 			{
 				waitForIt(373, 56, 405, 96);
 				// 7
 				DEBUG_KEYBOARD("7");
-				return 0xE7;
+				return 0x37;
 			}
 			if ((x >= 407) && (x <= 439))
 			{
 				waitForIt(407, 56, 439, 96);
 				// 8
 				DEBUG_KEYBOARD("8");
-				return 0xE8;
+				return 0x38;
 			}
 			if ((x >= 441) && (x <= 473))
 			{
 				waitForIt(441, 56, 473, 96);
 				// 9
 				DEBUG_KEYBOARD("9");
-				return 0xE9;
+				return 0x39;
 			}
 		}
 		if ((y >= 99) && (y <= 139))
@@ -2021,70 +2022,70 @@ int keyboardButtons()
 				waitForIt(135, 99, 167, 139);
 				// a
 				DEBUG_KEYBOARD("a");
-				return 1;
+				return 0x61;
 			}
 			if ((x >= 169) && (x <= 201))
 			{
 				waitForIt(169, 99, 201, 139);
 				// b
 				DEBUG_KEYBOARD("b");
-				return 2;
+				return 0x62;
 			}
 			if ((x >= 203) && (x <= 235))
 			{
 				waitForIt(203, 99, 235, 139);
 				// c
 				DEBUG_KEYBOARD("c");
-				return 3;
+				return 0x63;
 			}
 			if ((x >= 237) && (x <= 269))
 			{
 				waitForIt(237, 99, 269, 139);
 				// d
 				DEBUG_KEYBOARD("d");
-				return 4;
+				return 0x64;
 			}
 			if ((x >= 271) && (x <= 303))
 			{
 				waitForIt(271, 99, 303, 139);
 				// e
 				DEBUG_KEYBOARD("e");
-				return 5;
+				return 0x65;
 			}
 			if ((x >= 305) && (x <= 337))
 			{
 				waitForIt(305, 99, 337, 139);
 				// f
 				DEBUG_KEYBOARD("f");
-				return 6;
+				return 0x66;
 			}
 			if ((x >= 339) && (x <= 371))
 			{
 				waitForIt(339, 99, 371, 139);
 				// g
 				DEBUG_KEYBOARD("g");
-				return 7;
+				return 0x67;
 			}
 			if ((x >= 373) && (x <= 405))
 			{
 				waitForIt(373, 99, 405, 139);
 				// h
 				DEBUG_KEYBOARD("h");
-				return 8;
+				return 0x68;
 			}
 			if ((x >= 407) && (x <= 439))
 			{
 				waitForIt(407, 99, 439, 139);
 				// i
 				DEBUG_KEYBOARD("i");
-				return 9;
+				return 0x69;
 			}
 			if ((x >= 441) && (x <= 473))
 			{
 				waitForIt(441, 99, 473, 139);
 				// j
 				DEBUG_KEYBOARD("j");
-				return 10;
+				return 0x6A;
 			}
 		}
 		if ((y >= 142) && (y <= 182))
@@ -2094,70 +2095,70 @@ int keyboardButtons()
 				waitForIt(135, 142, 167, 182);
 				// k
 				DEBUG_KEYBOARD("k");
-				return 11;
+				return 0x6B;
 			}
 			if ((x >= 169) && (x <= 201))
 			{
 				waitForIt(169, 142, 201, 182);
 				// l
 				DEBUG_KEYBOARD("l");
-				return 12;
+				return 0x6C;
 			}
 			if ((x >= 203) && (x <= 235))
 			{
 				waitForIt(203, 142, 235, 182);
 				// m
 				DEBUG_KEYBOARD("m");
-				return 13;
+				return 0x6D;
 			}
 			if ((x >= 237) && (x <= 269))
 			{
 				waitForIt(237, 142, 269, 182);
 				// n
 				DEBUG_KEYBOARD("n");
-				return 14;
+				return 0x6E;
 			}
 			if ((x >= 271) && (x <= 303))
 			{
 				waitForIt(271, 142, 303, 182);
 				// o
 				DEBUG_KEYBOARD("o");
-				return 15;
+				return 0x6F;
 			}
 			if ((x >= 305) && (x <= 337))
 			{
 				waitForIt(305, 142, 337, 182);
 				// p
 				DEBUG_KEYBOARD("p");
-				return 16;
+				return 0x70;
 			}
 			if ((x >= 339) && (x <= 371))
 			{
 				waitForIt(339, 142, 371, 182);
 				// q
 				DEBUG_KEYBOARD("q");
-				return 17;
+				return 0x71;
 			}
 			if ((x >= 373) && (x <= 405))
 			{
 				waitForIt(373, 142, 405, 182);
 				// r
 				DEBUG_KEYBOARD("r");
-				return 18;
+				return 0x72;
 			}
 			if ((x >= 407) && (x <= 439))
 			{
 				waitForIt(407, 142, 439, 182);
 				// s
 				DEBUG_KEYBOARD("s");
-				return 19;
+				return 0x73;
 			}
 			if ((x >= 441) && (x <= 473))
 			{
 				waitForIt(441, 142, 473, 182);
 				// t
 				DEBUG_KEYBOARD("t");
-				return 20;
+				return 0x74;
 			}
 		}
 		if ((y >= 185) && (y <= 225))
@@ -2167,14 +2168,14 @@ int keyboardButtons()
 				waitForIt(135, 185, 167, 225);
 				// u
 				DEBUG_KEYBOARD("u");
-				return 21;
+				return 0x75;
 			}
 			if ((x >= 169) && (x <= 201))
 			{
 				waitForIt(169, 185, 201, 225);
 				// v
 				DEBUG_KEYBOARD("v");
-				return 22;
+				return 0x76;
 			}
 			
 			if ((x >= 203) && (x <= 235))
@@ -2182,28 +2183,28 @@ int keyboardButtons()
 				waitForIt(203, 185, 235, 225);
 				// w
 				DEBUG_KEYBOARD("w");
-				return 23;
+				return 0x77;
 			}
 			if ((x >= 237) && (x <= 269))
 			{
 				waitForIt(237, 185, 269, 225);
 				// x
 				DEBUG_KEYBOARD("x");
-				return 24;
+				return 0x78;
 			}
 			if ((x >= 271) && (x <= 303))
 			{
 				waitForIt(271, 185, 303, 225);
 				// y
 				DEBUG_KEYBOARD("y");
-				return 25;
+				return 0x79;
 			}
 			if ((x >= 305) && (x <= 337))
 			{
 				waitForIt(305, 185, 337, 225);
 				// z
 				DEBUG_KEYBOARD("z");
-				return 26;
+				return 0x7A;
 			}
 			if ((x >= 340) && (x <= 474))
 			{
@@ -2233,6 +2234,42 @@ int keyboardButtons()
 		}
 	}
 	return 0xFF;
+}
+
+uint8_t keyboardController(uint8_t &index)
+{
+	uint8_t input = keyboardButtons();
+	if (input > 0x29 && input < 0x7B)
+	{
+		SerialUSB.print("index: ");
+		SerialUSB.println(index);
+		SerialUSB.print("input: ");
+		SerialUSB.println(input, 16);
+		keyboardInput[index] = input;
+		SerialUSB.print("Array index: ");
+		SerialUSB.println(keyboardInput[index]);
+		SerialUSB.println("Array full: ");
+		for (int i = 0; i < 10; i++)
+		{
+			SerialUSB.println(keyboardInput[i]);
+		}
+		drawRoundBtn(245, 230, 475, 270, String(keyboardInput), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		++index;
+		return 0xFF;
+	}
+	if (input == 0xF2)
+	{
+		keyboardInput[index - 1] = 0x20;
+		drawRoundBtn(245, 230, 475, 270, String(keyboardInput), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		--index;
+		return 0xFF;
+	}
+	return input;
+	// Num = 
+	// no change return 0xFF
+	// Accept 0xF1 return 1
+	// Cancel 0xF0 return 0
+	// Backspace 0xF2 
 }
 
 // Error Message function

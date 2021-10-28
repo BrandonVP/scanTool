@@ -16,7 +16,7 @@
 	CAN Bus
 ===========================================================*/
 // Draw CANBus menu buttons
-void drawCANBus()
+bool drawCANBus()
 {
 	switch (graphicLoaderState)
 	{
@@ -52,7 +52,11 @@ void drawCANBus()
 	case 10:
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
+	case 11:
+		return false;
+		break;
 	}
+	return true;
 }
 
 // Buttons to start CANBus programs
@@ -147,7 +151,7 @@ void CANBusButtons()
 
 /*============== CAPTURE ==============*/
 // Draw the stationary capture program buttons
-void drawCapture()
+bool drawCapture()
 {
 	switch (graphicLoaderState)
 	{
@@ -188,7 +192,11 @@ void drawCapture()
 	case 7:
 		drawSquareBtn(310, 125, 475, 165, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 8:
+		return false;
+		break;
 	}
+	return true;
 }
 
 // Draw current selected capture configuration 
@@ -233,7 +241,7 @@ void drawCaptureSelected()
 }
 
 // Draw capture menu
-void drawCaptureOutput()
+bool drawCaptureOutput()
 {
 	switch (graphicLoaderState)
 	{
@@ -257,11 +265,15 @@ void drawCaptureOutput()
 	case 6:
 		drawSquareBtn(135, 205, 300, 245, F("Back"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 7:
+		return false;
+		break;
 	}
+	return true;
 }
 
 // Draw source menu
-void drawCaptureSource()
+bool drawCaptureSource()
 {
 	switch (graphicLoaderState)
 	{
@@ -288,7 +300,11 @@ void drawCaptureSource()
 	case 7:
 		drawSquareBtn(135, 245, 300, 285, F("Bridge0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 8:
+		return false;
+		break;
 	}
+	return true;
 }
 
 // Buttons for capture program
@@ -475,7 +491,7 @@ void readInCANMsg(uint8_t channel)
 
 /*============== Send Frame ==============*/
 // Draw the send frame page
-void drawSendFrame(uint8_t channel)
+bool drawSendFrame(uint8_t channel)
 {
 	switch (graphicLoaderState)
 	{
@@ -525,7 +541,11 @@ void drawSendFrame(uint8_t channel)
 	case 14:
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
+	case 15:
+		return false;
+		break;
 	}
+	return true;
 }
 
 // Buttons for send frame program
@@ -680,9 +700,8 @@ void sendCANFrame(uint8_t channel)
 	case 0: // Draw
 		if (!isFinished)
 		{
-			if (graphicLoaderState < 15)
+			if (drawSendFrame(g_var8[POS0]))
 			{
-				drawSendFrame(g_var8[POS0]);
 				graphicLoaderState++;
 				break;
 			}
@@ -758,13 +777,32 @@ void sendCANFrame(uint8_t channel)
 
 /*============== Baud ==============*/
 // Draw the stationary baud page buttons
-void drawBaud()
+bool drawBaud()
 {
-	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-	drawSquareBtn(140, 275, 300, 315, F("Set CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(305, 275, 475, 315, F("Set CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(305, 60, 475, 100, F("CAN0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawSquareBtn(305, 150, 475, 190, F("CAN1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	switch (graphicLoaderState)
+	{
+	case 0:
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 2:
+		drawSquareBtn(140, 275, 300, 315, F("Set CAN0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 3:
+		drawSquareBtn(305, 275, 475, 315, F("Set CAN1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawSquareBtn(305, 60, 475, 100, F("CAN0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		drawSquareBtn(305, 150, 475, 190, F("CAN1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 6:
+		return false;
+		break;
+	}
+	return true;
 }
 
 // Draw the current baud rates
@@ -1104,7 +1142,7 @@ void filterMask()
 
 /*============== CAN Playback ==============*/
 // Draw the capture playback page
-void drawCANLog()
+bool drawCANLog()
 {
 	switch (graphicLoaderState)
 	{
@@ -1132,7 +1170,11 @@ void drawCANLog()
 	case 7:
 		drawSquareBtn(386, 275, 479, 315, F("Conf"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 8:
+		return false;
+		break;
 	}
+	return true;
 }
 
 // Draw playable filelist

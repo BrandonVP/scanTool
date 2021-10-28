@@ -8,11 +8,11 @@
 #else
 	#include "WProgram.h"
 #endif
-extern void drawExtraFN();
+extern bool drawExtraFN();
 extern void extraFNButtons();
-extern void drawDongleSim();
+extern bool drawDongleSim();
 extern void dongleSimButtons();
-extern void drawDongleSimFord();
+extern bool drawDongleSimFord();
 extern void dongleSimButtonsFord();
 extern void resetDongle();
 extern void drawOBDSimulator();
