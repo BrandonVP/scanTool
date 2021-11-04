@@ -20,12 +20,26 @@
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
 #define SD_CAPTURE(x) sdCard.writeFileS("capture.txt", x);
 
+// States
+#define START_BYTE              (0)
+#define PACKET_LENGTH           (1)
+#define CAN_BUS_ID1             (2)
+#define CAN_BUS_ID2             (3)
+#define CAN_BUS_DATA            (4)
+#define END_BYTE                (5)
+// 
+#define STARTING_BYTE           (0xFE)
+#define ENDING_BYTE             (0xFD)
+#define PACKET_SIZE             (0x09)
+
 class CANBus
 {
 protected:
 	CAN_FRAME incCAN0;
 	CAN_FRAME incCAN1;
+	CAN_FRAME incWIFI;
 	CAN_FRAME CANOut;
+	
 
 private:
 	// Def for getMSG()
@@ -38,6 +52,9 @@ private:
 	char PIDDir[17];
 	char capture_filename[10] = { 'C', 'a', 'p', '0', '0', '.', 't', 'x', 't' };
 	uint8_t captureNumber = 0;
+
+	uint8_t state = 0;
+	uint8_t packetIndex = 0;
 
 	const uint8_t PID_bank[0x06][0x20] = 
 	{

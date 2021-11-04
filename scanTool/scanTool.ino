@@ -1364,6 +1364,8 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			isSerialOut = true;
+			selectedChannelOut = 6;
 			hasDrawn = true;
 		}
 
@@ -1615,7 +1617,7 @@ void pageControl()
 void setup()
 {
 	Serial.begin(115200);
-	Serial3.begin(57600);
+	Serial3.begin(115200);
 	SerialUSB.begin(CAN_BPS_500K);
 
 	can1.startCAN0(0x000, 0x7FF);

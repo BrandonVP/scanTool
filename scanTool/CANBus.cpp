@@ -146,10 +146,10 @@ void CANBus::sendCANOut(uint8_t channel, bool serialOut)
 	}
 	if (channel == 2)
 	{
-		SerialUSB.println("Sending");
 		Serial3.write(0xFE);
 		Serial3.write(0x09);
-		Serial3.write(CANOut.id);
+		Serial3.write((CANOut.id >> 0) & 0xFF);
+		Serial3.write((CANOut.id >> 8) & 0xFF);
 		for (uint8_t i = 0; i < 8; i++)
 		{
 			Serial3.write(CANOut.data.bytes[i]);
@@ -698,6 +698,66 @@ bool CANBus::SerialOutCAN(uint8_t config)
 			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SERIAL_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
+		}
+	}
+	else if (config == 6)
+	{
+		if (Serial3.available() > 0)
+		{
+			uint8_t recByte = Serial3.read();
+			//SerialUSB.println(recByte, 16);
+			switch (state)
+			{
+			case START_BYTE:
+				if (recByte == STARTING_BYTE)
+				{
+					state = PACKET_LENGTH;
+					return false;
+				}
+				break;
+			case PACKET_LENGTH:
+				state = CAN_BUS_ID1;
+				if (recByte == PACKET_SIZE)
+				{
+					packetIndex = 0;
+					return false;
+				}
+				else
+				{
+					// Bad packet
+					state = START_BYTE;
+				}
+				break;
+			case CAN_BUS_ID1:
+				incWIFI.id = recByte;
+				state = CAN_BUS_ID2;
+				break;
+			case CAN_BUS_ID2:
+				incWIFI.id += (recByte << 8);
+				state = CAN_BUS_DATA;
+				break;
+			case CAN_BUS_DATA:
+				incWIFI.data.bytes[packetIndex] = recByte;
+				packetIndex++;
+				if (packetIndex == PACKET_SIZE - 1)
+				{
+					state = END_BYTE;
+				}
+				break;
+			case END_BYTE:
+				if (recByte == ENDING_BYTE)
+				{
+					state = START_BYTE;
+					sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
+					SERIAL_CAPTURE(buffer);
+				}
+				else
+				{
+					// packet failed restart
+					state = START_BYTE;
+				}
+				break;
+			}
 		}
 	}
 	return true;
