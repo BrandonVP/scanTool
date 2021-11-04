@@ -307,6 +307,18 @@ void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t M
 	drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
+bool Touch_getXY()
+{
+	if (myTouch.dataAvailable())
+	{
+		myTouch.read();
+		x = myTouch.getX();
+		y = myTouch.getY();
+		return true;
+	}
+	return false;
+}
+
 // Manages the different App pages
 void pageControl()
 {
@@ -473,10 +485,12 @@ void pageControl()
 			bool error = false;
 			// Lock global variables
 			// lockVar8(LOCK0) called from button
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Channel
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // keypad return 
+			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : error = true; // keypad index
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
 			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
+			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : error = true; // keypad input total
 			state = 0;
 			isFinished = false;
 			if (error)
@@ -495,9 +509,10 @@ void pageControl()
 		{
 			unlockVar8(LOCK0);
 			unlockVar8(LOCK1);
+			unlockVar8(LOCK2);
 			unlockVar16(LOCK0);
 			unlockVar16(LOCK1);
-			unlockVar32(LOCK0);
+			unlockVar16(LOCK2);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1600,6 +1615,7 @@ void pageControl()
 void setup()
 {
 	Serial.begin(115200);
+	Serial3.begin(57600);
 	SerialUSB.begin(CAN_BPS_500K);
 
 	can1.startCAN0(0x000, 0x7FF);
@@ -1764,12 +1780,8 @@ void drawMenu()
 void menuButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((x >= 5) && (x <= 125))
 		{
 			if ((y >= 32) && (y <= 83))
@@ -1844,12 +1856,8 @@ void drawKeypad()
 int keypadButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((y >= 80) && (y <= 120))
 		{
 			// 0
@@ -2067,12 +2075,8 @@ void drawKeypadDec()
 int keypadButtonsDec()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((y >= 125) && (y <= 165))
 		{
 			// 0
@@ -2281,12 +2285,8 @@ void drawkeyboard()
 int keyboardButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((y >= 56) && (y <= 96))
 		{
 			if ((x >= 135) && (x <= 167))
@@ -2628,12 +2628,8 @@ void drawErrorMSG(String title, String eMessage1, String eMessage2)
 uint8_t errorMSGButton(uint8_t returnPage)
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((x >= 365) && (x <= 415))
 		{
 			if ((y >= 100) && (y <= 130))
@@ -2705,7 +2701,6 @@ void backgroundProcess()
 	SDCardOut();
 	//msgSpamOut();
 }
-
 
 
 /*=========================================================

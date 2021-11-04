@@ -32,10 +32,10 @@ bool drawCANBus()
 		drawRoundBtn(310, 80, 475, 130, F("Playback"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(140, 135, 305, 185, F("CAN0 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(140, 135, 305, 185, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(310, 135, 475, 185, F("CAN1 RX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 135, 475, 185, F(" "), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawRoundBtn(140, 190, 305, 240, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -63,12 +63,8 @@ bool drawCANBus()
 void CANBusButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((x >= 140) && (x <= 308))
 		{
 			if ((y >= 80) && (y <= 130))
@@ -83,17 +79,8 @@ void CANBusButtons()
 			{
 				waitForIt(140, 135, 305, 185);
 				// CAN0 RX
-				if (lockVar8(LOCK0))
-				{
-					graphicLoaderState = 0;
-					nextPage = 3;
-					g_var8[POS0] = 0;
-				}
-				else
-				{
-					// Error 
-					DEBUG_ERROR("POS0 LOCKED");
-				}
+				graphicLoaderState = 0;
+				nextPage = 3;
 			}
 			if ((y >= 190) && (y <= 240))
 			{
@@ -120,18 +107,7 @@ void CANBusButtons()
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(310, 135, 475, 185);
-				// CAN1 RX
-				if (lockVar8(LOCK0))
-				{
-					graphicLoaderState = 0;
-					nextPage = 3;
-					g_var8[POS0] = 1;
-				}
-				else
-				{
-					// Error 
-					DEBUG_ERROR("POS0 LOCKED");
-				}
+				// Unused
 			}
 			if ((y >= 190) && (y <= 240))
 			{
@@ -311,12 +287,8 @@ bool drawCaptureSource()
 void CaptureButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((x >= 135) && (x <= 300))
 		{
 			if ((y >= 85) && (y <= 125))
@@ -460,7 +432,7 @@ void drawReadInCANLCD()
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
-// Capture to LCD, max rate without filling buffer is 26ms per message (slow)
+// Capture to LCD, max rate without filling buffer is 26ms per message (slow), useful for bench testings or filtered traffic
 void readInCANMsg(uint8_t channel)
 {
 	myGLCD.setBackColor(VGA_WHITE);
@@ -500,69 +472,96 @@ bool drawSendFrame(uint8_t channel)
 	case 1:
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
-	case 2:
-		drawRoundBtn(145, 55, 473, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
 	case 3:
-		drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(135, 55, 259, 95, F("Channel"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(145, 150, 473, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(135, 100, 259, 145, F("ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		myGLCD.setFont(SmallFont);
-		drawRoundBtn(145, 195, 186, 250, " " + String(can1.getCANOutData(0), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(261, 100, 475, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawRoundBtn(186, 195, 227, 250, " " + String(can1.getCANOutData(1), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(135, 150, 475, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawRoundBtn(227, 195, 268, 250, " " + String(can1.getCANOutData(2), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		myGLCD.setFont(SmallFont);
+		drawRoundBtn(134, 195, 175, 250, " " + String(can1.getCANOutData(0), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 8:
-		drawRoundBtn(268, 195, 309, 250, " " + String(can1.getCANOutData(3), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(177, 195, 218, 250, " " + String(can1.getCANOutData(1), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 9:
-		drawRoundBtn(309, 195, 350, 250, " " + String(can1.getCANOutData(4), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(220, 195, 261, 250, " " + String(can1.getCANOutData(2), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 10:
-		drawRoundBtn(350, 195, 391, 250, " " + String(can1.getCANOutData(5), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(263, 195, 304, 250, " " + String(can1.getCANOutData(3), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 11:
-		drawRoundBtn(391, 195, 432, 250, " " + String(can1.getCANOutData(6), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(306, 195, 347, 250, " " + String(can1.getCANOutData(4), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 12:
-		drawRoundBtn(432, 195, 473, 250, " " + String(can1.getCANOutData(7), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		myGLCD.setFont(BigFont);
+		drawRoundBtn(349, 195, 390, 250, " " + String(can1.getCANOutData(5), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 13:
-		drawRoundBtn(145, 255, 473, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(392, 195, 433, 250, " " + String(can1.getCANOutData(6), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 14:
-		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		drawRoundBtn(435, 195, 476, 250, " " + String(can1.getCANOutData(7), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		myGLCD.setFont(BigFont);
 		break;
 	case 15:
+		drawRoundBtn(135, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 16:
+		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	case 17:
 		return false;
 		break;
 	}
 	return true;
 }
 
+void drawSendChannel(uint8_t channel)
+{
+	(channel == 0) ? drawRoundBtn(261, 55, 331, 95, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(261, 55, 331, 95, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	(channel == 1) ? drawRoundBtn(333, 55, 403, 95, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(333, 55, 403, 95, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	(channel == 2) ? drawRoundBtn(405, 55, 475, 95, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(405, 55, 475, 95, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+}
+
 // Buttons for send frame program
 void sendFrameButtons(uint8_t channel)
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
-		if ((x >= 145) && (x <= 473))
+		if ((y >= 55) && (y <= 95))
+		{
+			if ((x >= 261) && (x <= 331))
+			{
+				waitForIt(261, 55, 331, 95);
+				// Channel 0
+				drawSendChannel((g_var8[POS0] = 0));
+			}
+			if ((x >= 333) && (x <= 403))
+			{
+				waitForIt(333, 55, 403, 95);
+				// Channel 1
+				drawSendChannel((g_var8[POS0] = 1));
+			}
+			if ((x >= 405) && (x <= 475))
+			{
+				waitForIt(405, 55, 475, 95);
+				// WIFI
+				drawSendChannel((g_var8[POS0] = 2));
+			}
+		}
+		if ((x >= 261) && (x <= 475))
 		{
 			if ((y >= 100) && (y <= 145))
 			{
-				waitForIt(145, 100, 473, 145);
+				waitForIt(261, 100, 475, 145);
 				// Set ID
 				state = 1;
 				isFinished = false;
@@ -570,68 +569,68 @@ void sendFrameButtons(uint8_t channel)
 		}
 		if ((y >= 195) && (y <= 250))
 		{
-			if ((x >= 145) && (x <= 186))
+			if ((x >= 134) && (x <= 175))
 			{
-				waitForIt(145, 195, 186, 250);
+				waitForIt(134, 195, 175, 250);
 				// Set Data[0]
 				state = 2;
 				isFinished = false;
 			}
-			if ((x >= 186) && (x <= 227))
+			if ((x >= 177) && (x <= 218))
 			{
-				waitForIt(186, 195, 227, 250);
+				waitForIt(177, 195, 218, 250);
 				// Set Data[1]
 				state = 3;
 				isFinished = false;
 			}
-			if ((x >= 227) && (x <= 268))
+			if ((x >= 220) && (x <= 261))
 			{
-				waitForIt(227, 195, 268, 250);
+				waitForIt(220, 195, 261, 250);
 				// Set Data[2]
 				state = 4;
 				isFinished = false;
 			}
-			if ((x >= 268) && (x <= 309))
+			if ((x >= 263) && (x <= 304))
 			{
-				waitForIt(268, 195, 309, 250);
+				waitForIt(263, 195, 304, 250);
 				// Set Data[3]
 				state = 5;
 				isFinished = false;
 			}
-			if ((x >= 309) && (x <= 350))
+			if ((x >= 306) && (x <= 347))
 			{
-				waitForIt(309, 195, 350, 250);
+				waitForIt(306, 195, 347, 250);
 				// Set Data[4]
 				state = 6;
 				isFinished = false;
 			}
 			if ((x >= 350) && (x <= 391))
 			{
-				waitForIt(350, 195, 391, 250);
+				waitForIt(349, 195, 390, 250);
 				// Set Data[5]
 				state = 7;
 				isFinished = false;
 			}
-			if ((x >= 391) && (x <= 432))
+			if ((x >= 392) && (x <= 433))
 			{
-				waitForIt(391, 195, 432, 250);
+				waitForIt(392, 195, 433, 250);
 				// Set Data[6]
 				state = 8;
 				isFinished = false;
 			}
-			if ((x >= 432) && (x <= 473))
+			if ((x >= 435) && (x <= 476))
 			{
-				waitForIt(432, 195, 473, 250);
+				waitForIt(435, 195, 476, 250);
 				// Set Data[7]
 				state = 9;
 				isFinished = false;
 			}
 		}
-		if ((x >= 145) && (x <= 473))
+		if ((x >= 135) && (x <= 475))
 		{
 			if ((y >= 255) && (y <= 300))
 			{
-				waitForIt(145, 255, 473, 300);
+				waitForIt(135, 255, 475, 300);
 				// Send Frame
 				can1.sendCANOut(channel, selectedChannelOut);
 			}
@@ -700,6 +699,12 @@ void sendCANFrame(uint8_t channel)
 	case 0: // Draw
 		if (!isFinished)
 		{
+			if (graphicLoaderState == 2)
+			{
+				drawSendChannel(g_var8[POS0]);
+				graphicLoaderState++;
+				break;
+			}
 			if (drawSendFrame(g_var8[POS0]))
 			{
 				graphicLoaderState++;
@@ -718,39 +723,20 @@ void sendCANFrame(uint8_t channel)
 			isFinished = true;
 			g_var16[POS1] = 2;
 			g_var8[POS1] = 0xFF;
-			g_var32[POS0] = 0;
-			drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			g_var16[POS2] = 0;
+			drawRoundBtn(255, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		}
 
 		// Keypad response
-		g_var8[POS1] = keypadButtons();
-		if (g_var8[POS1] >= 0x00 && g_var8[POS1] < 0x10 && g_var16[POS1] >= 0)
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS2]); // index, current input total
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
-			// current value + returned keypad value times its hex place
-			g_var32[POS0] = g_var32[POS0] + (g_var8[POS1] * hexTable[g_var16[POS1]]);
-			sprintf(displayText, "%03X", g_var32[POS0]);
-			drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			if (g_var16[POS1] >= 0)
-			{
-				g_var16[POS1]--;
-			}
-			g_var8[POS1] = 0xFF;
-		}
-		if (g_var8[POS1] == 0x10)
-		{
-			g_var16[POS1] = 2;
-			g_var8[POS1] = 0;
-			g_var32[POS0] = 0;
-			drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		}
-		if (g_var8[POS1] == 0x11)
-		{
-			can1.setIDCANOut(g_var32[POS0]);
-			drawRoundBtn(145, 100, 473, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			can1.setIDCANOut(g_var16[POS2]);
+			drawRoundBtn(255, 220, 470, 260, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			isFinished = false;
 			state = 0;
 		}
-		if (g_var8[POS1] == 0x12)
+		if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			isFinished = false;
 			state = 0;
@@ -830,12 +816,8 @@ void drawBaudScroll()
 void baudButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((x >= 140) && (x <= 300))
 		{
 			if ((y >= 60) && (y <= 95))
@@ -950,12 +932,8 @@ bool drawFilterMask()
 void filterMaskButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((y >= 125) && (y <= 175))
 		{
 			if ((x >= 205) && (x <= 340))
@@ -1211,12 +1189,8 @@ void drawCANLogScroll()
 void CANLogButtons()
 {
 	// Touch screen controls
-	if (myTouch.dataAvailable())
+	if (Touch_getXY())
 	{
-		myTouch.read();
-		x = myTouch.getX();
-		y = myTouch.getY();
-
 		if ((x >= 150) && (x <= 410))
 		{
 			if ((y >= 60) && (y <= 95))

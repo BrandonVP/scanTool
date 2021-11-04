@@ -144,6 +144,18 @@ void CANBus::sendCANOut(uint8_t channel, bool serialOut)
 	{
 		Can1.sendFrame(CANOut);
 	}
+	if (channel == 2)
+	{
+		SerialUSB.println("Sending");
+		Serial3.write(0xFE);
+		Serial3.write(0x09);
+		Serial3.write(CANOut.id);
+		for (uint8_t i = 0; i < 8; i++)
+		{
+			Serial3.write(CANOut.data.bytes[i]);
+		}
+		Serial3.write(0xFD);
+	}
 	if (serialOut)
 	{
 		char buffer[50];

@@ -105,4 +105,7 @@ extern void drawKeypad();
 extern bool loadBar(int);
 extern void drawErrorMSG(String title, String eMessage1, String eMessage2);
 extern void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);
+extern bool Touch_getXY();
+extern uint8_t keypadController(uint8_t&, uint16_t&);
+extern uint8_t keypadControllerDec(uint8_t&, uint16_t&);
 #endif // EXTERN_H

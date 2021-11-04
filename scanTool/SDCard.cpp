@@ -143,11 +143,8 @@ void SDCard::readLogFile(char* filename)
 		}
 		sendIt = !sendIt;
 
-		if (myTouch.dataAvailable())
+		if (Touch_getXY())
 		{
-			myTouch.read();
-			x = myTouch.getX();
-			y = myTouch.getY();
 			if ((y >= 275) && (y <= 315))
 			{
 				if ((x >= 131) && (x <= 216))

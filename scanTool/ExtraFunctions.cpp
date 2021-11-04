@@ -57,12 +57,8 @@ bool drawExtraFN()
 void extraFNButtons()
 {
     // Touch screen controls
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         if ((x >= 140) && (x <= 305))
         {
             if ((y >= 80) && (y <= 130))
@@ -182,12 +178,8 @@ void incID()
 
 void sendMSGButtons()
 {
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         if ((y >= 255) && (y <= 305))
         {
             if ((x >= 135) && (x <= 305))
@@ -543,12 +535,8 @@ bool drawDongleSimFord()
 void dongleSimButtonsFord()
 {
     // Touch screen controls
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         // VIN G
         if ((y >= 55) && (y <= 100) && millis() - g_var32[POS0] > 20)
         {

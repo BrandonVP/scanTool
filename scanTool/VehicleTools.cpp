@@ -57,12 +57,8 @@ bool drawVehicleTools()
 void VehicleToolButtons()
 {
     // Touch screen controls
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         // Start Scan
         if ((x >= 140) && (x <= 305))
         {
@@ -218,12 +214,8 @@ void drawPIDStream()
 void PIDStreamButtons()
 {
     // Touch screen controls
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         if ((x >= 150) && (x <= 410))
         {
             if ((y >= 60) && (y <= 95))
@@ -348,12 +340,8 @@ void PIDGauges()
     float g1, g2, g3, g4 = -1;
     while (isWait)
     {
-        if (myTouch.dataAvailable())
+        if (Touch_getXY())
         {
-            myTouch.read();
-            x = myTouch.getX();
-            y = myTouch.getY();
-
             if ((x >= 1) && (x <= 140))
             {
                 if ((y >= 1) && (y <= 319))
@@ -492,12 +480,8 @@ void drawClearDTC()
 uint8_t DTCButtons()
 {
     // Touch screen controls
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         // Start Scan
         if ((y >= 190) && (y <= 240))
         {

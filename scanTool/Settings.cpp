@@ -53,12 +53,8 @@ void drawSettings()
 void settingsButtons()
 {
     // Touch screen controls
-    if (myTouch.dataAvailable())
+    if (Touch_getXY())
     {
-        myTouch.read();
-        x = myTouch.getX();
-        y = myTouch.getY();
-
         // Start Scan
         if ((x >= 140) && (x <= 305))
         {
