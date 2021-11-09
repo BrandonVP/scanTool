@@ -157,7 +157,7 @@ bool drawCapture()
 		}
 		break;
 	case 4:
-		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		//drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
 	case 5:
 		drawSquareBtn(310, 55, 475, 85, F("Selected"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -198,6 +198,9 @@ void drawCaptureSelected()
 	case 5:
 		drawSquareBtn(310, 85, 475, 125, F("Bridge0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 6:
+		drawSquareBtn(310, 85, 475, 125, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
 	}
 	switch (selectedSourceOut)
 	{
@@ -224,7 +227,7 @@ bool drawCaptureOutput()
 	case 0:
 		break;
 	case 1:
-		drawSquareBtn(135, 55, 300, 285, "", themeBackground, themeBackground, themeBackground, CENTER);
+		drawSquareBtn(135, 55, 300, 320, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 2:
 		drawSquareBtn(135, 55, 300, 85, F("Output"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -277,6 +280,9 @@ bool drawCaptureSource()
 		drawSquareBtn(135, 245, 300, 285, F("Bridge0&1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
+		drawSquareBtn(135, 285, 300, 320, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 9:
 		return false;
 		break;
 	}
@@ -372,6 +378,23 @@ void CaptureButtons()
 					waitForIt(135, 245, 300, 285);
 					// Bridge0/1
 					selectedChannelOut = 5;
+					state = 2;
+					hasDrawn = false;
+					graphicLoaderState = 0;
+					drawCaptureSelected();
+				}
+				else if (state == 2)
+				{
+					// Unused
+				}
+			}
+			if ((y >= 285) && (y <= 320))
+			{
+				if (state == 1)
+				{
+					waitForIt(135, 285, 300, 320);
+					// WIFI
+					selectedChannelOut = 6;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;

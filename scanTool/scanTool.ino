@@ -9,8 +9,6 @@
 ===========================================================
 Read Vehicle DTCs
 Read / Clear RZR DTCs
-keyboard function
-numpad (dec)
 Switch to FATSD
 -RTC Time stamps
 File naming
@@ -23,7 +21,6 @@ Organize / move output variables into a settings structure
 #define DEBUG_KEYBOARD(x)
 
 // Libraries
-#include "Variables.h"
 #include <malloc.h>
 #include <memorysaver.h>
 #include <SD.h>
@@ -42,6 +39,7 @@ Organize / move output variables into a settings structure
 #include "SDCard.h"
 #include "Settings.h"
 #include "VehicleTools.h"
+#include "Variables.h"
 
 // Harware Objects
 CANBus can1;

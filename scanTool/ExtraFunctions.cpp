@@ -35,7 +35,7 @@ bool drawExtraFN()
         drawRoundBtn(140, 190, 305, 240, F("Keypad D"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(310, 190, 475, 240, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
         drawRoundBtn(140, 245, 305, 295, F("Dongle F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -107,8 +107,8 @@ void extraFNButtons()
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
-                // WIFI
-                nextPage = 33;
+                // Unused
+                //nextPage = 33;
             }
             if ((y >= 245) && (y <= 295))
             {

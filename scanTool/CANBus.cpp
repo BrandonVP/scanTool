@@ -638,6 +638,72 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 			return true;
 		}
 	}
+	else if (config == 6)
+	{
+		if (Serial3.available() > 0)
+		{
+			uint8_t recByte = Serial3.read();
+			//SerialUSB.println(recByte, 16);
+			switch (state)
+			{
+			case START_BYTE:
+				if (recByte == STARTING_BYTE)
+				{
+					state = PACKET_LENGTH;
+					return false;
+				}
+				break;
+			case PACKET_LENGTH:
+				state = CAN_BUS_ID1;
+				if (recByte == PACKET_SIZE)
+				{
+					packetIndex = 0;
+					return false;
+				}
+				else
+				{
+					// Bad packet
+					state = START_BYTE;
+				}
+				break;
+			case CAN_BUS_ID1:
+				incWIFI.id = recByte;
+				state = CAN_BUS_ID2;
+				break;
+			case CAN_BUS_ID2:
+				incWIFI.id += (recByte << 8);
+				state = CAN_BUS_DATA;
+				break;
+			case CAN_BUS_DATA:
+				incWIFI.data.bytes[packetIndex] = recByte;
+				packetIndex++;
+				if (packetIndex == PACKET_SIZE - 1)
+				{
+					state = END_BYTE;
+				}
+				break;
+			case END_BYTE:
+				if (recByte == ENDING_BYTE)
+				{
+					state = START_BYTE;
+					id = incWIFI.id;
+					len = 8;
+					for (int count = 0; count < incCAN0.length; count++) {
+						msg[count] = incWIFI.data.bytes[count];
+					}
+					//sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
+					//SERIAL_CAPTURE(buffer);
+					return true;
+				}
+				else
+				{
+					// packet failed restart
+					state = START_BYTE;
+				}
+				break;
+			}
+		}
+	}
 	return false;
 }
 
