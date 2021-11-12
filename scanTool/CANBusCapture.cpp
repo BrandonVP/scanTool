@@ -35,7 +35,7 @@ bool drawCANBus()
 		drawRoundBtn(140, 135, 305, 185, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(310, 135, 475, 185, F(" "), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 135, 475, 185, F("Timed TX"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawRoundBtn(140, 190, 305, 240, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -107,7 +107,9 @@ void CANBusButtons()
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(310, 135, 475, 185);
-				// Unused
+				// Timed TX
+				graphicLoaderState = 0;
+				nextPage = 6;
 			}
 			if ((y >= 190) && (y <= 240))
 			{
@@ -782,6 +784,87 @@ void sendCANFrame(uint8_t channel)
 	case 9: setData(7);
 		break;
 	}
+}
+
+/*============== Timed TX ==============*/
+bool drawTimedTX()
+{
+	switch (graphicLoaderState)
+	{
+	case 0:
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 3:
+		drawRoundBtn(134, 55, 200, 95, F("CHL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(202, 55, 283, 95, F("INT"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(285, 55, 349, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(351, 55, 421, 95, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(423, 55, 476, 95, F("ON"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawRoundBtn(134, 100, 200, 145, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(202, 100, 283, 145, F("10000"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(285, 100, 349, 145, F("7E8"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(351, 100, 421, 145, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(423, 100, 476, 145, F("x"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		break;
+	case 6:
+		drawRoundBtn(134, 150, 200, 190, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(202, 150, 283, 190, F("50"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(285, 150, 349, 190, F("101"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(351, 150, 421, 190, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(423, 150, 476, 190, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 7:
+		
+		break;
+	case 8:
+		
+		break;
+	case 9:
+		
+		break;
+	case 10:
+		
+		break;
+	case 11:
+		
+		break;
+	case 12:
+		
+		break;
+	case 13:
+		
+		break;
+	case 14:
+		
+		break;
+	case 15:
+		drawRoundBtn(134, 195, 200, 235, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(202, 195, 283, 235, F("50"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(285, 195, 349, 235, F("101"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(351, 195, 421, 235, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(423, 195, 476, 235, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 16:
+		drawRoundBtn(134, 340, 200, 390, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(202, 340, 283, 390, F("50"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(285, 340, 349, 390, F("101"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(351, 340, 421, 390, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(423, 340, 476, 390, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 17:
+
+		break;
+	case 18:
+		return false;
+		break;
+	}
+	return true;
 }
 
 /*============== Baud ==============*/

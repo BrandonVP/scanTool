@@ -359,16 +359,17 @@ uint8_t CANBus::requestVIN(uint16_t state, bool saveSD)
 }
 
 //
-int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
+uint8_t CANBus::PIDStream(uint8_t &value, bool saveToSD)
 {
 	// Frames to request VIN
 	uint8_t PIDRequest[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-	PIDRequest[2] = PID;
+	//PIDRequest[2] = PID;
 
 	// Waits to recieve all messages
 	bool isWait = true;
-
+	uint8_t PID = 0;
+	/*
 	if (saveToSD)
 	{
 		sdCard.writeFileln(fullDir);
@@ -376,13 +377,16 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 		sdCard.writeFile(fullDir, PID, HEX);
 		sdCard.writeFileln(fullDir);
 	}
+	*/
+	
 
 	// Send first frame requesting VIN
 	isWait = true;
-	sendFrame(sendID, PIDRequest);
-	delay(10);
+	//sendFrame(sendID, PIDRequest);
+	//delay(10);
 	if (Can0.available() > 0) {
 		Can0.read(incCAN0);
+		PID = incCAN0.data.bytes[2];
 		switch (PID)
 		{
 		case PID_ENGINE_RPM:
@@ -398,7 +402,8 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 					sdCard.writeFileln(fullDir);
 				}
 				isWait = false;
-				return rpm;
+				value = rpm;
+				return PID;
 			}
 		case PID_FUEL_LEVEL:
 			if (incCAN0.data.bytes[2] == PID_FUEL_LEVEL) {
@@ -412,7 +417,8 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 					sdCard.writeFile(fullDir, level, DEC);
 					sdCard.writeFileln(fullDir);
 				}
-				return level;
+				value = level;
+				return PID;
 			}
 			break;
 		case PID_THROTTLE_POSITION:
@@ -427,21 +433,23 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 					sdCard.writeFile(fullDir, position, DEC);
 					sdCard.writeFileln(fullDir);
 				}
-				return position;
+				value = position;
+				return PID;
 			}
 		case PID_VEHICLE_SPEED:
 			if (incCAN0.data.bytes[2] == PID_VEHICLE_SPEED) {
 				uint16_t vehicleSpeed;
 				vehicleSpeed = ((incCAN0.data.bytes[3])) / 1.609344; //formula 100*A/255
-				//Serial.print(F("MPH: "));
-				//Serial.println(spd, DEC);
+				//SerialUSB.print(F("MPH: "));
+				//SerialUSB.println(vehicleSpeed, DEC);
 				if (saveToSD)
 				{
 					sdCard.writeFile(fullDir, "MPH: ");
 					sdCard.writeFile(fullDir, vehicleSpeed, DEC);
 					sdCard.writeFileln(fullDir);
 				}
-				return vehicleSpeed;
+				value = vehicleSpeed;
+				return PID;
 			}
 			break;
 		case PID_MASS_AIR_FLOW:
@@ -456,9 +464,25 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 					sdCard.writeFile(fullDir, airFlow, DEC);
 					sdCard.writeFileln(fullDir);
 				}
-				return airFlow;
+				value = airFlow;
+				return PID;
 			}
 			break;
+		case PID_ENGINE_LOAD:
+			if (incCAN0.data.bytes[2] == PID_ENGINE_LOAD) 
+			{
+				uint16_t engineLoad = (incCAN0.data.bytes[3]) / 2.55; //formula A/2.55
+				value = engineLoad;
+				return PID;
+			}
+			break;
+		case PID_COOLANT_TEMP:
+			if (incCAN0.data.bytes[2] == PID_COOLANT_TEMP) 
+			{
+				uint16_t coolantTemp = (((incCAN0.data.bytes[3]) - 40) * 1.8) + 32; //formula A - 40 for C, C * 1.8 + 32 = F
+				value = coolantTemp;
+				return PID;
+			}
 		}
 
 		if (saveToSD)
@@ -486,6 +510,7 @@ int CANBus::PIDStream(uint16_t sendID, uint8_t PID, bool saveToSD)
 			sdCard.writeFileln(fullDir);
 		}
 	}
+	return 0;
 }
 
 //

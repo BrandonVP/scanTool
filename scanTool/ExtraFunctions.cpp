@@ -362,7 +362,7 @@ void dongleSimButtons()
             }
             if ((x >= 330) && (x <= 400))
             {
-                waitForIt(255, 55, 325, 100);
+                waitForIt(330, 55, 400, 100);
                 // 2
                 const uint16_t id = 0x7E8;
                 uint8_t data1[8] = { 0x21, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
@@ -370,7 +370,7 @@ void dongleSimButtons()
             }
             if ((x >= 405) && (x <= 475))
             {
-                waitForIt(255, 55, 325, 100);
+                waitForIt(405, 55, 475, 100);
                 // 3
                 const uint16_t id = 0x7E8;
                 uint8_t data1[8] = { 0x22, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45 };

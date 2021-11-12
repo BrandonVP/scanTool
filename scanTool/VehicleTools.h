@@ -19,6 +19,7 @@ extern void PIDGauges();
 extern void drawVIN();
 extern void clearDTC();
 extern void drawClearDTC();
+extern bool drawPIDGauges();
 extern uint8_t DTCButtons();
 #endif
 

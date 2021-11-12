@@ -92,7 +92,7 @@ public:
 	bool SerialOutCAN(uint8_t);
 	bool SDOutCAN(uint8_t);
 	void startPID();
-	int PIDStream(uint16_t, uint8_t, bool);
+	uint8_t PIDStream(uint8_t&, bool);
 	int PIDStreamGauge(uint16_t, uint8_t);
 	void setBaud0(uint32_t);
 	void setBaud1(uint32_t);

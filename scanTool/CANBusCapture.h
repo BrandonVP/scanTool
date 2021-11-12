@@ -34,5 +34,6 @@ extern void drawCANLogScroll();
 extern void CANLogButtons();
 extern void findBaud();
 extern void openAllTraffic();
+extern bool drawTimedTX();
 #endif
 

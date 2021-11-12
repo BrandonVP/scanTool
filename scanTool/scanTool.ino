@@ -587,6 +587,12 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (drawTimedTX())
+			{
+				graphicLoaderState++;
+				break;
+			}
+			
 			hasDrawn = true;
 			//TODO: Write function
 		}
@@ -769,7 +775,8 @@ void pageControl()
 		}
 		if ((state == 1) && (g_var16[POS1] < PIDSAMPLES) && (millis() - g_var32[POS0] > 1000))
 		{
-			can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
+			// TODO: Fix me
+			//can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
 			g_var16[POS1]++;
 			drawErrorMSG("Samples", String(g_var16[POS1]), "Saved to SD");
 			g_var32[POS0] = millis();
@@ -799,6 +806,7 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			drawPIDGauges();
 			hasDrawn = true;
 			//can1.startPID();
 		}

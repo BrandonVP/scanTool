@@ -297,10 +297,9 @@ void PIDStreamButtons()
 }
 
 /*============== PID Stream Guages ==============*/
-void PIDGauges()
+// Draw the gauges
+bool drawPIDGauges()
 {
-    bool isWait = true;
-
     drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 
     myGLCD.setBackColor(menuBtnColor);
@@ -318,14 +317,19 @@ void PIDGauges()
 
     myGLCD.setBackColor(VGA_WHITE);
     myGLCD.setColor(menuBtnColor);
-    myGLCD.print(F("Load"), 188, 148); // 4
-    myGLCD.print(F("RPM"), 358, 148);// C
-    myGLCD.print(F("TEMP"), 188, 278); // 5
-    myGLCD.print(F("MPH"), 358, 278); // D
+    myGLCD.print(F("Load"), 188, 148); // 0x04
+    myGLCD.print(F("RPM"), 358, 148);  // 0x0C
+    myGLCD.print(F("TEMP"), 188, 278); // 0x05
+    myGLCD.print(F("MPH"), 358, 278);  // 0x0D
     myGLCD.setBackColor(menuBtnColor);
+}
 
+// 
+void PIDGauges()
+{
     const float pi = 3.14159;
     const uint8_t r = 50;
+    const float offset = (pi / 2) + 1;
 
     uint16_t x1 = r * cos(pi / 2) + 220;
     uint16_t y1 = r * sin(pi / 2) + 120;
@@ -336,8 +340,15 @@ void PIDGauges()
     uint16_t x4 = r * cos(pi / 2) + 380;
     uint16_t y4 = r * sin(pi / 2) + 250;
 
-    const float offset = (pi / 2) + 1;
+    bool isWait = true;
     float g1, g2, g3, g4 = -1;
+
+    uint8_t PIDRequest[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    uint32_t sendTimer = 0;
+    uint8_t traverse = 0;
+    uint8_t value = 0;
+
     while (isWait)
     {
         if (Touch_getXY())
@@ -350,20 +361,50 @@ void PIDGauges()
                 }
             }
         }
-        g1 = can1.PIDStream(CAN_PID_ID, 0x4, false);
-        g2 = can1.PIDStream(CAN_PID_ID, 0xC, false);
-        g3 = can1.PIDStream(CAN_PID_ID, 0x5, false);
-        g4 = can1.PIDStream(CAN_PID_ID, 0xD, false);
-        myGLCD.setBackColor(VGA_WHITE);
-        myGLCD.printNumI(g1, 197, 128, 3, '0');
-        myGLCD.printNumI(g2, 343, 128, 5, '0');
-        myGLCD.printNumI(g3, 193, 258, 3, '0');
-        myGLCD.printNumI(g4, 358, 258, 3, '0');
 
+        if (millis() - sendTimer > 3)
+        {
+            uint8_t temp = traverse & 0x7;
+            switch (temp)
+            {
+            case 0:
+                PIDRequest[2] = 0x4;
+                can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
+                break;
+            case 1:
+                break;
+            case 2:
+                PIDRequest[2] = 0xC;
+                can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
+                break;
+            case 3:
+                break;
+            case 4:
+                PIDRequest[2] = 0x5;
+                can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
+                break;
+            case 5:
+                break;
+            case 6:
+                PIDRequest[2] = 0xD;
+                can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
+                break;
+            case 7:
+                break;
+            }
+            sendTimer = millis();
+            traverse++;
+        }
+
+        uint8_t result = can1.PIDStream(value, false);
+
+        myGLCD.setBackColor(VGA_WHITE);
         // gauge values 0-286
 
-        if (g1 >= 0)
+        if (result == 0x04)
         {
+            g1 = value;
+            myGLCD.printNumI(g1, 197, 128, 3, '0');
             g1 = offset + (g1 * 0.042);
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
@@ -374,8 +415,10 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 120, x1, y1);
         }
-        if (g2 >= 0)
+        if (result == 0x0C)
         {
+            g2 = value;
+            myGLCD.printNumI(g2, 343, 128, 5, '0');
             g2 = (offset + ((g2 * 0.0286) * 0.015));
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
@@ -386,8 +429,10 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(380, 120, x2, y2);
         }
-        if (g3 >= 0)
+        if (result == 0x05)
         {
+            g3 = value;
+            myGLCD.printNumI(g3, 193, 258, 3, '0');
             g3 = offset + (g3 * 0.01);
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
@@ -398,8 +443,10 @@ void PIDGauges()
             myGLCD.setColor(menuBtnColor);
             myGLCD.drawLine(220, 250, x3, y3);
         }
-        if (g4 >= 0)
+        if (result == 0x0D)
         {
+            g4 = value;
+            myGLCD.printNumI(g4, 358, 258, 3, '0');
             g4 = offset + (g4 * 0.027);
             myGLCD.setBackColor(VGA_WHITE);
             myGLCD.setColor(VGA_WHITE);
@@ -411,7 +458,6 @@ void PIDGauges()
             myGLCD.drawLine(380, 250, x4, y4);
         }
     }
-    return;
 }
 
 /*=============== Vin ================*/
