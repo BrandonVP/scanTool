@@ -108,4 +108,5 @@ extern void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uin
 extern bool Touch_getXY();
 extern uint8_t keypadController(uint8_t&, uint16_t&);
 extern uint8_t keypadControllerDec(uint8_t&, uint16_t&);
+extern void backgroundProcess();
 #endif // EXTERN_H

@@ -787,6 +787,15 @@ void sendCANFrame(uint8_t channel)
 }
 
 /*============== Timed TX ==============*/
+SchedulerRX RXtimedMSG;
+uint8_t selectedIndex = 0;
+uint8_t freeNode = 0;
+uint8_t testValue = 0;
+uint8_t hexPadIndex = 0;
+uint8_t userInput = 0;
+uint16_t totalValue = 0;
+
+#define TIMED_TX_MAX_SIZE 10
 bool drawTimedTX()
 {
 	switch (graphicLoaderState)
@@ -797,74 +806,483 @@ bool drawTimedTX()
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 3:
-		drawRoundBtn(134, 55, 200, 95, F("CHL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(202, 55, 283, 95, F("INT"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(285, 55, 349, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(351, 55, 421, 95, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(423, 55, 476, 95, F("ON"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(132, 56, 478, 96, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(134, 100, 200, 145, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(202, 100, 283, 145, F("10000"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(285, 100, 349, 145, F("7E8"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(351, 100, 421, 145, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(423, 100, 476, 145, F("x"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(133, 56, 202, 95, F("CHL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
+		drawSquareBtn(202, 56, 271, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawRoundBtn(134, 150, 200, 190, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(202, 150, 283, 190, F("50"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(285, 150, 349, 190, F("101"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(351, 150, 421, 190, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(423, 150, 476, 190, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(271, 56, 340, 95, F("ON"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		
+		drawSquareBtn(340, 56, 409, 95, F("EDIT"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
-		
+		drawSquareBtn(409, 56, 477, 95, F("DEL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
-		
+		drawSquareBtn(132, 99, 478, 141, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 10:
-		
+		drawSquareBtn(132, 144, 478, 186, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 11:
-		
+		drawSquareBtn(132, 189, 478, 231, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 12:
-		
-		break;
+		drawSquareBtn(132, 279, 211, 318, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;	
 	case 13:
-		
+		drawSquareBtn(132, 234, 478, 276, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 14:
-		
+		drawSquareBtn(133, 280, 210, 317, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 15:
-		drawRoundBtn(134, 195, 200, 235, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(202, 195, 283, 235, F("50"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(285, 195, 349, 235, F("101"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(351, 195, 421, 235, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(423, 195, 476, 235, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(260, 279, 351, 318, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 16:
-		drawRoundBtn(134, 340, 200, 390, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(202, 340, 283, 390, F("50"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(285, 340, 349, 390, F("101"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(351, 340, 421, 390, F("DATA"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(423, 340, 476, 390, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(261, 280, 350, 317, F("Add"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 17:
-
+		drawSquareBtn(400, 279, 478, 318, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 18:
+		drawSquareBtn(401, 280, 477, 317, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 19:
+		drawTXNode(testValue);
+		break;
+	case 20:
 		return false;
 		break;
 	}
 	return true;
+}
+
+void test()
+{
+	// For testing
+	for (uint8_t j = 0; j < 9; j++)
+	{
+		RXtimedMSG.node[j].channel = j % 3;
+		RXtimedMSG.node[j].interval = 10;
+		RXtimedMSG.node[j].id = 101 + j;
+		RXtimedMSG.node[j].isOn = true;
+		RXtimedMSG.node[j].isDel = false;
+		for (uint8_t i = 0; i < 8; i++)
+		{
+			RXtimedMSG.node[j].data[i] = i;
+		}
+		RXtimedMSG.nodeLength = 1;
+	}
+}
+bool drawTXNode(uint8_t index)
+{
+	uint16_t yAxis = 100;
+	for (uint8_t i = index; i < (index + 4); i++)
+	{
+		if (!RXtimedMSG.node[i].isDel && i < 10)
+		{
+			if (RXtimedMSG.node[i].channel > 1)
+			{
+				drawSquareBtn(133, yAxis, 202, yAxis + 40, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			}
+			else
+			{
+				drawSquareBtn(133, yAxis, 202, yAxis + 40, String(RXtimedMSG.node[i].channel), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			}
+			drawSquareBtn(202, yAxis, 271, yAxis + 40, String(RXtimedMSG.node[i].id), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			drawSquareBtn(271, yAxis, 340, yAxis + 40, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			drawSquareBtn(340, yAxis, 409, yAxis + 40, F("EDIT"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			drawSquareBtn(409, yAxis, 477, yAxis + 40, F("DEL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			yAxis += 45;
+		}
+		else if(i + index < 5)
+		{
+			index++;
+		}
+		backgroundProcess();
+	}
+}
+
+bool drawEditTXNode(uint8_t node)
+{
+	switch (graphicLoaderState)
+	{
+	case 0:
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 3:
+		drawRoundBtn(135, 55, 259, 95, F("Channel"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 4:
+		drawRoundBtn(135, 100, 200, 145, F("ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 5:
+		drawRoundBtn(202, 100, 282, 145, String(RXtimedMSG.node[node].id), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(284, 100, 354, 145, F("INT:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(356, 100, 475, 145, String(RXtimedMSG.node[node].interval), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 6:
+		drawRoundBtn(135, 150, 475, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 7:
+		myGLCD.setFont(SmallFont);
+		drawRoundBtn(134, 195, 175, 250, " " + String(can1.getCANOutData(0), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 8:
+		drawRoundBtn(177, 195, 218, 250, " " + String(can1.getCANOutData(1), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 9:
+		drawRoundBtn(220, 195, 261, 250, " " + String(can1.getCANOutData(2), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 10:
+		drawRoundBtn(263, 195, 304, 250, " " + String(can1.getCANOutData(3), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 11:
+		drawRoundBtn(306, 195, 347, 250, " " + String(can1.getCANOutData(4), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 12:
+		drawRoundBtn(349, 195, 390, 250, " " + String(can1.getCANOutData(5), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 13:
+		drawRoundBtn(392, 195, 433, 250, " " + String(can1.getCANOutData(6), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 14:
+		drawRoundBtn(435, 195, 476, 250, " " + String(can1.getCANOutData(7), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		myGLCD.setFont(BigFont);
+		break;
+	case 15:
+		drawRoundBtn(135, 255, 304, 300, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(306, 255, 475, 300, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 16:
+		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	case 17:
+		drawSendChannel(0);
+		return false;
+		break;
+	}
+	graphicLoaderState++;
+	return true;
+}
+
+void timedTXButtons()
+{
+	if (Touch_getXY())
+	{
+		if ((y >= 100) && (y <= 140))
+		{
+			if ((x >= 271) && (x <= 340))
+			{
+				waitForIt(271, 100, 340, 140);
+				// On
+				RXtimedMSG.node[(testValue + 0)].isOn = !RXtimedMSG.node[(testValue + 0)].isOn;
+				RXtimedMSG.node[(testValue + 0)].isOn ? drawSquareBtn(271, 100, 340, 140, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 100, 340, 140, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			}
+			if ((x >= 340) && (x <= 409))
+			{
+				waitForIt(340, 100, 409, 140);
+				// Edit
+
+			}
+			if ((x >= 409) && (x <= 477))
+			{
+				waitForIt(409, 100, 477, 140);
+				// Del
+				RXtimedMSG.node[(testValue + 0)].isDel = true;
+				drawTXNode(testValue);
+			}
+		}
+		if ((y >= 145) && (y <= 185))
+		{
+			if ((x >= 271) && (x <= 340))
+			{
+				waitForIt(271, 145, 340, 185);
+				// On
+				RXtimedMSG.node[(testValue + 1)].isOn = !RXtimedMSG.node[(testValue + 1)].isOn;
+				RXtimedMSG.node[(testValue + 1)].isOn ? drawSquareBtn(271, 145, 340, 185, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 145, 340, 185, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			}
+			if ((x >= 340) && (x <= 409))
+			{
+				waitForIt(340, 145, 409, 185);
+				// Edit
+
+			}
+			if ((x >= 409) && (x <= 477))
+			{
+				waitForIt(409, 145, 477, 185);
+				// Del
+
+			}
+		}
+		if ((y >= 190) && (y <= 230))
+		{
+			if ((x >= 271) && (x <= 340))
+			{
+				waitForIt(271, 190, 340, 230);
+				// On
+
+			}
+			if ((x >= 340) && (x <= 409))
+			{
+				waitForIt(340, 190, 409, 230);
+				// Edit
+
+			}
+			if ((x >= 409) && (x <= 477))
+			{
+				waitForIt(409, 190, 477, 230);
+				// Del
+
+			}
+		}
+		if ((y >= 235) && (y <= 275))
+		{
+			if ((x >= 271) && (x <= 340))
+			{
+				waitForIt(271, 235, 340, 275);
+				// On
+
+			}
+			if ((x >= 340) && (x <= 409))
+			{
+				waitForIt(340, 235, 409, 275);
+				// Edit
+
+			}
+			if ((x >= 409) && (x <= 477))
+			{
+				waitForIt(409, 235, 477, 275);
+				// Del
+
+			}
+		}
+		if ((y >= 280) && (y <= 317))
+		{
+			if ((x >= 133) && (x <= 210))
+			{
+				waitForIt(133, 280, 210, 317);
+				// Up
+				if (testValue > 0)
+				{
+					testValue--;
+					drawTXNode(testValue);
+				}
+			}
+			if ((x >= 261) && (x <= 350))
+			{
+				waitForIt(261, 280, 350, 317);
+				// Add
+				graphicLoaderState = 0;
+				state = 1;
+			}
+			if ((x >= 401) && (x <= 477))
+			{
+				waitForIt(401, 280, 477, 317);
+				// Down
+				if (testValue < 6)
+				{
+					testValue++;
+					drawTXNode(testValue);
+				}
+			}
+		}
+	}
+}
+
+void timedTX()
+{
+	switch (state)
+	{
+	case 0:
+		// Main State
+		// Del
+		// Up
+		// Down
+		break;
+	case 1:
+		// Add state
+		selectedIndex = findFreeTXNode();
+		state = 2;
+		break;
+	case 2:
+		drawEditTXNode(selectedIndex) ? state = 2 : state = 3;
+		break;
+	case 3:
+		// Edit state
+		// Channel
+		break;
+	case 4:
+		//ID
+
+		break;
+	case 5:
+		// INT
+		userInput = keypadController(hexPadIndex, totalValue);
+		if (userInput == 0xF1) // Accept
+		{
+			drawRoundBtn(284, 100, 354, 145, String(RXtimedMSG.node[selectedIndex].interval), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else if (userInput == 0xF0) // Cancel
+		{
+
+		}
+		break;
+	case 6:
+		// Data0
+		break;
+	case 7:
+		// Data1
+		break;
+	case 8:
+		// Data2
+		break;
+	case 9:
+		// Data3
+		break;
+	case 10:
+		// Data4
+		break;
+	case 11:
+		// Data5
+		break;
+	case 12:
+		// Data6
+		break;
+	case 13:
+		// Data7
+		break;
+	case 14:
+		// Data8
+		// 
+		break;
+	}
+}
+
+
+void editTXNodeButtons()
+{
+	// Touch screen controls
+	if (Touch_getXY())
+	{
+		if ((y >= 55) && (y <= 95))
+		{
+			if ((x >= 261) && (x <= 331))
+			{
+				waitForIt(261, 55, 331, 95);
+				// Channel 0
+				drawSendChannel((g_var8[POS0] = 0));
+			}
+			if ((x >= 333) && (x <= 403))
+			{
+				waitForIt(333, 55, 403, 95);
+				// Channel 1
+				drawSendChannel((g_var8[POS0] = 1));
+			}
+			if ((x >= 405) && (x <= 475))
+			{
+				waitForIt(405, 55, 475, 95);
+				// WIFI
+				drawSendChannel((g_var8[POS0] = 2));
+			}
+		}
+		if ((x >= 261) && (x <= 475))
+		{
+			if ((y >= 100) && (y <= 145))
+			{
+				waitForIt(261, 100, 475, 145);
+				// Set ID
+				
+			}
+		}
+		if ((y >= 195) && (y <= 250))
+		{
+			if ((x >= 134) && (x <= 175))
+			{
+				waitForIt(134, 195, 175, 250);
+				// Set Data[0]
+				state = 2;
+				isFinished = false;
+			}
+			if ((x >= 177) && (x <= 218))
+			{
+				waitForIt(177, 195, 218, 250);
+				// Set Data[1]
+				state = 3;
+				isFinished = false;
+			}
+			if ((x >= 220) && (x <= 261))
+			{
+				waitForIt(220, 195, 261, 250);
+				// Set Data[2]
+				state = 4;
+				isFinished = false;
+			}
+			if ((x >= 263) && (x <= 304))
+			{
+				waitForIt(263, 195, 304, 250);
+				// Set Data[3]
+				state = 5;
+				isFinished = false;
+			}
+			if ((x >= 306) && (x <= 347))
+			{
+				waitForIt(306, 195, 347, 250);
+				// Set Data[4]
+				state = 6;
+				isFinished = false;
+			}
+			if ((x >= 350) && (x <= 391))
+			{
+				waitForIt(349, 195, 390, 250);
+				// Set Data[5]
+				state = 7;
+				isFinished = false;
+			}
+			if ((x >= 392) && (x <= 433))
+			{
+				waitForIt(392, 195, 433, 250);
+				// Set Data[6]
+				state = 8;
+				isFinished = false;
+			}
+			if ((x >= 435) && (x <= 476))
+			{
+				waitForIt(435, 195, 476, 250);
+				// Set Data[7]
+				state = 9;
+				isFinished = false;
+			}
+		}
+		if ((x >= 135) && (x <= 475))
+		{
+			if ((y >= 255) && (y <= 300))
+			{
+				waitForIt(135, 255, 475, 300);
+				// Send Frame
+			}
+		}
+	}
+}
+
+
+uint8_t findFreeTXNode()
+{
+	for (uint8_t i = 0; i < TIMED_TX_MAX_SIZE; i++)
+	{
+		if (!RXtimedMSG.node[i].isOn)
+		{
+			return i;
+		}
+	}
 }
 
 /*============== Baud ==============*/

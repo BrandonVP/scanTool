@@ -583,7 +583,7 @@ void pageControl()
 		}
 		break;
 
-	case 6: // SD Capture
+	case 6: // Timed RX
 		// Draw Page
 		if (!hasDrawn)
 		{
@@ -592,12 +592,15 @@ void pageControl()
 				graphicLoaderState++;
 				break;
 			}
-			
+			test();
+			state = 0;
 			hasDrawn = true;
 			//TODO: Write function
 		}
 
 		// Call buttons if any
+		timedTXButtons();
+		timedTX();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
