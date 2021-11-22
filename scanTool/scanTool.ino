@@ -77,7 +77,7 @@ uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
 char keyboardInput[10] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
-uint8_t keypadInput[3] = {0, 0, 0};
+uint8_t keypadInput[4] = {0, 0, 0, 0};
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
@@ -592,14 +592,14 @@ void pageControl()
 				graphicLoaderState++;
 				break;
 			}
-			test();
+			
 			state = 0;
 			hasDrawn = true;
 			//TODO: Write function
 		}
 
 		// Call buttons if any
-		timedTXButtons();
+		
 		timedTX();
 
 		// Release any variable locks if page changed
@@ -1834,6 +1834,14 @@ void menuButtons()
 	}
 }
 
+// Call before using keypad to clear out old values from array used to shift input
+void resetKeypad()
+{
+	for (uint8_t i = 0; i < 4; i++)
+	{
+	keypadInput[i] = 0;
+	}
+}
 /*============== Hex Keypad ==============*/
 // User input keypad
 void drawKeypad()
@@ -2695,14 +2703,6 @@ void SDCardOut()
 	(isSDOut) && (can1.SDOutCAN(selectedChannelOut));
 }
 
-// Future feature
-void msgSpamOut()
-{
-	if (isMSGSpam)
-	{
-		MSGSpam();
-	}
-}
 
 // Able to call background process from blocked loop
 void backgroundProcess()
@@ -2710,7 +2710,7 @@ void backgroundProcess()
 	updateTime();
 	serialOut();
 	SDCardOut();
-	//msgSpamOut();
+	timedTXSend();
 }
 
 

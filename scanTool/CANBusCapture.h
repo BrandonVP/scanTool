@@ -14,6 +14,7 @@ struct MessageRX
 	uint8_t channel = 0;
 	uint16_t interval = 0;
 	uint32_t id = 0;
+	uint32_t timer = 0;
 	uint8_t data[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 	bool isOn = false;
 	bool isDel = true;
@@ -59,5 +60,7 @@ extern void timedTX();
 extern uint8_t findFreeTXNode();
 extern bool drawEditTXNode(uint8_t);
 extern void test();
+extern void editTXNodeButtons();
+extern void timedTXSend();
 #endif
 

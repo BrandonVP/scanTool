@@ -109,4 +109,6 @@ extern bool Touch_getXY();
 extern uint8_t keypadController(uint8_t&, uint16_t&);
 extern uint8_t keypadControllerDec(uint8_t&, uint16_t&);
 extern void backgroundProcess();
+extern void drawKeypadDec();
+extern void resetKeypad();
 #endif // EXTERN_H
