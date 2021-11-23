@@ -592,19 +592,34 @@ void pageControl()
 				graphicLoaderState++;
 				break;
 			}
-			
+
+			bool error = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Selected index
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // User input
+			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : error = true; // Keypad index
+			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : error = true; // Scroll index
+			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : error = true; // Node position
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Total value
+			if (error)
+			{
+				DEBUG_ERROR("Error: Variable locked");
+				nextPage = 0;
+			}
 			state = 0;
 			hasDrawn = true;
-			//TODO: Write function
 		}
-
 		// Call buttons if any
-		
 		timedTX();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar16(LOCK0);
+			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
+			unlockVar8(LOCK2);
+			unlockVar8(LOCK3);
+			unlockVar8(LOCK4);
 			hasDrawn = false;
 			page = nextPage;
 		}

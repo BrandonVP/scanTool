@@ -235,7 +235,7 @@ bool drawCaptureOutput()
 		drawSquareBtn(135, 55, 300, 85, F("Output"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		selectedChannelOut == 6 ? drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBackground, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
 		drawSquareBtn(135, 125, 300, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -310,7 +310,7 @@ void CaptureButtons()
 					hasDrawn = false;
 					graphicLoaderState = 0;
 				}
-				else if (state == 2)
+				else if (state == 2 && selectedChannelOut != 6) // LCD wont work with WIFI
 				{
 					// LCD
 					selectedSourceOut = 1;
@@ -588,6 +588,9 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(261, 100, 475, 145);
 				// Set ID
+				g_var8[POS2] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 1;
 				isFinished = false;
 			}
@@ -598,6 +601,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(134, 195, 175, 250);
 				// Set Data[0]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 2;
 				isFinished = false;
 			}
@@ -605,6 +612,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(177, 195, 218, 250);
 				// Set Data[1]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 3;
 				isFinished = false;
 			}
@@ -612,6 +623,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(220, 195, 261, 250);
 				// Set Data[2]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 4;
 				isFinished = false;
 			}
@@ -619,6 +634,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(263, 195, 304, 250);
 				// Set Data[3]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 5;
 				isFinished = false;
 			}
@@ -626,6 +645,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(306, 195, 347, 250);
 				// Set Data[4]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 6;
 				isFinished = false;
 			}
@@ -633,6 +656,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(349, 195, 390, 250);
 				// Set Data[5]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 7;
 				isFinished = false;
 			}
@@ -640,6 +667,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(392, 195, 433, 250);
 				// Set Data[6]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 8;
 				isFinished = false;
 			}
@@ -647,6 +678,10 @@ void sendFrameButtons(uint8_t channel)
 			{
 				waitForIt(435, 195, 476, 250);
 				// Set Data[7]
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 				state = 9;
 				isFinished = false;
 			}
@@ -666,6 +701,21 @@ void sendFrameButtons(uint8_t channel)
 // Using this function in sendFrame switch statement to avoid writing it out 8 times
 void setData(uint8_t position)
 {
+	
+	g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
+		{
+			can1.setDataCANOut(g_var16[POS0], position);
+			isFinished = false;
+			state = 0;
+		}
+		else if (g_var8[POS1] == 0xF0) // Cancel
+		{
+			isFinished = false;
+			state = 0;
+		}
+	
+		/*
 	char displayText[10];
 	if (!isFinished)
 	{
@@ -713,6 +763,7 @@ void setData(uint8_t position)
 		isFinished = false;
 		state = 0;
 	}
+	*/
 }
 
 // Send CAN Bus frame program
@@ -743,7 +794,6 @@ void sendCANFrame(uint8_t channel)
 	case 1: // ID
 		if (!isFinished)
 		{
-			drawKeypad();
 			sprintf(displayText, "%03X", can1.getCANOutID());
 			isFinished = true;
 			g_var16[POS1] = 2;
@@ -788,15 +838,9 @@ void sendCANFrame(uint8_t channel)
 
 /*============== Timed TX ==============*/
 SchedulerRX RXtimedMSG;
-uint8_t selectedIndex = 0;
-uint8_t freeNode = 0;
-uint8_t testValue = 0;
-uint8_t keypadIndex = 0;
-uint8_t userInput = 0;
-uint16_t totalValue = 0;
+CAN_FRAME timedTXFRAME;
 uint8_t displayedNodePosition[4];
 
-#define TIMED_TX_MAX_SIZE 10
 bool drawTimedTX()
 {
 	switch (graphicLoaderState)
@@ -855,37 +899,18 @@ bool drawTimedTX()
 		drawSquareBtn(401, 280, 477, 317, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 19:
-		//test();
+		drawTXNode(g_var8[POS3]);
 		break;
 	case 20:
-		drawTXNode(testValue);
 		return false;
 		break;
 	}
 	return true;
 }
 
-void test()
-{
-	// For testing
-	for (uint8_t j = 0; j < 10; j++)
-	{
-		RXtimedMSG.node[j].channel = j % 3;
-		RXtimedMSG.node[j].interval = 10;
-		RXtimedMSG.node[j].id = 101 + j;
-		RXtimedMSG.node[j].isOn = true;
-		RXtimedMSG.node[j].isDel = false;
-		for (uint8_t i = 0; i < 8; i++)
-		{
-			RXtimedMSG.node[j].data[i] = i;
-		}
-		RXtimedMSG.nodeLength = 1;
-	}
-}
-
 bool drawTXNode(uint8_t index)
 {
-	uint8_t nodePosition = 0;
+	g_var8[POS4] = 0;
 	uint16_t yAxis = 100;
 	for (uint8_t i = index; i < (index + 4); i++)
 	{
@@ -904,8 +929,8 @@ bool drawTXNode(uint8_t index)
 			RXtimedMSG.node[i].isOn ? drawSquareBtn(271, yAxis, 340, yAxis + 40, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, yAxis, 340, yAxis + 40, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			drawSquareBtn(340, yAxis, 409, yAxis + 40, F("EDIT"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			drawSquareBtn(409, yAxis, 477, yAxis + 40, F("DEL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			displayedNodePosition[nodePosition] = i;
-			nodePosition++;
+			displayedNodePosition[g_var8[POS4]] = i;
+			g_var8[POS4]++;
 			yAxis += 45;
 		}
 		else if (i < 9)
@@ -947,28 +972,28 @@ bool drawEditTXNode(uint8_t node)
 		break;
 	case 7:
 		myGLCD.setFont(SmallFont);
-		drawRoundBtn(134, 195, 175, 250, " " + String(RXtimedMSG.node[selectedIndex].data[0], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(134, 195, 175, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[0], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 8:
-		drawRoundBtn(177, 195, 218, 250, " " + String(RXtimedMSG.node[selectedIndex].data[1], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(177, 195, 218, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[1], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 9:
-		drawRoundBtn(220, 195, 261, 250, " " + String(RXtimedMSG.node[selectedIndex].data[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(220, 195, 261, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 10:
-		drawRoundBtn(263, 195, 304, 250, " " + String(RXtimedMSG.node[selectedIndex].data[3], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(263, 195, 304, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[3], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 11:
-		drawRoundBtn(306, 195, 347, 250, " " + String(RXtimedMSG.node[selectedIndex].data[4], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(306, 195, 347, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[4], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 12:
-		drawRoundBtn(349, 195, 390, 250, " " + String(RXtimedMSG.node[selectedIndex].data[5], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(349, 195, 390, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[5], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 13:
-		drawRoundBtn(392, 195, 433, 250, " " + String(RXtimedMSG.node[selectedIndex].data[6], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(392, 195, 433, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[6], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 14:
-		drawRoundBtn(435, 195, 476, 250, " " + String(RXtimedMSG.node[selectedIndex].data[7], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(435, 195, 476, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[7], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		myGLCD.setFont(BigFont);
 		break;
 	case 15:
@@ -979,7 +1004,7 @@ bool drawEditTXNode(uint8_t node)
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
 	case 17:
-		drawSendChannel(RXtimedMSG.node[selectedIndex].channel);
+		drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 		return false;
 		break;
 	}
@@ -991,7 +1016,7 @@ void timedTXButtons()
 {
 	if (Touch_getXY())
 	{
-		if ((y >= 100) && (y <= 140))
+		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 0)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
@@ -1004,7 +1029,7 @@ void timedTXButtons()
 			{
 				waitForIt(340, 100, 409, 140);
 				// Edit
-				selectedIndex = displayedNodePosition[0];
+				g_var8[POS0] = displayedNodePosition[0];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
@@ -1020,10 +1045,10 @@ void timedTXButtons()
 				{
 					RXtimedMSG.node[displayedNodePosition[0]].data[i] = 0;
 				}
-				drawTXNode(testValue);
+				drawTXNode(g_var8[POS3]);
 			}
 		}
-		if ((y >= 145) && (y <= 185))
+		if ((y >= 145) && (y <= 185) && g_var8[POS4] > 1)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
@@ -1036,7 +1061,7 @@ void timedTXButtons()
 			{
 				waitForIt(340, 145, 409, 185);
 				// Edit
-				selectedIndex = displayedNodePosition[1];
+				g_var8[POS0] = displayedNodePosition[1];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
@@ -1044,10 +1069,18 @@ void timedTXButtons()
 				waitForIt(409, 145, 477, 185);
 				// Del
 				RXtimedMSG.node[displayedNodePosition[1]].isDel = true;
-				drawTXNode(testValue);
+				RXtimedMSG.node[displayedNodePosition[1]].isOn = false;
+				RXtimedMSG.node[displayedNodePosition[1]].id = 0;
+				RXtimedMSG.node[displayedNodePosition[1]].interval = 0;
+				RXtimedMSG.node[displayedNodePosition[1]].channel = 0;
+				for (uint8_t i = 0; i < 8; i++)
+				{
+					RXtimedMSG.node[displayedNodePosition[1]].data[i] = 0;
+				}
+				drawTXNode(g_var8[POS3]);
 			}
 		}
-		if ((y >= 190) && (y <= 230))
+		if ((y >= 190) && (y <= 230) && g_var8[POS4] > 2)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
@@ -1060,7 +1093,7 @@ void timedTXButtons()
 			{
 				waitForIt(340, 190, 409, 230);
 				// Edit
-				selectedIndex = displayedNodePosition[2];
+				g_var8[POS0] = displayedNodePosition[2];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
@@ -1068,10 +1101,18 @@ void timedTXButtons()
 				waitForIt(409, 190, 477, 230);
 				// Del
 				RXtimedMSG.node[displayedNodePosition[2]].isDel = true;
-				drawTXNode(testValue);
+				RXtimedMSG.node[displayedNodePosition[2]].isOn = false;
+				RXtimedMSG.node[displayedNodePosition[2]].id = 0;
+				RXtimedMSG.node[displayedNodePosition[2]].interval = 0;
+				RXtimedMSG.node[displayedNodePosition[2]].channel = 0;
+				for (uint8_t i = 0; i < 8; i++)
+				{
+					RXtimedMSG.node[displayedNodePosition[2]].data[i] = 0;
+				}
+				drawTXNode(g_var8[POS3]);
 			}
 		}
-		if ((y >= 235) && (y <= 275))
+		if ((y >= 235) && (y <= 275) && g_var8[POS4] > 3)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
@@ -1084,7 +1125,7 @@ void timedTXButtons()
 			{
 				waitForIt(340, 235, 409, 275);
 				// Edit
-				selectedIndex = displayedNodePosition[3];
+				g_var8[POS0] = displayedNodePosition[3];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
@@ -1092,7 +1133,15 @@ void timedTXButtons()
 				waitForIt(409, 235, 477, 275);
 				// Del
 				RXtimedMSG.node[displayedNodePosition[3]].isDel = true;
-				drawTXNode(testValue);
+				RXtimedMSG.node[displayedNodePosition[3]].isOn = false;
+				RXtimedMSG.node[displayedNodePosition[3]].id = 0;
+				RXtimedMSG.node[displayedNodePosition[3]].interval = 0;
+				RXtimedMSG.node[displayedNodePosition[3]].channel = 0;
+				for (uint8_t i = 0; i < 8; i++)
+				{
+					RXtimedMSG.node[displayedNodePosition[3]].data[i] = 0;
+				}
+				drawTXNode(g_var8[POS3]);
 			}
 		}
 		if ((y >= 280) && (y <= 317))
@@ -1101,10 +1150,10 @@ void timedTXButtons()
 			{
 				waitForIt(133, 280, 210, 317);
 				// Up
-				if (testValue > 0)
+				if (g_var8[POS3] > 0)
 				{
-					testValue--;
-					drawTXNode(testValue);
+					g_var8[POS3]--;
+					drawTXNode(g_var8[POS3]);
 				}
 			}
 			if ((x >= 261) && (x <= 350))
@@ -1118,10 +1167,10 @@ void timedTXButtons()
 			{
 				waitForIt(401, 280, 477, 317);
 				// Down
-				if (testValue < 5)
+				if (g_var8[POS3] < 5)
 				{
-					testValue++;
-					drawTXNode(testValue);
+					g_var8[POS3]++;
+					drawTXNode(g_var8[POS3]);
 				}
 			}
 		}
@@ -1133,37 +1182,34 @@ void timedTX()
 	switch (state)
 	{
 	case 0:
-		// Main State
-		// Del
-		// Up
-		// Down
+		if (drawTimedTX())
+		{
+			graphicLoaderState++;
+		}
 		timedTXButtons();
 		break;
 	case 1:
 		// Add state
-		selectedIndex = findFreeTXNode();
+		g_var8[POS0] = findFreeTXNode();
 		// 0xFF = no free slots
-		//SerialUSB.println(selectedIndex);
-		(selectedIndex == 0xFF) ? state = 0 : state = 2;
+		(g_var8[POS0] == 0xFF) ? state = 0 : state = 2;
 		break;
 	case 2:
-		drawEditTXNode(selectedIndex) ? state = 2 : state = 3;
+		drawEditTXNode(g_var8[POS0]) ? state = 2 : state = 3;
 		break;
 	case 3:
-		// Edit state
-		// Channel
 		editTXNodeButtons();
 		break;
 	case 4:
 		//ID
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].id = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].id = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1171,14 +1217,14 @@ void timedTX()
 		break;
 	case 5:
 		// INT
-		userInput = keypadControllerDec(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadControllerDec(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].interval = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].interval = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1186,14 +1232,14 @@ void timedTX()
 		break;
 	case 6:
 		// Data0
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[0] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[0] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1201,14 +1247,14 @@ void timedTX()
 		break;
 	case 7:
 		// Data1
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[1] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[1] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1216,14 +1262,14 @@ void timedTX()
 		break;
 	case 8:
 		// Data2
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[2] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[2] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1231,14 +1277,14 @@ void timedTX()
 		break;
 	case 9:
 		// Data3
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[3] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[3] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1246,14 +1292,14 @@ void timedTX()
 		break;
 	case 10:
 		// Data4
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[4] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[4] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1261,14 +1307,14 @@ void timedTX()
 		break;
 	case 11:
 		// Data5
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[5] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[5] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1276,14 +1322,14 @@ void timedTX()
 		break;
 	case 12:
 		// Data6
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[6] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[6] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1291,14 +1337,14 @@ void timedTX()
 		break;
 	case 13:
 		// Data7
-		userInput = keypadController(keypadIndex, totalValue);
-		if (userInput == 0xF1) // Accept
+		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
+		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[selectedIndex].data[7] = totalValue;
+			RXtimedMSG.node[g_var8[POS0]].data[7] = g_var16[POS0];
 			state = 2;
 		}
-		else if (userInput == 0xF0) // Cancel
+		else if (g_var8[POS1] == 0xF0) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1318,22 +1364,22 @@ void editTXNodeButtons()
 			{
 				waitForIt(261, 55, 331, 95);
 				// Channel 0
-				RXtimedMSG.node[selectedIndex].channel = 0;
-				drawSendChannel(RXtimedMSG.node[selectedIndex].channel);
+				RXtimedMSG.node[g_var8[POS0]].channel = 0;
+				drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 			}
 			if ((x >= 333) && (x <= 403))
 			{
 				waitForIt(333, 55, 403, 95);
 				// Channel 1
-				RXtimedMSG.node[selectedIndex].channel = 1;
-				drawSendChannel(RXtimedMSG.node[selectedIndex].channel);
+				RXtimedMSG.node[g_var8[POS0]].channel = 1;
+				drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 			}
 			if ((x >= 405) && (x <= 475))
 			{
 				waitForIt(405, 55, 475, 95);
 				// WIFI
-				RXtimedMSG.node[selectedIndex].channel = 2;
-				drawSendChannel(RXtimedMSG.node[selectedIndex].channel);
+				RXtimedMSG.node[g_var8[POS0]].channel = 2;
+				drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 			}
 		}
 		if ((y >= 100) && (y <= 145))
@@ -1342,8 +1388,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(202, 100, 282, 145);
 				// Set ID
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				drawKeypad();
 				state = 4;
@@ -1352,8 +1398,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(356, 100, 475, 145);
 				// Set Interval
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				drawKeypadDec();
 				state = 5;
@@ -1365,8 +1411,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(134, 195, 175, 250);
 				// Set Data[0]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 6;
 				drawKeypad();
@@ -1375,8 +1421,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(177, 195, 218, 250);
 				// Set Data[1]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 7;
 				drawKeypad();
@@ -1385,8 +1431,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(220, 195, 261, 250);
 				// Set Data[2]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 8;
 				drawKeypad();
@@ -1395,8 +1441,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(263, 195, 304, 250);
 				// Set Data[3]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 9;
 				drawKeypad();
@@ -1405,8 +1451,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(306, 195, 347, 250);
 				// Set Data[4]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 10;
 				drawKeypad();
@@ -1414,8 +1460,8 @@ void editTXNodeButtons()
 			if ((x >= 350) && (x <= 391))
 			{
 				waitForIt(349, 195, 390, 250);
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				// Set Data[5]
 				state = 11;
@@ -1425,8 +1471,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(392, 195, 433, 250);
 				// Set Data[6]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 12;
 				drawKeypad();
@@ -1435,8 +1481,8 @@ void editTXNodeButtons()
 			{
 				waitForIt(435, 195, 476, 250);
 				// Set Data[7]
-				keypadIndex = 0;
-				totalValue = 0;
+				g_var8[POS2] = 0;
+				g_var16[POS0] = 0;
 				resetKeypad();
 				state = 13;
 				drawKeypad();
@@ -1449,8 +1495,7 @@ void editTXNodeButtons()
 				waitForIt(135, 255, 304, 300);
 				// Accept
 				graphicLoaderState = 0;
-				hasDrawn = false;
-				RXtimedMSG.node[selectedIndex].isDel = false;
+				RXtimedMSG.node[g_var8[POS0]].isDel = false;
 				state = 0;
 			}
 			if ((x >= 306) && (x <= 475))
@@ -1458,7 +1503,6 @@ void editTXNodeButtons()
 				waitForIt(306, 255, 475, 300);
 				// Cancel
 				graphicLoaderState = 0;
-				hasDrawn = false;
 				state = 0;
 			}
 		}
@@ -1483,16 +1527,19 @@ void timedTXSend()
 	{
 		if (!RXtimedMSG.node[i].isDel && RXtimedMSG.node[i].isOn && (millis() - RXtimedMSG.node[i].timer > RXtimedMSG.node[i].interval))
 		{
-			can1.setIDCANOut(RXtimedMSG.node[i].id);
+			timedTXFRAME.id = RXtimedMSG.node[i].id;
+			timedTXFRAME.length = 8;
+			timedTXFRAME.extended = false;
 			for (uint8_t j = 0; j < 8; j++)
 			{
-				can1.setDataCANOut(RXtimedMSG.node[i].data[j], j);
+				timedTXFRAME.data.bytes[i] = RXtimedMSG.node[i].data[j];
 			}
-			can1.sendCANOut(RXtimedMSG.node[i].channel, false);
+			can1.sendCANOut(RXtimedMSG.node[i].channel, timedTXFRAME, false);
 			RXtimedMSG.node[i].timer = millis();
 		}
 	}
 }
+
 /*============== Baud ==============*/
 // Draw the stationary baud page buttons
 bool drawBaud()

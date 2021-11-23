@@ -87,6 +87,7 @@ public:
 	uint16_t getCANOutID();
 	uint8_t getCANOutData(uint8_t);
 	void sendCANOut(uint8_t, bool);
+	void sendCANOut(uint8_t, CAN_FRAME, bool);
 	uint8_t requestVIN(uint16_t, bool);
 	char* getFullDir();
 	bool SerialOutCAN(uint8_t);

@@ -9,6 +9,8 @@
 	#include "WProgram.h"
 #endif
 
+#define TIMED_TX_MAX_SIZE 10
+
 struct MessageRX
 {
 	uint8_t channel = 0;
@@ -59,7 +61,6 @@ extern void timedTXButtons();
 extern void timedTX();
 extern uint8_t findFreeTXNode();
 extern bool drawEditTXNode(uint8_t);
-extern void test();
 extern void editTXNodeButtons();
 extern void timedTXSend();
 #endif

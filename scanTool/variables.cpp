@@ -4,6 +4,36 @@
 
 #include "Variables.h"
 
+/* How to use
+
+* Returns true if able to lock, false if already locked *
+Lock first variable: lockVar8(LOCK0);
+Lock second variable: lockVar8(LOCK1);
+Lock another variable lockVar32(LOCK0);
+
+* Use locked variables *
+g_var8[POS0] = 0;
+g_var8[POS1] = 2;
+g_var32[POS0] = g_var8[POS0] + g_var8[POS1]
+
+* Unlock variable when finished *
+Unlock first variable: unlockVar8(LOCK0);
+Unlock sewcond variable variable: unlockVar8(LOCK1);
+Unlock another variable unlockVar8(LOCK0);
+
+*/
+
+/*Example Application
+
+bool error = false;
+(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
+if (error)
+{
+	DEBUG_ERROR("Error: Variable locked");
+}
+
+*/
+
 // false if locked
 bool isVar8Unlocked(uint8_t pos)
 {

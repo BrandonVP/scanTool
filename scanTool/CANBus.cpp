@@ -165,6 +165,37 @@ void CANBus::sendCANOut(uint8_t channel, bool serialOut)
 	}
 }
 
+void CANBus::sendCANOut(uint8_t channel, CAN_FRAME CANBus, bool serialOut)
+{
+	if (channel == 0)
+	{
+		Can0.sendFrame(CANBus);
+	}
+	if (channel == 1)
+	{
+		Can1.sendFrame(CANBus);
+	}
+	if (channel == 2)
+	{
+		Serial3.write(0xFE);
+		Serial3.write(0x09);
+		Serial3.write((CANBus.id >> 0) & 0xFF);
+		Serial3.write((CANBus.id >> 8) & 0xFF);
+		for (uint8_t i = 0; i < 8; i++)
+		{
+			Serial3.write(CANBus.data.bytes[i]);
+		}
+		Serial3.write(0xFD);
+	}
+	if (serialOut)
+	{
+		char buffer[50];
+		uint32_t temp = millis();
+		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANBus.id, CANBus.length, CANBus.data.bytes[0], CANBus.data.bytes[1], CANBus.data.bytes[2], CANBus.data.bytes[3], CANBus.data.bytes[4], CANBus.data.bytes[5], CANBus.data.bytes[6], CANBus.data.bytes[7]);
+		SERIAL_CAPTURE(buffer);
+	}
+}
+
 // Send out CAN Bus message
 void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8, bool serialOut = false)
 {
@@ -738,7 +769,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	// Display CAN0
 	if (config == 1 && Can0.get_rx_buff(incCAN0))
 	{
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+		sprintf(buffer, "%08d   %08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.timestamp, incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN1
