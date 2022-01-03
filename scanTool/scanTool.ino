@@ -522,9 +522,9 @@ void pageControl()
 		{
 			bool error = false;
 			// Lock global variables
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 5 : error = true;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : error = true;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Keypad return
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // Keypad index
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Current total value
 			if (error)
 			{
 				DEBUG_ERROR("Error: Variable locked");
@@ -532,7 +532,7 @@ void pageControl()
 			}
 			hasDrawn = true;
 			state = 0;
-			isFinished = false;
+			graphicLoaderState = 0;
 		}
 
 		// Call buttons if any
@@ -541,9 +541,9 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
 			unlockVar16(LOCK0);
-			unlockVar32(LOCK0);
-			unlockVar32(LOCK1);
 			hasDrawn = false;
 			page = nextPage;
 		}

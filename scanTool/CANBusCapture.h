@@ -48,7 +48,6 @@ extern void drawCurrentBaud();
 extern bool drawBaud();
 extern bool drawFilterMask();
 extern void filterMaskButtons();
-extern uint8_t setFilterMask(uint32_t&);
 extern void filterMask();
 extern bool drawCANLog();
 extern void drawCANLogScroll();

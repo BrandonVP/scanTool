@@ -78,7 +78,7 @@ void CANBusButtons()
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(140, 135, 305, 185);
-				// CAN0 RX
+				// CAN0 TX
 				graphicLoaderState = 0;
 				nextPage = 3;
 			}
@@ -775,19 +775,25 @@ void sendCANFrame(uint8_t channel)
 	case 0: // Draw
 		if (!isFinished)
 		{
+			SerialUSB.println(graphicLoaderState);
 			if (graphicLoaderState == 2)
 			{
 				drawSendChannel(g_var8[POS0]);
 				graphicLoaderState++;
 				break;
 			}
+
 			if (drawSendFrame(g_var8[POS0]))
 			{
 				graphicLoaderState++;
 				break;
 			}
-			graphicLoaderState = 0;
-			isFinished = true;
+			else
+			{
+				graphicLoaderState = 0;
+				isFinished = true;
+			}
+			
 		}
 		sendFrameButtons(channel);
 		break;
@@ -838,7 +844,6 @@ void sendCANFrame(uint8_t channel)
 
 /*============== Timed TX ==============*/
 SchedulerRX RXtimedMSG;
-CAN_FRAME timedTXFRAME;
 uint8_t displayedNodePosition[4];
 
 bool drawTimedTX()
@@ -1523,6 +1528,7 @@ uint8_t findFreeTXNode()
 
 void timedTXSend()
 {
+	CAN_FRAME timedTXFRAME;
 	for (uint8_t i = 0; i < 10; i++)
 	{
 		if (!RXtimedMSG.node[i].isDel && RXtimedMSG.node[i].isOn && (millis() - RXtimedMSG.node[i].timer > RXtimedMSG.node[i].interval))
@@ -1702,6 +1708,9 @@ bool drawFilterMask()
 	case 12:
 		drawSquareBtn(150, 295, 479, 315, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
+	case 13:
+		return false;
+		break;
 	}
 	graphicLoaderState++;
 	return true;
@@ -1719,15 +1728,21 @@ void filterMaskButtons()
 			{
 				waitForIt(205, 125, 340, 175);
 				// Set CAN0 Filter
-				state = 1;
-				isFinished = false;
+				state = 2;
+				g_var8[POS1] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 			}
 			if ((x >= 345) && (x <= 475))
 			{
 				waitForIt(345, 125, 475, 175);
 				// Set CAN 0Mask
-				state = 2;
-				isFinished = false;
+				state = 3;
+				g_var8[POS1] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 			}
 		}
 		if ((y >= 180) && (y <= 230))
@@ -1736,15 +1751,21 @@ void filterMaskButtons()
 			{
 				waitForIt(205, 180, 340, 230);
 				// Set CAN1 Filter
-				state = 3;
-				isFinished = false;
+				state = 4;
+				g_var8[POS1] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 			}
 			if ((x >= 345) && (x <= 475))
 			{
 				waitForIt(345, 180, 475, 230);
 				// Set CAN1 Mask
-				state = 4;
-				isFinished = false;
+				state = 5;
+				g_var8[POS1] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
 			}
 		}
 		if ((y >= 235) && (y <= 285))
@@ -1773,125 +1794,76 @@ void openAllTraffic()
 	can1.startCAN1(CAN1Filter, CAN1Mask);
 }
 
-// Filter mask program
-uint8_t setFilterMask(uint32_t& value)
-{
-	char displayText[10];
-	if (!isFinished)
-	{
-		drawKeypad();
-		isFinished = true;
-		g_var16[POS0] = 2;
-		g_var32[POS0] = 0xFF;
-		g_var32[POS1] = 0;
-		drawRoundBtn(145, 220, 470, 260, F("000"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	}
-
-	g_var32[POS0] = keypadButtons();
-	if (g_var32[POS0] >= 0x00 && g_var32[POS0] < 0x10 && g_var16[POS0] >= 0)
-	{
-		// CAN0Filter = current value + returned keypad value times its hex place
-		g_var32[POS1] = g_var32[POS1] + (g_var32[POS0] * hexTable[g_var16[POS0]]);
-		sprintf(displayText, "%03X", g_var32[POS1]);
-		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		if (g_var16[POS0] >= 0)
-		{
-			g_var16[POS0]--;
-		}
-		g_var32[POS0] = 0xFF;
-	}
-	if (g_var32[POS0] == 0x10)
-	{
-		// Clear
-		g_var16[POS0] = 2;
-		g_var32[POS0] = 0;
-		g_var32[POS1] = 0;
-		sprintf(displayText, "%03X", g_var32[POS1]);
-		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	}
-	if (g_var32[POS0] == 0x11)
-	{
-		// Accept
-		isFinished = false;
-		graphicLoaderState = 0;
-		state = 0;
-		value = g_var32[POS1];
-		return 0x11;
-	}
-	if (g_var32[POS0] == 0x12)
-	{
-		// Cancel
-		isFinished = false;
-		graphicLoaderState = 0;
-		state = 0;
-	}
-	return 0;
-}
-
 // Set new filter mask
 void filterMask()
 {
-	uint8_t temp = 0;
 	switch (state)
 	{
 	case 0:
-		(!isFinished && graphicLoaderState < 13) ? drawFilterMask() : isFinished = true;
+		drawFilterMask() ? state = 0 : state = 1;
+		break;
+	case 1:
 		filterMaskButtons();
 		break;
-	case 1: temp = setFilterMask(CAN0Filter);
-		if (temp == 0x11)
+	case 2: // Set channel 0 filter
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
+
+		if (g_var8[POS0] == 0xF1) // Accept
 		{
-#if defined DEBUG_FILTERMASK
-			DEBUG("\nFilter: ");
-			DEBUG_HEX(CAN0Filter, 16);
-			DEBUG("\nMask: ");
-			DEBUG_HEX(CAN0Mask, 16);
-			DEBUG("\n");
-#endif
+			state = 0;
+			graphicLoaderState = 0;
+			CAN0Filter = g_var16[POS0];
 			can1.setFilterMask0(CAN0Filter, CAN0Mask);
-			temp = 0;
+		}
+		else if (g_var8[POS0] == 0xF0) // Cancel
+		{
+			state = 0;
+			graphicLoaderState = 0;
 		}
 		break;
-	case 2: temp = setFilterMask(CAN0Mask);
-		if (temp == 0x11)
+	case 3:
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
+		if (g_var8[POS0] == 0xF1) // Accept
 		{
-#if defined DEBUG_FILTERMASK
-			DEBUG("\nFilter: ");
-			DEBUG_HEX(CAN0Filter, 16);
-			DEBUG("\nMask: ");
-			DEBUG_HEX(CAN0Mask, 16);
-			DEBUG("\n");
-#endif
+			state = 0;
+			graphicLoaderState = 0;
+			CAN0Mask = g_var16[POS0];
 			can1.setFilterMask0(CAN0Filter, CAN0Mask);
-			temp = 0;
+		}
+		else if (g_var8[POS0] == 0xF0) // Cancel
+		{
+			state = 0;
+			graphicLoaderState = 0;
 		}
 		break;
-	case 3: temp = setFilterMask(CAN1Filter);
-		if (temp == 0x11)
+	case 4:
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
+		if (g_var8[POS0] == 0xF1) // Accept
 		{
-#if defined DEBUG_FILTERMASK
-			DEBUG("\nFilter: ");
-			DEBUG_HEX(CAN1Filter, 16);
-			DEBUG("\nMask: ");
-			DEBUG_HEX(CAN1Mask, 16);
-			DEBUG("\n");
-#endif
+			state = 0;
+			graphicLoaderState = 0;
+			CAN1Filter = g_var16[POS0];
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
-			temp = 0;
+		}
+		else if (g_var8[POS0] == 0xF0) // Cancel
+		{
+			state = 0;
+			graphicLoaderState = 0;
 		}
 		break;
-	case 4: temp = setFilterMask(CAN1Mask);
-		if (temp == 0x11)
+	case 5:
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
+		if (g_var8[POS0] == 0xF1) // Accept
 		{
-#if defined DEBUG_FILTERMASK
-			DEBUG("\nFilter: ");
-			DEBUG_HEX(CAN1Filter, 16);
-			DEBUG("\nMask: ");
-			DEBUG_HEX(CAN1Mask, 16);
-			DEBUG("\n");
-#endif
+			state = 0;
+			graphicLoaderState = 0;
+			CAN1Mask = g_var16[POS0];
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
-			temp = 0;
+		}
+		else if (g_var8[POS0] == 0xF0) // Cancel
+		{
+			state = 0;
+			graphicLoaderState = 0;
 		}
 		break;
 	}
