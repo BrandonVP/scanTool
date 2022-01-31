@@ -1017,7 +1017,7 @@ bool drawEditTXNode(uint8_t node)
 	return true;
 }
 
-void timedTXButtons()
+void timedTXButtons()	
 {
 	if (Touch_getXY())
 	{

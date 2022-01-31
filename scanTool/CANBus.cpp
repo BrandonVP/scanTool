@@ -769,7 +769,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	// Display CAN0
 	if (config == 1 && Can0.get_rx_buff(incCAN0))
 	{
-		sprintf(buffer, "%08d   %08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.timestamp, incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN1

@@ -67,6 +67,7 @@ extern UTouch  myTouch;
 // Initialize to 0 before use
 extern bool isFinished;
 extern uint8_t state;
+
 extern uint8_t controlPage;
 extern uint8_t page;
 extern uint8_t nextPage;
