@@ -714,56 +714,6 @@ void setData(uint8_t position)
 			isFinished = false;
 			state = 0;
 		}
-	
-		/*
-	char displayText[10];
-	if (!isFinished)
-	{
-		drawKeypad();
-		sprintf(displayText, "%02X", can1.getCANOutData(position));
-		isFinished = true;
-		g_var16[POS1] = 1;
-		g_var8[POS1] = 0xFF;
-		g_var16[POS0] = 0;
-		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	}
-
-	// Keypad response
-	g_var8[POS1] = keypadButtons();
-	if (g_var8[POS1] >= 0x00 && g_var8[POS1] < 0x10 && g_var16[POS1] >= 0)
-	{
-		// current value + returned keypad value times its hex place
-		g_var16[POS0] = g_var16[POS0] + (g_var8[POS1] * hexTable[g_var16[POS1]]);
-		sprintf(displayText, "%02X", g_var16[POS0]);
-		drawRoundBtn(145, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		if (g_var16[POS1] >= 0)
-		{
-			g_var16[POS1]--;
-		}
-		g_var8[POS1] = 0xFF;
-	}
-	if (g_var8[POS1] == 0x10)
-	{
-		// Clear
-		g_var16[POS1] = 1;
-		g_var8[POS1] = 0;
-		g_var16[POS0] = 0;
-		drawRoundBtn(145, 220, 470, 260, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-	}
-	if (g_var8[POS1] == 0x11)
-	{
-		// Accept
-		can1.setDataCANOut(g_var16[POS0], position);
-		isFinished = false;
-		state = 0;
-	}
-	if (g_var8[POS1] == 0x12)
-	{
-		// Cancel
-		isFinished = false;
-		state = 0;
-	}
-	*/
 }
 
 // Send CAN Bus frame program
@@ -793,7 +743,6 @@ void sendCANFrame(uint8_t channel)
 				graphicLoaderState = 0;
 				isFinished = true;
 			}
-			
 		}
 		sendFrameButtons(channel);
 		break;
@@ -807,7 +756,6 @@ void sendCANFrame(uint8_t channel)
 			g_var16[POS2] = 0;
 			drawRoundBtn(255, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		}
-
 		// Keypad response
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS2]); // index, current input total
 		if (g_var8[POS1] == 0xF1) // Accept
@@ -919,7 +867,6 @@ bool drawTXNode(uint8_t index)
 	uint16_t yAxis = 100;
 	for (uint8_t i = index; i < (index + 4); i++)
 	{
-		
 		if (!RXtimedMSG.node[i].isDel && i < 9)
 		{
 			if (RXtimedMSG.node[i].channel > 1)
@@ -1876,7 +1823,6 @@ bool drawCANLog()
 	switch (graphicLoaderState)
 	{
 	case 0:
-
 		break;
 	case 1:
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);

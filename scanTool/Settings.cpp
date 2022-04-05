@@ -33,6 +33,7 @@ void drawSettings()
         break;
     case 6:
         drawRoundBtn(140, 190, 305, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+
         break;
     case 7:
         drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);

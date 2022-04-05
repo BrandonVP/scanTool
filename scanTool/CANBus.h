@@ -40,7 +40,6 @@ protected:
 	CAN_FRAME incWIFI;
 	CAN_FRAME CANOut;
 	
-
 private:
 	// Def for getMSG()
 	typedef byte buff[8];

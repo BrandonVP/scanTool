@@ -238,7 +238,6 @@ uint8_t CANBus::getPIDList(uint8_t state, uint8_t range, uint8_t bank)
 	case 1:
 		setFilterMask0(0x0, 0x0);
 		sendFrame(PID_LIST_TX, frame);
-		state++;
 		break;
 	case 2:
 		if (Can0.get_rx_buff(incCAN0) && incCAN0.id == ECU_RX)
