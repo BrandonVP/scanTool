@@ -76,7 +76,7 @@ uint32_t CANBus::findBaudRate1()
 	return Can1.beginAutoSpeed();
 }
 
-// Is this function still used?
+// PID callback
 void ECUtraffic(CAN_FRAME* incCAN0)
 {
 	char buffer[50];

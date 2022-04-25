@@ -587,12 +587,6 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
-			if (drawTimedTX())
-			{
-				graphicLoaderState++;
-				break;
-			}
-
 			bool error = false;
 			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Selected index
 			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // User input
@@ -2750,7 +2744,6 @@ void loop()
 	// Background Processes
 	backgroundProcess();
 }
-
 
 /*
 irqLock();
