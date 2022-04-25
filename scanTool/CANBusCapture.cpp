@@ -863,7 +863,6 @@ bool drawTimedTX()
 
 bool drawTXNode(uint8_t index)
 {
-	SerialUSB.println("draw");
 	g_var8[POS4] = 0;
 	uint16_t yAxis = 100;
 	for (uint8_t i = index; i < (index + 4); i++)
@@ -898,8 +897,6 @@ bool drawTXNode(uint8_t index)
 		}
 		backgroundProcess();
 	}
-	SerialUSB.print("drawTXNode: ");
-	SerialUSB.println(g_var8[POS4]);
 }
 
 bool drawEditTXNode(uint8_t node)
@@ -967,16 +964,8 @@ bool drawEditTXNode(uint8_t node)
 	return true;
 }
 
-uint32_t test44 = 0;
 void timedTXButtons()	
 {
-	if (millis() - test44 > 1000)
-	{
-		SerialUSB.print("timedTXButtons: ");
-		SerialUSB.println(g_var8[POS4]);
-
-		test44 = millis();
-	}
 	if (Touch_getXY())
 	{
 		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 0)
@@ -1140,7 +1129,6 @@ void timedTXButtons()
 	}
 }
 
-uint32_t test55 = 0;
 void timedTX()
 {
 	switch (state)
@@ -1149,13 +1137,6 @@ void timedTX()
 		if (drawTimedTX())
 		{
 			graphicLoaderState++;
-		}
-		if (millis() - test55 > 1000)
-		{
-			SerialUSB.print("timedTX: ");
-			SerialUSB.println(g_var8[POS4]);
-
-			test55 = millis();
 		}
 		timedTXButtons();
 		break;

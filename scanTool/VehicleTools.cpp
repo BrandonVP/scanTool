@@ -138,7 +138,7 @@ void startPIDSCAN()
 {
     switch (state)
     {
-    case 0: // Start request VIN state machine that ends with state 5
+    case 0: // Start request VIN
         (g_var8[POS0] < 5) ? g_var8[POS0] = can1.requestVIN(g_var8[POS0], true) : loadBar(++state);
         break;
     case 1: // Send PID request message
