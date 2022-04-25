@@ -789,9 +789,18 @@ void pageControl()
 		{
 			// TODO: Fix me
 			//can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
+			uint8_t PIDRequest[8] = { 0x02, 0x01, arrayIn[g_var16[POS0]], 0x00, 0x00, 0x00, 0x00, 0x00 };
+			can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
 			g_var16[POS1]++;
-			drawErrorMSG("Samples", String(g_var16[POS1]), "Saved to SD");
+			drawErrorMSG2("Samples", String(g_var16[POS1]), "Saved to SD");
 			g_var32[POS0] = millis();
+			uint8_t result = 0;
+			uint32_t wait = millis();
+			while (millis() - wait < 10)
+			{
+				backgroundProcess();
+			}
+			can1.PIDStream(result, true);
 		}
 		if ((g_var16[POS1] == PIDSAMPLES) && (state == 1) && (millis() - g_var32[POS0] > 2000))
 		{
@@ -2650,6 +2659,15 @@ void drawErrorMSG(String title, String eMessage1, String eMessage2)
 	drawRoundBtn(365, 100, 415, 130, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 	drawRoundBtn(155, 180, 275, 215, "Confirm", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 	drawRoundBtn(285, 180, 405, 215, "Cancel", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
+}
+
+void drawErrorMSG2(String title, String eMessage1, String eMessage2)
+{
+	drawSquareBtn(145, 100, 401, 220, "", menuBackground, menuBtnColor, menuBtnColor, CENTER);
+	drawSquareBtn(145, 100, 401, 130, title, themeBackground, menuBtnColor, menuBtnBorder, LEFT);
+	drawSquareBtn(146, 131, 400, 155, eMessage1, menuBackground, menuBackground, menuBtnText, CENTER);
+	drawSquareBtn(146, 155, 400, 180, eMessage2, menuBackground, menuBackground, menuBtnText, CENTER);
+	drawRoundBtn(365, 100, 401, 130, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 }
 
 // Error Message buttons
