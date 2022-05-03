@@ -725,7 +725,6 @@ void sendCANFrame(uint8_t channel)
 	case 0: // Draw
 		if (!isFinished)
 		{
-			SerialUSB.println(graphicLoaderState);
 			if (graphicLoaderState == 2)
 			{
 				drawSendChannel(g_var8[POS0]);
@@ -1485,7 +1484,7 @@ void timedTXSend()
 			timedTXFRAME.extended = false;
 			for (uint8_t j = 0; j < 8; j++)
 			{
-				timedTXFRAME.data.bytes[i] = RXtimedMSG.node[i].data[j];
+				timedTXFRAME.data.bytes[j] = RXtimedMSG.node[i].data[j];
 			}
 			can1.sendCANOut(RXtimedMSG.node[i].channel, timedTXFRAME, false);
 			RXtimedMSG.node[i].timer = millis();
