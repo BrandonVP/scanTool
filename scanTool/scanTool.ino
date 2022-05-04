@@ -1647,6 +1647,9 @@ void setup()
 	Serial3.begin(115200);
 	SerialUSB.begin(CAN_BPS_500K);
 
+	can1.setBaud0(500000);
+	can1.setBaud1(500000);
+
 	can1.startCAN0(0x000, 0x7FF);
 	can1.startCAN1(0x000, 0x7FF);
 
@@ -2710,7 +2713,9 @@ uint8_t errorMSGButton(uint8_t returnPage)
 // Displays time on menu
 void updateTime()
 {
-	if (millis() - updateClock > 1000)
+	const uint16_t SECOND = 1000;
+
+	if (millis() - updateClock > SECOND)
 	{
 		char time[40];
 		drawRoundBtn(5, 5, 125, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
@@ -2729,7 +2734,6 @@ void SDCardOut()
 {
 	(isSDOut) && (can1.SDOutCAN(selectedChannelOut));
 }
-
 
 // Able to call background process from blocked loop
 void backgroundProcess()

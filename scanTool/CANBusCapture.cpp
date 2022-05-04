@@ -1475,6 +1475,8 @@ uint8_t findFreeTXNode()
 void timedTXSend()
 {
 	CAN_FRAME timedTXFRAME;
+
+	// Generate CAN Bus message for every active struture object and send if interval is ready
 	for (uint8_t i = 0; i < 10; i++)
 	{
 		if (!RXtimedMSG.node[i].isDel && RXtimedMSG.node[i].isOn && (millis() - RXtimedMSG.node[i].timer > RXtimedMSG.node[i].interval))
@@ -1602,12 +1604,13 @@ void baudButtons()
 	}
 }
 
-// Auto baud
+// Baud rate is set if found, otherwise the baud will default to 500k
 void findBaud()
 {
-	can1.setBaud0(can1.findBaudRate0());
-	can1.setBaud1(can1.findBaudRate1());
-	openAllTraffic();
+	// Find baud rate is a blocking function, takes about 2-3 seconds to run
+	can1.findBaudRate0();
+	backgroundProcess();
+	can1.findBaudRate1();
 }
 
 /*============== Filter Mask ==============*/

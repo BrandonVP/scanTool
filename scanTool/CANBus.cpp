@@ -9,7 +9,7 @@
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN0(uint32_t start, uint32_t end)
 {
-	Can0.begin(500000);
+	Can0.begin(getBaud0());
 	Can0.watchForRange(start, end);
 
 	// Do not use extended frames
@@ -22,7 +22,7 @@ void CANBus::startCAN0(uint32_t start, uint32_t end)
 // Initialize CAN1 and set the baud rates here
 void CANBus::startCAN1(uint32_t start, uint32_t end)
 {
-	Can1.begin(500000);
+	Can1.begin(getBaud1());
 	Can1.watchForRange(start, end);
 }
 
