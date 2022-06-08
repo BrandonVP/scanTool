@@ -550,9 +550,9 @@ bool drawSendFrame(uint8_t channel)
 
 void drawSendChannel(uint8_t channel)
 {
-	(channel == 0) ? drawRoundBtn(261, 55, 331, 95, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(261, 55, 331, 95, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	(channel == 1) ? drawRoundBtn(333, 55, 403, 95, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(333, 55, 403, 95, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	(channel == 2) ? drawRoundBtn(405, 55, 475, 95, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(405, 55, 475, 95, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	(channel == 0) ? drawRoundBtn(261, 99, 331, 139, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(261, 99, 331, 139, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	(channel == 1) ? drawRoundBtn(333, 99, 403, 139, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(333, 99, 403, 139, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+	(channel == 2) ? drawRoundBtn(405, 99, 475, 139, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(405, 99, 475, 139, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 }
 
 // Buttons for send frame program
@@ -806,19 +806,20 @@ bool drawTimedTX()
 		drawSquareBtn(132, 56, 478, 96, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawSquareBtn(133, 56, 202, 95, F("CHL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		//drawSquareBtn(133, 56, 271, 95, F("Name"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawSquareBtn(202, 56, 271, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		// drawSquareBtn(202, 56, 271, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawSquareBtn(271, 56, 340, 95, F("ON"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		//drawSquareBtn(271, 56, 340, 95, F("ON"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawSquareBtn(340, 56, 409, 95, F("EDIT"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		//drawSquareBtn(340, 56, 409, 95, F("EDIT"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
-		drawSquareBtn(409, 56, 477, 95, F("DEL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		//drawSquareBtn(409, 56, 477, 95, F("DEL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(132, 55, 478, 96, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
 		drawSquareBtn(132, 99, 478, 141, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -863,11 +864,12 @@ bool drawTimedTX()
 bool drawTXNode(uint8_t index)
 {
 	g_var8[POS4] = 0;
-	uint16_t yAxis = 100;
-	for (uint8_t i = index; i < (index + 4); i++)
+	uint16_t yAxis = 55;
+	for (uint8_t i = index; i < (index + 5); i++)
 	{
-		if (!RXtimedMSG.node[i].isDel && i < 9)
+		if (!RXtimedMSG.node[i].isDel && i < 20)
 		{
+			/*
 			if (RXtimedMSG.node[i].channel > 1)
 			{
 				drawSquareBtn(133, yAxis, 202, yAxis + 40, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -876,15 +878,18 @@ bool drawTXNode(uint8_t index)
 			{
 				drawSquareBtn(133, yAxis, 202, yAxis + 40, String(RXtimedMSG.node[i].channel), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
-			drawSquareBtn(202, yAxis, 271, yAxis + 40, String(RXtimedMSG.node[i].id, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			RXtimedMSG.node[i].isOn ? drawSquareBtn(271, yAxis, 340, yAxis + 40, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, yAxis, 340, yAxis + 40, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			*/
+
+			// drawSquareBtn(202, yAxis, 271, yAxis + 40, String(RXtimedMSG.node[i].id, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			drawSquareBtn(133, yAxis, 271, yAxis + 40, RXtimedMSG.node[i].name, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			RXtimedMSG.node[i].isOn ? drawSquareBtn(271, yAxis, 340, yAxis + 40, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, yAxis, 340, yAxis + 40, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			drawSquareBtn(340, yAxis, 409, yAxis + 40, F("EDIT"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			drawSquareBtn(409, yAxis, 477, yAxis + 40, F("DEL"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			displayedNodePosition[g_var8[POS4]] = i;
 			g_var8[POS4]++;
 			yAxis += 45;
 		}
-		else if (i < 9)
+		else if (i < 19)
 		{
 			index++;
 		}
@@ -908,53 +913,62 @@ bool drawEditTXNode(uint8_t node)
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 3:
-		drawRoundBtn(135, 55, 259, 95, F("Channel"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(135, 55, 290, 95, F("Name"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(135, 100, 200, 145, F("ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(292, 55, 475, 95, RXtimedMSG.node[node].name, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(202, 100, 282, 145, String(RXtimedMSG.node[node].id, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(284, 100, 354, 145, F("INT:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(356, 100, 475, 145, String(RXtimedMSG.node[node].interval), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(135, 99, 259, 139, F("Channel"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawRoundBtn(135, 150, 475, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(135, 143, 180, 183, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		myGLCD.setFont(SmallFont);
-		drawRoundBtn(134, 195, 175, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[0], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(182, 143, 245, 183, String(RXtimedMSG.node[node].id, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
-		drawRoundBtn(177, 195, 218, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[1], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(247, 143, 378, 183, F("Interval"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
-		drawRoundBtn(220, 195, 261, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(380, 143, 475, 183, String(RXtimedMSG.node[node].interval), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 10:
-		drawRoundBtn(263, 195, 304, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[3], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(135, 187, 475, 223, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 11:
-		drawRoundBtn(306, 195, 347, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[4], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		myGLCD.setFont(SmallFont);
+		drawRoundBtn(134, 227, 175, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[0], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 12:
-		drawRoundBtn(349, 195, 390, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[5], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(177, 227, 218, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[1], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 13:
-		drawRoundBtn(392, 195, 433, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[6], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		drawRoundBtn(220, 227, 261, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[2], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 14:
-		drawRoundBtn(435, 195, 476, 250, " " + String(RXtimedMSG.node[g_var8[POS0]].data[7], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		myGLCD.setFont(BigFont);
+		drawRoundBtn(263, 227, 304, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[3], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 15:
-		drawRoundBtn(135, 255, 304, 300, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		drawRoundBtn(306, 255, 475, 300, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(306, 227, 347, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[4], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 16:
-		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		drawRoundBtn(349, 227, 390, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[5], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
 		break;
 	case 17:
+		drawRoundBtn(392, 227, 433, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[6], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		break;
+	case 18:
+		drawRoundBtn(435, 227, 476, 272, " " + String(RXtimedMSG.node[g_var8[POS0]].data[7], 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
+		myGLCD.setFont(BigFont);
+		break;
+	case 19:
+		drawRoundBtn(135, 276, 304, 316, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 20:
+		drawRoundBtn(306, 276, 475, 316, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 21:
 		drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 		return false;
 		break;
@@ -963,135 +977,152 @@ bool drawEditTXNode(uint8_t node)
 	return true;
 }
 
+void deleteNode(uint8_t node)
+{
+	RXtimedMSG.node[node].name = "";
+	RXtimedMSG.node[node].isDel = true;
+	RXtimedMSG.node[node].isOn = false;
+	RXtimedMSG.node[node].id = 0;
+	RXtimedMSG.node[node].interval = 0;
+	RXtimedMSG.node[node].channel = 0;
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		RXtimedMSG.node[node].data[i] = 0;
+	}
+}
+
 void timedTXButtons()	
 {
 	if (Touch_getXY())
 	{
-		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 0)
+		if ((y >= 55) && (y <= 95) && g_var8[POS4] > 0)
+		{
+			if ((x >= 271) && (x <= 340))
+			{
+				waitForIt(271, 55, 340, 95);
+				// On
+				RXtimedMSG.node[displayedNodePosition[0]].isOn = !RXtimedMSG.node[displayedNodePosition[0]].isOn;
+				RXtimedMSG.node[displayedNodePosition[0]].isOn ? drawSquareBtn(271, 55, 340, 95, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 55, 340, 95, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+			}
+			if ((x >= 340) && (x <= 409))
+			{
+				waitForIt(340, 55, 409, 95);
+				// Edit
+				graphicLoaderState = 0;
+				g_var8[POS0] = displayedNodePosition[0];
+				state = 2;
+			}
+			if ((x >= 409) && (x <= 477))
+			{
+				waitForIt(409, 55, 477, 95);
+				// Del
+				SerialUSB.println(displayedNodePosition[0]);
+				deleteNode(displayedNodePosition[0]);
+				drawTXNode(g_var8[POS3]);
+			}
+		}
+		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 1)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 100, 340, 140);
 				// On
-				RXtimedMSG.node[displayedNodePosition[0]].isOn = !RXtimedMSG.node[displayedNodePosition[0]].isOn;
-				RXtimedMSG.node[displayedNodePosition[0]].isOn ? drawSquareBtn(271, 100, 340, 140, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 100, 340, 140, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				RXtimedMSG.node[displayedNodePosition[1]].isOn = !RXtimedMSG.node[displayedNodePosition[1]].isOn;
+				RXtimedMSG.node[displayedNodePosition[1]].isOn ? drawSquareBtn(271, 100, 340, 140, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 100, 340, 140, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
 			if ((x >= 340) && (x <= 409))
 			{
 				waitForIt(340, 100, 409, 140);
 				// Edit
-				g_var8[POS0] = displayedNodePosition[0];
+				graphicLoaderState = 0;
+				g_var8[POS0] = displayedNodePosition[1];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
 			{
 				waitForIt(409, 100, 477, 140);
 				// Del
-				RXtimedMSG.node[displayedNodePosition[0]].isDel = true;
-				RXtimedMSG.node[displayedNodePosition[0]].isOn = false;
-				RXtimedMSG.node[displayedNodePosition[0]].id = 0;
-				RXtimedMSG.node[displayedNodePosition[0]].interval = 0;
-				RXtimedMSG.node[displayedNodePosition[0]].channel = 0;
-				for (uint8_t i = 0; i < 8; i++)
-				{
-					RXtimedMSG.node[displayedNodePosition[0]].data[i] = 0;
-				}
+				SerialUSB.println(displayedNodePosition[1]);
+				deleteNode(displayedNodePosition[1]);
 				drawTXNode(g_var8[POS3]);
 			}
 		}
-		if ((y >= 145) && (y <= 185) && g_var8[POS4] > 1)
+		if ((y >= 145) && (y <= 185) && g_var8[POS4] > 2)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 145, 340, 185);
 				// On
-				RXtimedMSG.node[displayedNodePosition[1]].isOn = !RXtimedMSG.node[displayedNodePosition[1]].isOn;
-				RXtimedMSG.node[displayedNodePosition[1]].isOn ? drawSquareBtn(271, 145, 340, 185, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 145, 340, 185, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				RXtimedMSG.node[displayedNodePosition[2]].isOn = !RXtimedMSG.node[displayedNodePosition[2]].isOn;
+				RXtimedMSG.node[displayedNodePosition[2]].isOn ? drawSquareBtn(271, 145, 340, 185, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 145, 340, 185, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
 			if ((x >= 340) && (x <= 409))
 			{
 				waitForIt(340, 145, 409, 185);
 				// Edit
-				g_var8[POS0] = displayedNodePosition[1];
+				graphicLoaderState = 0;
+				g_var8[POS0] = displayedNodePosition[2];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
 			{
 				waitForIt(409, 145, 477, 185);
 				// Del
-				RXtimedMSG.node[displayedNodePosition[1]].isDel = true;
-				RXtimedMSG.node[displayedNodePosition[1]].isOn = false;
-				RXtimedMSG.node[displayedNodePosition[1]].id = 0;
-				RXtimedMSG.node[displayedNodePosition[1]].interval = 0;
-				RXtimedMSG.node[displayedNodePosition[1]].channel = 0;
-				for (uint8_t i = 0; i < 8; i++)
-				{
-					RXtimedMSG.node[displayedNodePosition[1]].data[i] = 0;
-				}
+				SerialUSB.println(displayedNodePosition[2]);
+				deleteNode(displayedNodePosition[2]);
 				drawTXNode(g_var8[POS3]);
 			}
 		}
-		if ((y >= 190) && (y <= 230) && g_var8[POS4] > 2)
+		if ((y >= 190) && (y <= 230) && g_var8[POS4] > 3)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 190, 340, 230);
 				// On
-				RXtimedMSG.node[displayedNodePosition[2]].isOn = !RXtimedMSG.node[displayedNodePosition[2]].isOn;
-				RXtimedMSG.node[displayedNodePosition[2]].isOn ? drawSquareBtn(271, 190, 340, 230, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 190, 340, 230, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				RXtimedMSG.node[displayedNodePosition[3]].isOn = !RXtimedMSG.node[displayedNodePosition[3]].isOn;
+				RXtimedMSG.node[displayedNodePosition[3]].isOn ? drawSquareBtn(271, 190, 340, 230, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 190, 340, 230, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
 			if ((x >= 340) && (x <= 409))
 			{
 				waitForIt(340, 190, 409, 230);
 				// Edit
-				g_var8[POS0] = displayedNodePosition[2];
+				graphicLoaderState = 0;
+				g_var8[POS0] = displayedNodePosition[3];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
 			{
 				waitForIt(409, 190, 477, 230);
 				// Del
-				RXtimedMSG.node[displayedNodePosition[2]].isDel = true;
-				RXtimedMSG.node[displayedNodePosition[2]].isOn = false;
-				RXtimedMSG.node[displayedNodePosition[2]].id = 0;
-				RXtimedMSG.node[displayedNodePosition[2]].interval = 0;
-				RXtimedMSG.node[displayedNodePosition[2]].channel = 0;
-				for (uint8_t i = 0; i < 8; i++)
-				{
-					RXtimedMSG.node[displayedNodePosition[2]].data[i] = 0;
-				}
+				SerialUSB.println(displayedNodePosition[3]);
+				deleteNode(displayedNodePosition[3]);
 				drawTXNode(g_var8[POS3]);
 			}
 		}
-		if ((y >= 235) && (y <= 275) && g_var8[POS4] > 3)
+		if ((y >= 235) && (y <= 275) && g_var8[POS4] > 4)
 		{
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 235, 340, 275);
 				// On
-				RXtimedMSG.node[displayedNodePosition[3]].isOn = !RXtimedMSG.node[displayedNodePosition[3]].isOn;
-				RXtimedMSG.node[displayedNodePosition[3]].isOn ? drawSquareBtn(271, 235, 340, 275, F("x"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 235, 340, 275, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				RXtimedMSG.node[displayedNodePosition[4]].isOn = !RXtimedMSG.node[displayedNodePosition[4]].isOn;
+				RXtimedMSG.node[displayedNodePosition[4]].isOn ? drawSquareBtn(271, 235, 340, 275, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 235, 340, 275, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
 			if ((x >= 340) && (x <= 409))
 			{
 				waitForIt(340, 235, 409, 275);
 				// Edit
-				g_var8[POS0] = displayedNodePosition[3];
+				graphicLoaderState = 0;
+				g_var8[POS0] = displayedNodePosition[4];
 				state = 2;
 			}
 			if ((x >= 409) && (x <= 477))
 			{
 				waitForIt(409, 235, 477, 275);
 				// Del
-				RXtimedMSG.node[displayedNodePosition[3]].isDel = true;
-				RXtimedMSG.node[displayedNodePosition[3]].isOn = false;
-				RXtimedMSG.node[displayedNodePosition[3]].id = 0;
-				RXtimedMSG.node[displayedNodePosition[3]].interval = 0;
-				RXtimedMSG.node[displayedNodePosition[3]].channel = 0;
-				for (uint8_t i = 0; i < 8; i++)
-				{
-					RXtimedMSG.node[displayedNodePosition[3]].data[i] = 0;
-				}
+
+				SerialUSB.println(displayedNodePosition[4]);
+				deleteNode(displayedNodePosition[4]);
 				drawTXNode(g_var8[POS3]);
 			}
 		}
@@ -1118,7 +1149,7 @@ void timedTXButtons()
 			{
 				waitForIt(401, 280, 477, 317);
 				// Down
-				if (g_var8[POS3] < 5)
+				if (g_var8[POS3] < 15)
 				{
 					g_var8[POS3]++;
 					drawTXNode(g_var8[POS3]);
@@ -1301,6 +1332,25 @@ void timedTX()
 			state = 2;
 		}
 		break;
+	case 14:
+		// Name
+		g_var8[POS1] = keyboardController(g_var8[POS5]);
+		if (g_var8[POS1] == 0xF1) // Accept
+		{
+			graphicLoaderState = 0;
+			RXtimedMSG.node[g_var8[POS0]].name = keyboardInput;
+			for (uint8_t i = 0; i < 8; i++)
+			{
+				keyboardInput[i] = ' ';
+			}
+			state = 2;
+		}
+		else if (g_var8[POS1] == 0xF0) // Cancel
+		{
+			graphicLoaderState = 0;
+			state = 2;
+		}
+		break;
 	}
 }
 
@@ -1311,33 +1361,44 @@ void editTXNodeButtons()
 	{
 		if ((y >= 55) && (y <= 95))
 		{
+			if ((x >= 292) && (x <= 475))
+			{
+				waitForIt(292, 55, 475, 95);
+				// Set name
+				g_var8[POS5] = 0;
+				drawkeyboard();
+				state = 14;
+			}
+		}
+		if ((y >= 99) && (y <= 139))
+		{
 			if ((x >= 261) && (x <= 331))
 			{
-				waitForIt(261, 55, 331, 95);
+				waitForIt(261, 99, 331, 139);
 				// Channel 0
 				RXtimedMSG.node[g_var8[POS0]].channel = 0;
 				drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 			}
 			if ((x >= 333) && (x <= 403))
 			{
-				waitForIt(333, 55, 403, 95);
+				waitForIt(333, 99, 403, 139);
 				// Channel 1
 				RXtimedMSG.node[g_var8[POS0]].channel = 1;
 				drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 			}
 			if ((x >= 405) && (x <= 475))
 			{
-				waitForIt(405, 55, 475, 95);
+				waitForIt(405, 99, 475, 139);
 				// WIFI
 				RXtimedMSG.node[g_var8[POS0]].channel = 2;
 				drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
 			}
 		}
-		if ((y >= 100) && (y <= 145))
+		if ((y >= 143) && (y <= 183))
 		{
-			if ((x >= 202) && (x <= 282))
+			if ((x >= 182) && (x <= 245))
 			{
-				waitForIt(202, 100, 282, 145);
+				waitForIt(182, 143, 245, 183);
 				// Set ID
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1345,9 +1406,9 @@ void editTXNodeButtons()
 				drawKeypad();
 				state = 4;
 			}
-			if ((x >= 356) && (x <= 475))
+			if ((x >= 380) && (x <= 475))
 			{
-				waitForIt(356, 100, 475, 145);
+				waitForIt(380, 143, 475, 183);
 				// Set Interval
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1356,11 +1417,11 @@ void editTXNodeButtons()
 				state = 5;
 			}
 		}
-		if ((y >= 195) && (y <= 250))
+		if ((y >= 227) && (y <= 272))
 		{
 			if ((x >= 134) && (x <= 175))
 			{
-				waitForIt(134, 195, 175, 250);
+				waitForIt(134, 227, 175, 272);
 				// Set Data[0]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1370,7 +1431,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 177) && (x <= 218))
 			{
-				waitForIt(177, 195, 218, 250);
+				waitForIt(177, 227, 218, 272);
 				// Set Data[1]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1380,7 +1441,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 220) && (x <= 261))
 			{
-				waitForIt(220, 195, 261, 250);
+				waitForIt(220, 227, 261, 272);
 				// Set Data[2]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1390,7 +1451,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 263) && (x <= 304))
 			{
-				waitForIt(263, 195, 304, 250);
+				waitForIt(263, 227, 304, 272);
 				// Set Data[3]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1400,7 +1461,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 306) && (x <= 347))
 			{
-				waitForIt(306, 195, 347, 250);
+				waitForIt(306, 227, 347, 272);
 				// Set Data[4]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1410,7 +1471,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 350) && (x <= 391))
 			{
-				waitForIt(349, 195, 390, 250);
+				waitForIt(349, 227, 390, 272);
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
 				resetKeypad();
@@ -1420,7 +1481,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 392) && (x <= 433))
 			{
-				waitForIt(392, 195, 433, 250);
+				waitForIt(392, 227, 433, 272);
 				// Set Data[6]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1430,7 +1491,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 435) && (x <= 476))
 			{
-				waitForIt(435, 195, 476, 250);
+				waitForIt(435, 227, 476, 272);
 				// Set Data[7]
 				g_var8[POS2] = 0;
 				g_var16[POS0] = 0;
@@ -1439,11 +1500,11 @@ void editTXNodeButtons()
 				drawKeypad();
 			}
 		}
-		if ((y >= 255) && (y <= 300))
+		if ((y >= 276) && (y <= 316))
 		{
 			if ((x >= 135) && (x <= 304))
 			{
-				waitForIt(135, 255, 304, 300);
+				waitForIt(135, 276, 304, 316);
 				// Accept
 				graphicLoaderState = 0;
 				RXtimedMSG.node[g_var8[POS0]].isDel = false;
@@ -1451,7 +1512,7 @@ void editTXNodeButtons()
 			}
 			if ((x >= 306) && (x <= 475))
 			{
-				waitForIt(306, 255, 475, 300);
+				waitForIt(306, 276, 475, 316);
 				// Cancel
 				graphicLoaderState = 0;
 				state = 0;

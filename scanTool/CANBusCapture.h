@@ -9,10 +9,11 @@
 	#include "WProgram.h"
 #endif
 
-#define TIMED_TX_MAX_SIZE 10
+#define TIMED_TX_MAX_SIZE 20
 
 struct MessageRX
 {
+	String name = "";
 	uint8_t channel = 0;
 	uint16_t interval = 0;
 	uint32_t id = 0;
@@ -26,7 +27,7 @@ struct MessageRX
 struct SchedulerRX
 {
 	uint8_t nodeLength = 0;
-	MessageRX node[10];
+	MessageRX node[20];
 };
 
 extern bool drawCANBus();

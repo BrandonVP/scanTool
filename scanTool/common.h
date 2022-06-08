@@ -112,4 +112,7 @@ extern uint8_t keypadControllerDec(uint8_t&, uint16_t&);
 extern void backgroundProcess();
 extern void drawKeypadDec();
 extern void resetKeypad();
+extern uint8_t keyboardController(uint8_t& index);
+extern void drawkeyboard();
+extern char keyboardInput[9];
 #endif // EXTERN_H

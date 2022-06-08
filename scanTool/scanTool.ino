@@ -76,7 +76,7 @@ uint16_t g_var16[8];
 uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
-char keyboardInput[10] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+char keyboardInput[9]; //= {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',};
 uint8_t keypadInput[4] = {0, 0, 0, 0};
 
 // Used for converting keypad input to appropriate hex place
@@ -583,7 +583,7 @@ void pageControl()
 		}
 		break;
 
-	case 6: // Timed RX
+	case 6: // Timed TX
 		// Draw Page
 		if (!hasDrawn)
 		{
@@ -593,6 +593,7 @@ void pageControl()
 			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : error = true; // Keypad index
 			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : error = true; // Scroll index
 			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : error = true; // Node position
+			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : error = true; // Keyboard index
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Total value
 			if (error)
 			{
@@ -614,6 +615,7 @@ void pageControl()
 			unlockVar8(LOCK2);
 			unlockVar8(LOCK3);
 			unlockVar8(LOCK4);
+			unlockVar8(LOCK5);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -2285,10 +2287,10 @@ void drawkeyboard()
 	uint16_t posY = 56;
 	uint8_t numPad = 0x00;
 
-	const char keyboardInput[36] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+	const char keyboardInput[37] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 									 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 									 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-									 'u', 'v', 'w', 'x', 'y', 'z' };
+									 'u', 'v', 'w', 'x', 'y', 'z', '_'};
 	uint8_t count = 0;
 
 	for (uint8_t i = 0; i < 4; i++)
@@ -2296,7 +2298,7 @@ void drawkeyboard()
 		int posX = 135;
 		for (uint8_t j = 0; j < 10; j++)
 		{
-			if (count < 36)
+			if (count < 37)
 			{
 				drawRoundBtn(posX, posY, posX + 32, posY + 40, String(keyboardInput[count]), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 				/* Print out button coords
@@ -2314,9 +2316,9 @@ void drawkeyboard()
 		}
 		posY += 43;
 	}
-	drawRoundBtn(340, 185, 474, 225, F("<--"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(373, 185, 475, 225, F("<--"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(135, 230, 240, 270, F("Input:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-	drawRoundBtn(245, 230, 475, 270, F("filename"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+	drawRoundBtn(245, 230, 475, 270, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(135, 275, 305, 315, F("Accept"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 	drawRoundBtn(310, 275, 475, 315, F("Cancel"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
@@ -2591,9 +2593,16 @@ int keyboardButtons()
 				DEBUG_KEYBOARD("z");
 				return 0x7A;
 			}
-			if ((x >= 340) && (x <= 474))
+			if ((x >= 339) && (x <= 371))
 			{
-				waitForIt(340, 185, 474, 225);
+				waitForIt(339, 185, 371, 225);
+				// z
+				DEBUG_KEYBOARD("_");
+				return 0x5F;
+			}
+			if ((x >= 373) && (x <= 474))
+			{
+				waitForIt(373, 185, 475, 225);
 				// Backspace
 				DEBUG_KEYBOARD("Backspace");
 				return 0xF2;
@@ -2630,18 +2639,25 @@ int keyboardButtons()
 uint8_t keyboardController(uint8_t &index)
 {
 	uint8_t input = keyboardButtons();
-	if (input > 0x29 && input < 0x7B)
+	if (input > 0x29 && input < 0x7B && index < 8) // 8 is max size of a filename
 	{
 		keyboardInput[index] = input;
-		for (int i = 0; i < 10; i++)
+		/*
+		SerialUSB.println("");
+		SerialUSB.print("Index: ");
+		SerialUSB.println(index);
+		for (int i = 0; i < 8; i++)
 		{
-			SerialUSB.println(keyboardInput[i]);
+			SerialUSB.print(keyboardInput[i]);
+			SerialUSB.print(" ");
 		}
+		SerialUSB.println("");
+		*/
 		drawRoundBtn(245, 230, 475, 270, String(keyboardInput), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		++index;
 		return 0xFF;
 	}
-	if (input == 0xF2)
+	if (input == 0xF2 && index > 0)
 	{
 		keyboardInput[index - 1] = 0x20;
 		drawRoundBtn(245, 230, 475, 270, String(keyboardInput), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
