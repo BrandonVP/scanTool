@@ -29,22 +29,22 @@ bool drawCANBus()
 		drawRoundBtn(140, 80, 305, 130, F("Capture"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawRoundBtn(310, 80, 475, 130, F("Playback"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 80, 475, 130, F("Send Msg"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(140, 135, 305, 185, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(140, 135, 305, 185, F("Playback"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(310, 135, 475, 185, F("Timed TX"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 135, 475, 185, F("Files"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawRoundBtn(140, 190, 305, 240, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawRoundBtn(310, 190, 475, 240, F("Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
-		drawRoundBtn(140, 245, 305, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(140, 245, 305, 295, F("Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
 		drawRoundBtn(310, 245, 475, 295, F("Auto Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -78,9 +78,10 @@ void CANBusButtons()
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(140, 135, 305, 185);
-				// CAN0 TX
+				// Playback
 				graphicLoaderState = 0;
-				nextPage = 3;
+				nextPage = 2;
+				
 			}
 			if ((y >= 190) && (y <= 240))
 			{
@@ -91,8 +92,9 @@ void CANBusButtons()
 			}
 			if ((y >= 245) && (y <= 295))
 			{
-				//waitForIt(140, 245, 305, 295);
-				// Unused
+				waitForIt(140, 245, 305, 295);
+				// Baud
+				nextPage = 5;
 			}
 		}
 		if ((x >= 310) && (x <= 475))
@@ -100,22 +102,21 @@ void CANBusButtons()
 			if ((y >= 80) && (y <= 130))
 			{
 				waitForIt(310, 80, 475, 130);
-				// Playback
-				graphicLoaderState = 0;
-				nextPage = 2;
-			}
-			if ((y >= 135) && (y <= 185))
-			{
-				waitForIt(310, 135, 475, 185);
 				// Timed TX
 				graphicLoaderState = 0;
 				nextPage = 6;
 			}
+			if ((y >= 135) && (y <= 185))
+			{
+				waitForIt(310, 135, 475, 185);
+				// Unused
+			}
 			if ((y >= 190) && (y <= 240))
 			{
-				waitForIt(310, 190, 475, 240);
-				// Baud
-				nextPage = 5;
+				//waitForIt(310, 190, 475, 240);
+				// Unused
+				//graphicLoaderState = 0;
+				//nextPage = 3;
 			}
 			if ((y >= 245) && (y <= 295))
 			{
@@ -793,6 +794,16 @@ void sendCANFrame(uint8_t channel)
 SchedulerRX RXtimedMSG;
 uint8_t displayedNodePosition[4];
 
+void loadRXMsg()
+{
+	sdCard.readSendMsg(RXtimedMSG);
+}
+
+void saveRXMsg()
+{
+	sdCard.writeSendMsg(RXtimedMSG);
+}
+
 bool drawTimedTX()
 {
 	switch (graphicLoaderState)
@@ -979,7 +990,11 @@ bool drawEditTXNode(uint8_t node)
 
 void deleteNode(uint8_t node)
 {
-	RXtimedMSG.node[node].name = "";
+	//RXtimedMSG.node[node].name = "";
+	for (uint8_t i = 0; i < 9; i++)
+	{
+		RXtimedMSG.node[node].name[i] = '\0';
+	}
 	RXtimedMSG.node[node].isDel = true;
 	RXtimedMSG.node[node].isOn = false;
 	RXtimedMSG.node[node].id = 0;
@@ -997,6 +1012,12 @@ void timedTXButtons()
 	{
 		if ((y >= 55) && (y <= 95) && g_var8[POS4] > 0)
 		{
+			if ((x >= 133) && (x <= 271))
+			{
+				waitForIt(133, 55, 271, 95);
+				// Send
+				TXSend(displayedNodePosition[0]);
+			}
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 55, 340, 95);
@@ -1023,6 +1044,12 @@ void timedTXButtons()
 		}
 		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 1)
 		{
+			if ((x >= 133) && (x <= 271))
+			{
+				waitForIt(133, 100, 271, 140);
+				// Send
+				TXSend(displayedNodePosition[1]);
+			}
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 100, 340, 140);
@@ -1049,6 +1076,12 @@ void timedTXButtons()
 		}
 		if ((y >= 145) && (y <= 185) && g_var8[POS4] > 2)
 		{
+			if ((x >= 133) && (x <= 271))
+			{
+				waitForIt(133, 145, 271, 185);
+				// Send
+				TXSend(displayedNodePosition[2]);
+			}
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 145, 340, 185);
@@ -1075,6 +1108,12 @@ void timedTXButtons()
 		}
 		if ((y >= 190) && (y <= 230) && g_var8[POS4] > 3)
 		{
+			if ((x >= 133) && (x <= 271))
+			{
+				waitForIt(133, 190, 271, 230);
+				// Send
+				TXSend(displayedNodePosition[3]);
+			}
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 190, 340, 230);
@@ -1101,6 +1140,12 @@ void timedTXButtons()
 		}
 		if ((y >= 235) && (y <= 275) && g_var8[POS4] > 4)
 		{
+			if ((x >= 133) && (x <= 271))
+			{
+				waitForIt(133, 235, 271, 275);
+				// Send
+				TXSend(displayedNodePosition[4]);
+			}
 			if ((x >= 271) && (x <= 340))
 			{
 				waitForIt(271, 235, 340, 275);
@@ -1338,10 +1383,11 @@ void timedTX()
 		if (g_var8[POS1] == 0xF1) // Accept
 		{
 			graphicLoaderState = 0;
-			RXtimedMSG.node[g_var8[POS0]].name = keyboardInput;
+			strncpy(RXtimedMSG.node[g_var8[POS0]].name, keyboardInput, 9);
+			//RXtimedMSG.node[g_var8[POS0]].name = keyboardInput;
 			for (uint8_t i = 0; i < 8; i++)
 			{
-				keyboardInput[i] = ' ';
+				keyboardInput[i] = '\0';
 			}
 			state = 2;
 		}
@@ -1508,6 +1554,7 @@ void editTXNodeButtons()
 				// Accept
 				graphicLoaderState = 0;
 				RXtimedMSG.node[g_var8[POS0]].isDel = false;
+				saveRXMsg();
 				state = 0;
 			}
 			if ((x >= 306) && (x <= 475))
@@ -1538,7 +1585,7 @@ void timedTXSend()
 	CAN_FRAME timedTXFRAME;
 
 	// Generate CAN Bus message for every active struture object and send if interval is ready
-	for (uint8_t i = 0; i < 10; i++)
+	for (uint8_t i = 0; i < 20; i++)
 	{
 		if (!RXtimedMSG.node[i].isDel && RXtimedMSG.node[i].isOn && (millis() - RXtimedMSG.node[i].timer > RXtimedMSG.node[i].interval))
 		{
@@ -1553,6 +1600,20 @@ void timedTXSend()
 			RXtimedMSG.node[i].timer = millis();
 		}
 	}
+}
+
+void TXSend(uint8_t msgNum)
+{
+	CAN_FRAME TXFRAME;
+	
+	TXFRAME.id = RXtimedMSG.node[msgNum].id;
+	TXFRAME.length = 8;
+	TXFRAME.extended = false;
+	for (uint8_t j = 0; j < 8; j++)
+	{
+		TXFRAME.data.bytes[j] = RXtimedMSG.node[msgNum].data[j];
+	}
+	can1.sendCANOut(RXtimedMSG.node[msgNum].channel, TXFRAME, false);
 }
 
 /*============== Baud ==============*/

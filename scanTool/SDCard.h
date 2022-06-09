@@ -13,7 +13,7 @@
 
 #define SD_CARD_CS 8
 #define ROW_DIM 100
-
+#include "CANBusCapture.h"
 class SDCard
 {
  protected:
@@ -21,13 +21,15 @@ class SDCard
 	 File myFile;
 	 typedef char MyArray[10][13];
  public:
-	 void writeFileS(char* filename, char* incoming);
+	void writeFileS(char* filename, char* incoming);
 	bool startSD();
 	void createDRIVE(char*);
 	void readFile(char* filename, uint8_t* arrayIn);
 	void writeFile(char*, int, int);
 	void writeFile(char*, String);
 	void writeFileln(char*);
+	void writeSendMsg(SchedulerRX);
+	void readSendMsg(SchedulerRX &);
 	void deleteFile(char*);
 	void readLogFile(char*);
 	uint32_t fileLength(char*);

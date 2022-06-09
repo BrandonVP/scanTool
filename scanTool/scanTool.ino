@@ -10,9 +10,19 @@
 Read Vehicle DTCs
 Read / Clear RZR DTCs
 Switch to FATSD
--RTC Time stamps
-File naming
-Organize / move output variables into a settings structure
+Daylight savings option
+
+- SD Capture - 
+Add larger buffer / write block for SD card capture to improve performance
+SD capture file naming
+
+- Playback - 
+Redo GUI to match send
+Share folder with SD capture
+Edit / Del / View files
+Get rid of .txt from list view
+configure: adjust playback speed?
+Improve file split (remove/fix added return lines and fix stability)
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -1679,6 +1689,7 @@ void setup()
 
 	// Draw the Hypertech logo
 	bmpDraw("System/HYPER.bmp", 0, 0);
+	loadRXMsg();
 }
 
 

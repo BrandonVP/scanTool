@@ -13,7 +13,7 @@
 
 struct MessageRX
 {
-	String name = "";
+	char name[9];
 	uint8_t channel = 0;
 	uint16_t interval = 0;
 	uint32_t id = 0;
@@ -30,6 +30,7 @@ struct SchedulerRX
 	MessageRX node[20];
 };
 
+extern SchedulerRX RXtimedMSG;
 extern bool drawCANBus();
 extern void CANBusButtons();
 extern bool drawCapture();
@@ -63,5 +64,7 @@ extern uint8_t findFreeTXNode();
 extern bool drawEditTXNode(uint8_t);
 extern void editTXNodeButtons();
 extern void timedTXSend();
+extern void TXSend(uint8_t);
+extern void loadRXMsg();
 #endif
 
