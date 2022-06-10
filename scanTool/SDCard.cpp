@@ -76,42 +76,34 @@ void SDCard::writeFileln(char* filename)
 void SDCard::writeSendMsg(SchedulerRX msgStruct)
 {
 	char buffer[100];
-	//SerialUSB.println("writeSendMsg1");
+
+	// Delete old before writing new file
 	SD.remove("SYSTEM/CANMsg.txt");
 
 	// File created and opened for writing
 	myFile = SD.open("SYSTEM/CANMsg.txt", FILE_WRITE);
 
-
 	for (uint8_t i = 0; i < 20; i++)
 	{
-		//char *s1;
-		/*
-		if (msgStruct.node[i].name != NULL)
+		if (strcmp(msgStruct.node[i].name, "\0"))
 		{
-			strncpy(s1, msgStruct.node[i].name, 9);
-
-			//s1 = msgStruct.node[i].name;
+			sprintf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x \n", msgStruct.node[i].name, msgStruct.node[i].channel, msgStruct.node[i].interval, msgStruct.node[i].id,
+				msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].data[6], msgStruct.node[i].data[7],
+				msgStruct.node[i].isOn, msgStruct.node[i].isDel);
+			SerialUSB.println(msgStruct.node[i].name);
 		}
 		else
 		{
-			s1 = "none";
+			sprintf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x \n", "(null)", msgStruct.node[i].channel, msgStruct.node[i].interval, msgStruct.node[i].id,
+				msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].data[6], msgStruct.node[i].data[7],
+				msgStruct.node[i].isOn, msgStruct.node[i].isDel);
+			SerialUSB.println("(null)");
 		}
-		*/
-
-		SerialUSB.println(msgStruct.node[i].name);
-		//strncpy(s1, msgStruct.node[i].name, 9);
-		//SerialUSB.println(s1);
-		sprintf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x %x \n", msgStruct.node[i].name, msgStruct.node[i].channel, msgStruct.node[i].interval, msgStruct.node[i].id, msgStruct.node[i].timer,
-			msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].data[6], msgStruct.node[i].data[7],
-			msgStruct.node[i].isOn, msgStruct.node[i].isDel);
-
-		// Check if file was sucsefully open
+		
+		// Copy buffer to file after confirming file was open
 		if (myFile)
 		{
-			//SerialUSB.println("writeSendMsg2");
 			myFile.print(buffer);
-
 		}
 	}
 	myFile.close();
@@ -151,8 +143,6 @@ void SDCard::readFile(char* filename, uint8_t* arrayIn)
 
 void SDCard::readSendMsg(SchedulerRX& msgStruct)
 {
-	SerialUSB.println("readSendMsg1");
-
 	// File created and opened for writing
 	myFile = SD.open("SYSTEM/CANMsg.txt", FILE_READ);
 
@@ -162,69 +152,59 @@ void SDCard::readSendMsg(SchedulerRX& msgStruct)
 		{
 			char buffer[51];
 			char s1[9];
-			String test;
-			//SerialUSB.println("readSendMsg2");
 
 			myFile.readBytesUntil('\n', buffer, 51);
-			
-			
-			sscanf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x %x", s1, &msgStruct.node[i].channel, &msgStruct.node[i].interval, &msgStruct.node[i].id, &msgStruct.node[i].timer,
+
+			sscanf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x", s1, &msgStruct.node[i].channel, &msgStruct.node[i].interval, &msgStruct.node[i].id, 
 				&msgStruct.node[i].data[0], &msgStruct.node[i].data[1], &msgStruct.node[i].data[2], &msgStruct.node[i].data[3], &msgStruct.node[i].data[4], &msgStruct.node[i].data[5], &msgStruct.node[i].data[6], &msgStruct.node[i].data[7],
 				&msgStruct.node[i].isOn, &msgStruct.node[i].isDel);
-			
+
+			if (!strcmp(s1, "(null)"))
+			{
+				char *temp = '\0';
+				strncpy(msgStruct.node[i].name, "\0", 9);
+			}
+			else if (s1 == NULL)
+			{
+				strncpy(msgStruct.node[i].name, "\0", 9);
+			}
+			else if (s1 == "\0")
+			{
+				strncpy(msgStruct.node[i].name, "\0", 9);
+			}
+			else
+			{
+				strncpy(msgStruct.node[i].name, s1, 9);
+			}
+
+			/*
+			SerialUSB.print("Index: ");
+			SerialUSB.println(i);
+			SerialUSB.println(msgStruct.node[i].name);
+			SerialUSB.println(msgStruct.node[i].channel);
+			SerialUSB.println(msgStruct.node[i].interval);
+			SerialUSB.println(msgStruct.node[i].id);
+			SerialUSB.println(msgStruct.node[i].timer);
+			SerialUSB.print("data: ");
+			SerialUSB.print(msgStruct.node[i].data[0]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[1]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[2]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[3]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[4]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[5]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[6]);
+			SerialUSB.print(" ");
+			SerialUSB.println(msgStruct.node[i].data[7]);
+			SerialUSB.println(msgStruct.node[i].isOn);
+			SerialUSB.println(msgStruct.node[i].isDel);
 			SerialUSB.println("");
-			SerialUSB.print("Index: "); SerialUSB.println(i);
-			SerialUSB.println(buffer);
-			SerialUSB.print("name: "); SerialUSB.println(s1);
-			for (uint8_t i = 0; i < 9; i++)
-			{
-				test[i] = s1[i];
-			}
-			SerialUSB.println(test);
-
-			strncpy(msgStruct.node[i].name, s1, 9);
-			//msgStruct.node[i].name = String(s1);
-			
-
-			/*
-			if (!msgStruct.node[i].isDel)
-			{
-				SerialUSB.print("Index: ");
-				SerialUSB.println(i);
-				SerialUSB.println(msgStruct.node[i].name);
-				SerialUSB.println(msgStruct.node[i].channel);
-				SerialUSB.println(msgStruct.node[i].interval);
-				SerialUSB.println(msgStruct.node[i].id);
-				SerialUSB.println(msgStruct.node[i].timer);
-
-				SerialUSB.print("data: ");
-				SerialUSB.print(msgStruct.node[i].data[0]);
-				SerialUSB.print(" ");
-				SerialUSB.print(msgStruct.node[i].data[1]);
-				SerialUSB.print(" ");
-				SerialUSB.print(msgStruct.node[i].data[2]);
-				SerialUSB.print(" ");
-				SerialUSB.print(msgStruct.node[i].data[3]);
-				SerialUSB.print(" ");
-				SerialUSB.print(msgStruct.node[i].data[4]);
-				SerialUSB.print(" ");
-				SerialUSB.print(msgStruct.node[i].data[5]);
-				SerialUSB.print(" ");
-				SerialUSB.print(msgStruct.node[i].data[6]);
-				SerialUSB.print(" ");
-				SerialUSB.println(msgStruct.node[i].data[7]);
-
-				SerialUSB.println(msgStruct.node[i].isOn);
-				SerialUSB.println(msgStruct.node[i].isDel);
-				SerialUSB.println("");
-				SerialUSB.println("");
-			}
-			*/
-			/*
-			myFile.readBytesUntil('\n', buffer, 80);
-			SerialUSB.println(buffer);
-			myFile.readBytesUntil('\n', buffer, 80);
-			SerialUSB.println(buffer);
+			SerialUSB.println("");
 			*/
 		}
 		myFile.close();

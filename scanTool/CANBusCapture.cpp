@@ -1037,8 +1037,8 @@ void timedTXButtons()
 			{
 				waitForIt(409, 55, 477, 95);
 				// Del
-				SerialUSB.println(displayedNodePosition[0]);
 				deleteNode(displayedNodePosition[0]);
+				saveRXMsg();
 				drawTXNode(g_var8[POS3]);
 			}
 		}
@@ -1069,8 +1069,8 @@ void timedTXButtons()
 			{
 				waitForIt(409, 100, 477, 140);
 				// Del
-				SerialUSB.println(displayedNodePosition[1]);
 				deleteNode(displayedNodePosition[1]);
+				saveRXMsg();
 				drawTXNode(g_var8[POS3]);
 			}
 		}
@@ -1101,8 +1101,8 @@ void timedTXButtons()
 			{
 				waitForIt(409, 145, 477, 185);
 				// Del
-				SerialUSB.println(displayedNodePosition[2]);
 				deleteNode(displayedNodePosition[2]);
+				saveRXMsg();
 				drawTXNode(g_var8[POS3]);
 			}
 		}
@@ -1133,8 +1133,8 @@ void timedTXButtons()
 			{
 				waitForIt(409, 190, 477, 230);
 				// Del
-				SerialUSB.println(displayedNodePosition[3]);
 				deleteNode(displayedNodePosition[3]);
+				saveRXMsg();
 				drawTXNode(g_var8[POS3]);
 			}
 		}
@@ -1165,9 +1165,8 @@ void timedTXButtons()
 			{
 				waitForIt(409, 235, 477, 275);
 				// Del
-
-				SerialUSB.println(displayedNodePosition[4]);
 				deleteNode(displayedNodePosition[4]);
+				saveRXMsg();
 				drawTXNode(g_var8[POS3]);
 			}
 		}

@@ -16,12 +16,14 @@
 #define _VMDEBUG 1
 #define F_CPU 84000000L
 #define ARDUINO 108013
-#define ARDUINO_SAM_DUE
-#define ARDUINO_ARCH_SAM
-#define __SAM3X8E__
+#define ARDUINO_SAM_DUE 1
+#define ARDUINO_ARCH_SAM 1
+#define __SAM3X8E__ 1
 #define USB_VID 0x2341
 #define USB_PID 0x003e
-#define USBCON
+#define USBCON 1
+#define USB_MANUFACTURER "\"Arduino
+#define USB_PRODUCT "\"Arduino
 #define __cplusplus 201103L
 #ifdef __CLEARCORE__
 #define __ARMCC_VERSION 6010050
@@ -59,7 +61,7 @@ extern "C" void __cxa_pure_virtual() {;}
 	#include "sam3xa.h"
 #endif
 
-#include "arduino.h"
+#include <arduino.h>
 #include <pins_arduino.h> 
 #include <variant.h> 
 #include <variant.cpp> 
