@@ -23,7 +23,6 @@ struct MessageRX
 	bool isDel = true;
 };
 
-
 struct SchedulerRX
 {
 	uint8_t nodeLength = 0;
@@ -34,7 +33,7 @@ extern SchedulerRX RXtimedMSG;
 extern bool drawCANBus();
 extern void CANBusButtons();
 extern bool drawCapture();
-extern void drawCaptureSelected();
+extern bool drawCaptureSelected();
 extern bool drawCaptureSource();
 extern bool drawCaptureOutput();
 extern void CaptureButtons();

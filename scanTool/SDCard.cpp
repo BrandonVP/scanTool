@@ -2,7 +2,6 @@
 
 #include "SDCard.h"
 #include "common.h"
-//#include "CANBusCapture.h"
 
 // Called at setup to initialize the SD Card
 bool SDCard::startSD()
@@ -30,16 +29,30 @@ void SDCard::writeFile(char* filename, String incoming)
 	}
 }
 
+void SDCard::setSDFilename(char* filename)
+{
+	for (uint8_t i = 0; i < 50; i++)
+	{
+		SDfilename[i] = '\0';
+	}
+	char* a1 = SDfilename;
+	memcpy(a1, "canlog/", 7);
+	a1 += 7;
+	memcpy(a1, filename, 12);
+	SerialUSB.println(SDfilename);
+}
+
 // Write string to SD Card
-void SDCard::writeFileS(char* filename, char* incoming)
+void SDCard::writeFileS(uint8_t* incoming)
 {
 	// File created and opened for writing
-	myFile = SD.open(filename, FILE_WRITE);
+	myFile = SD.open(SDfilename, FILE_WRITE);
 
 	// Check if file was sucsefully open
 	if (myFile)
 	{
-		myFile.write((const uint8_t*)incoming, strlen(incoming));
+		myFile.write(incoming, 270);
+		//myFile.write((const uint8_t*)incoming, strlen(incoming));
 		myFile.close();
 	}
 }
@@ -72,7 +85,7 @@ void SDCard::writeFileln(char* filename)
 	}
 }
 
-
+// Saves users CAN Bus RX messages
 void SDCard::writeSendMsg(SchedulerRX msgStruct)
 {
 	char buffer[100];
@@ -141,6 +154,7 @@ void SDCard::readFile(char* filename, uint8_t* arrayIn)
 	myFile.close();
 }
 
+// Reads users saved CAN Bus RX messages
 void SDCard::readSendMsg(SchedulerRX& msgStruct)
 {
 	// File created and opened for writing

@@ -20,8 +20,10 @@ class SDCard
 	 bool canDir = false;
 	 File myFile;
 	 typedef char MyArray[10][13];
+	 char SDfilename[50];
  public:
-	void writeFileS(char* filename, char* incoming);
+	void setSDFilename(char* );
+	void writeFileS(uint8_t* incoming);
 	bool startSD();
 	void createDRIVE(char*);
 	void readFile(char* filename, uint8_t* arrayIn);

@@ -885,13 +885,40 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	return true;
 }
 
+// Wirte large blocks to SD card
+void SDCardBuffer(char * message)
+{
+	static unsigned char* buf = (unsigned char*)malloc((324) * sizeof(unsigned char));
+	static unsigned char* a1 = buf;
+	static uint8_t count = 0;
+	static uint8_t printBufSize = 0;
+	memcpy(a1, message, 54);
+	a1 += 54;
+	count++;
+
+	if (count == 6)
+	{
+		sdCard.writeFileS(buf);
+		
+		count = 0;
+		a1 -= 324;
+		
+		printBufSize++;
+		if (printBufSize == 12)
+		{
+			SerialUSB.println(Can0.available());
+			printBufSize = 0;
+		}
+	}	
+}
+
 // Displays CAN traffic on Serial out
 bool CANBus::SDOutCAN(uint8_t config)
 {
 	// Display CAN0
 	if (config == 1 && Can0.get_rx_buff(incCAN0))
 	{
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+		sprintf(buffer, "%08d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 		SD_CAPTURE(buffer);
 	}
 	// Display CAN1

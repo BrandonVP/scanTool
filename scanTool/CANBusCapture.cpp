@@ -179,7 +179,7 @@ bool drawCapture()
 }
 
 // Draw current selected capture configuration 
-void drawCaptureSelected()
+bool drawCaptureSelected()
 {
 	switch (selectedChannelOut)
 	{
@@ -204,6 +204,8 @@ void drawCaptureSelected()
 	case 6:
 		drawSquareBtn(310, 85, 475, 125, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 7: 
+		return false;
 	}
 	switch (selectedSourceOut)
 	{
@@ -219,6 +221,8 @@ void drawCaptureSelected()
 	case 3:
 		drawSquareBtn(310, 125, 475, 165, F("SD Card"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
+	case 4:
+		return false;
 	}
 }
 
@@ -429,13 +433,45 @@ void CaptureButtons()
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 					break;
 				case 3: // SD Card
+					bool setName = true;
+					uint8_t result = 0;
+					uint8_t index = 0;
+					char filename[12];
+					char* a1 = filename;
+					
+					drawkeyboard();
+					while (setName)
+					{
+						// Name
+						result = keyboardController(index);
+						if (result == 0xF1) // Accept
+						{
+							strncpy(a1, keyboardInput, index);
+							a1 += index;
+							strncpy(a1, ".txt", 4);
+							for (uint8_t i = 0; i < 8; i++)
+							{
+								keyboardInput[i] = '\0';
+							}
+							setName = false;
+						}
+						else if (result == 0xF0) // Cancel
+						{
+							setName = false;
+						}
+						backgroundProcess();
+						//menuButtons();
+					}
+					sdCard.setSDFilename(filename);
 					can1.incCaptureFile();
 					Can0.empty_rx_buff();
 					Can1.empty_rx_buff();
 					isSDOut = true;
+					hasDrawn = false;
+					graphicLoaderState = 1;
+					drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 					drawSquareBtn(310, 185, 470, 240, F("Start"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-					sdCard.writeFile("capture.txt", "");
 					break;
 				}
 			}

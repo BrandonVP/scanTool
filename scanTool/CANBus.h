@@ -18,7 +18,8 @@
 // Switch between usb ports
 // #define SERIAL_CAPTURE(x) Serial.print(x);
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
-#define SD_CAPTURE(x) sdCard.writeFileS("capture.txt", x);
+#define SD_CAPTURE(x) SDCardBuffer(x)
+//#define SD_CAPTURE(x) sdCard.writeFileS("canlog/capture.txt", x);
 
 // States
 #define START_BYTE              (0)
@@ -43,7 +44,7 @@ protected:
 private:
 	// Def for getMSG()
 	typedef byte buff[8];
-	char buffer[50];
+	char buffer[54];
 	bool hasVIN = false;
 	String vehicleVIN;
 	char VIN[18];
