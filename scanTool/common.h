@@ -34,6 +34,13 @@
 #define ECU_RX 0x7E8
 #define PID_LIST_TX 0x7DF
 
+// This defines the char length of a formatted message
+// Inpacts reading and writing from SD card class and message streaming from the canbus class
+#define MSG_STRING_LENGTH       (67)
+#define SD_CAPTURE_NUM_MSG      (10)
+#define SD_CAPTURE_BLOCK_SIZE   (670) // SD_CAPTURE_NUM_MSG * MSG_STRING_LENGTH
+
+
 //#define DEBUG(x)
 //#define DEBUG(x)  Serial.println(x);
 #define DEBUG_HEX(x, z)  SerialUSB.print(x, z);

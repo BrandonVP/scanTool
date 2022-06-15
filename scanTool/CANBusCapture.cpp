@@ -29,13 +29,13 @@ bool drawCANBus()
 		drawRoundBtn(140, 80, 305, 130, F("Capture"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawRoundBtn(310, 80, 475, 130, F("Send Msg"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 80, 475, 130, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(140, 135, 305, 185, F("Playback"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(140, 135, 305, 185, F("Cap Files"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(310, 135, 475, 185, F("Files"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 135, 475, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawRoundBtn(140, 190, 305, 240, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -419,6 +419,7 @@ void CaptureButtons()
 			{
 				waitForIt(310, 185, 470, 240);
 				// Start
+				can1.resetMessageNum();
 				switch (selectedSourceOut)
 				{
 				case 1: // LCD
@@ -437,7 +438,7 @@ void CaptureButtons()
 					uint8_t result = 0;
 					uint8_t index = 0;
 					char filename[12];
-					char* a1 = filename;
+					//char* a1 = filename;
 					
 					drawkeyboard();
 					while (setName)
@@ -446,10 +447,12 @@ void CaptureButtons()
 						result = keyboardController(index);
 						if (result == 0xF1) // Accept
 						{
-							strncpy(a1, keyboardInput, index);
-							a1 += index;
-							strncpy(a1, ".txt", 4);
-							for (uint8_t i = 0; i < 8; i++)
+							//strcat(filename, keyboardInput);
+							strncpy(filename, keyboardInput, 9);
+							//a1 += index;
+							strcat(filename, ".txt");
+							//strncpy(a1, ".txt", 4);
+							for (uint8_t i = 0; i < 9; i++)
 							{
 								keyboardInput[i] = '\0';
 							}
@@ -463,7 +466,10 @@ void CaptureButtons()
 						//menuButtons();
 					}
 					sdCard.setSDFilename(filename);
-					can1.incCaptureFile();
+					for (uint8_t i = 0; i < 12; i++)
+					{
+						filename[i] = '\0';
+					}
 					Can0.empty_rx_buff();
 					Can1.empty_rx_buff();
 					isSDOut = true;
@@ -2031,11 +2037,11 @@ void drawCANLogScroll()
 		{
 			char temp[13];
 			sprintf(temp, "%s", fileList[(g_var8[POS0] + i)]);
-			drawSquareBtn(150, y, 410, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			drawSquareBtn(140, y, 420, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
 		}
 		else
 		{
-			drawSquareBtn(150, y, 410, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			drawSquareBtn(140, y, 420, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
 		}
 		y = y + 35;
 	}

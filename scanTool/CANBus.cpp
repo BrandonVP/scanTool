@@ -76,12 +76,17 @@ uint32_t CANBus::findBaudRate1()
 	return Can1.beginAutoSpeed();
 }
 
+void CANBus::resetMessageNum()
+{
+	messageNum = 0;
+}
+
 // PID callback
 void ECUtraffic(CAN_FRAME* incCAN0)
 {
-	char buffer[50];
-	uint32_t temp = millis();
-	sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, incCAN0->id, incCAN0->length, incCAN0->data.bytes[0], incCAN0->data.bytes[1], incCAN0->data.bytes[2], incCAN0->data.bytes[3], incCAN0->data.bytes[4], incCAN0->data.bytes[5], incCAN0->data.bytes[6], incCAN0->data.bytes[7]);
+	// TODO fix message number
+	char buffer[MSG_STRING_LENGTH];
+	sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", 0, (float)millis(), incCAN0->id, incCAN0->length, incCAN0->data.bytes[0], incCAN0->data.bytes[1], incCAN0->data.bytes[2], incCAN0->data.bytes[3], incCAN0->data.bytes[4], incCAN0->data.bytes[5], incCAN0->data.bytes[6], incCAN0->data.bytes[7]);
 	SERIAL_CAPTURE(buffer);
 }
 
@@ -103,11 +108,6 @@ String CANBus::getVIN()
 	return vehicleVIN;
 }
 
-void CANBus::incCaptureFile()
-{
-	captureNumber++;
-	capture_filename[4] = captureNumber;
-}
 // Future function
 char* CANBus::getFullDir()
 {
@@ -158,9 +158,8 @@ void CANBus::sendCANOut(uint8_t channel, bool serialOut)
 	}
 	if (serialOut)
 	{
-		char buffer[50];
-		uint32_t temp = millis();
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
+		char buffer[MSG_STRING_LENGTH];
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 }
@@ -189,9 +188,8 @@ void CANBus::sendCANOut(uint8_t channel, CAN_FRAME CANBus, bool serialOut)
 	}
 	if (serialOut)
 	{
-		char buffer[50];
-		uint32_t temp = millis();
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANBus.id, CANBus.length, CANBus.data.bytes[0], CANBus.data.bytes[1], CANBus.data.bytes[2], CANBus.data.bytes[3], CANBus.data.bytes[4], CANBus.data.bytes[5], CANBus.data.bytes[6], CANBus.data.bytes[7]);
+		char buffer[MSG_STRING_LENGTH];
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), CANBus.id, CANBus.length, CANBus.data.bytes[0], CANBus.data.bytes[1], CANBus.data.bytes[2], CANBus.data.bytes[3], CANBus.data.bytes[4], CANBus.data.bytes[5], CANBus.data.bytes[6], CANBus.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 }
@@ -218,10 +216,9 @@ void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8, bool s
 
 	if (serialOut)
 	{
-		char buffer[50];
-		uint32_t temp = millis();
+		char buffer[MSG_STRING_LENGTH];
 		Can0.read(incCAN0);
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", temp, CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 }
@@ -231,6 +228,7 @@ uint8_t CANBus::getPIDList(uint8_t state, uint8_t range, uint8_t bank)
 {
 	// Message used to requrest range of PIDS
 	byte frame[8] = { 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	char buffer[MSG_STRING_LENGTH];
 	frame[2] = range;
 
 	switch (state)
@@ -244,7 +242,7 @@ uint8_t CANBus::getPIDList(uint8_t state, uint8_t range, uint8_t bank)
 		if (Can0.get_rx_buff(incCAN0) && incCAN0.id == ECU_RX)
 		{
 			// Log PID message
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 
 			sdCard.writeFile(fullDir, buffer);
 			// Write the values from the bank if the Corresponding bit matches
@@ -343,9 +341,6 @@ uint8_t CANBus::requestVIN(uint16_t state, bool saveSD)
 		{
 			char VINLOG[7] = { 'L', 'O', 'G', '.', 't', 'x', 't' };
 			char PID[7] = { 'P', 'I', 'D', '.', 't', 'x', 't' };
-
-			// Directory temp
-			char temp[20];
 
 			// Create directory paths
 			uint8_t j = 0;
@@ -766,16 +761,18 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 // Displays CAN traffic on Serial out
 bool CANBus::SerialOutCAN(uint8_t config)
 {
+	char buffer[MSG_STRING_LENGTH];
+
 	// Display CAN0
 	if (config == 1 && Can0.get_rx_buff(incCAN0))
 	{
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN1
 	else if (config == 2 && Can1.get_rx_buff(incCAN1))
 	{
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN0 & CAN1
@@ -783,12 +780,12 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 			SERIAL_CAPTURE(buffer);
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SERIAL_CAPTURE(buffer);
 		}
 	}
@@ -801,7 +798,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SERIAL_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
 		}
@@ -811,13 +808,13 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 			SERIAL_CAPTURE(buffer);
 			Can1.sendFrame(incCAN0);
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SERIAL_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
 		}
@@ -870,7 +867,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 				if (recByte == ENDING_BYTE)
 				{
 					state = START_BYTE;
-					sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
+					sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
 					SERIAL_CAPTURE(buffer);
 				}
 				else
@@ -888,20 +885,21 @@ bool CANBus::SerialOutCAN(uint8_t config)
 // Wirte large blocks to SD card
 void SDCardBuffer(char * message)
 {
-	static unsigned char* buf = (unsigned char*)malloc((324) * sizeof(unsigned char));
+	static unsigned char* buf = (unsigned char*)malloc((SD_CAPTURE_BLOCK_SIZE) * sizeof(unsigned char));
 	static unsigned char* a1 = buf;
 	static uint8_t count = 0;
 	static uint8_t printBufSize = 0;
-	memcpy(a1, message, 54);
-	a1 += 54;
+	memcpy(a1, message, MSG_STRING_LENGTH);
+	a1 += MSG_STRING_LENGTH;
 	count++;
 
-	if (count == 6)
+	if (count == SD_CAPTURE_NUM_MSG)
 	{
 		sdCard.writeFileS(buf);
 		
 		count = 0;
-		a1 -= 324;
+		a1 -= SD_CAPTURE_BLOCK_SIZE;
+		
 		
 		printBufSize++;
 		if (printBufSize == 12)
@@ -909,22 +907,25 @@ void SDCardBuffer(char * message)
 			SerialUSB.println(Can0.available());
 			printBufSize = 0;
 		}
+		
 	}	
 }
 
 // Displays CAN traffic on Serial out
 bool CANBus::SDOutCAN(uint8_t config)
 {
+	char buffer[MSG_STRING_LENGTH];
+
 	// Display CAN0
 	if (config == 1 && Can0.get_rx_buff(incCAN0))
 	{
-		sprintf(buffer, "%08d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 		SD_CAPTURE(buffer);
 	}
 	// Display CAN1
 	else if (config == 2 && Can1.get_rx_buff(incCAN1))
 	{
-		sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 		SD_CAPTURE(buffer);
 	}
 	// Display CAN0 & CAN1
@@ -932,12 +933,12 @@ bool CANBus::SDOutCAN(uint8_t config)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 			SD_CAPTURE(buffer);
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SD_CAPTURE(buffer);
 		}
 	}
@@ -950,7 +951,7 @@ bool CANBus::SDOutCAN(uint8_t config)
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SD_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
 		}
@@ -960,13 +961,13 @@ bool CANBus::SDOutCAN(uint8_t config)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 			SD_CAPTURE(buffer);
 			Can1.sendFrame(incCAN0);
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
-			sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
+			sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 			SD_CAPTURE(buffer);
 			Can0.sendFrame(incCAN1);
 		}

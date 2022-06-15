@@ -462,6 +462,14 @@ void pageControl()
 			case 1:
 				state = 0;
 				sdCard.deleteFile(fileLocation);
+				for (uint8_t i = 0; i < 10; i++)
+				{
+					for (uint8_t j = 0; j < 13; j++)
+					{
+						fileList[i][j] = '\0';
+					}
+				}
+				
 				drawCANLogScroll();
 				break;
 			case 2:
@@ -2744,7 +2752,6 @@ void updateTime()
 
 	if (millis() - updateClock > SECOND)
 	{
-		char time[40];
 		drawRoundBtn(5, 5, 125, 30, rtc.getTimeStr(), menuBackground, menuBackground, menuBtnText, CENTER);
 		updateClock = millis();
 	}

@@ -37,8 +37,7 @@ void SDCard::setSDFilename(char* filename)
 	}
 	char* a1 = SDfilename;
 	memcpy(a1, "canlog/", 7);
-	a1 += 7;
-	memcpy(a1, filename, 12);
+	strcat(SDfilename, filename);
 	SerialUSB.println(SDfilename);
 }
 
@@ -51,8 +50,7 @@ void SDCard::writeFileS(uint8_t* incoming)
 	// Check if file was sucsefully open
 	if (myFile)
 	{
-		myFile.write(incoming, 270);
-		//myFile.write((const uint8_t*)incoming, strlen(incoming));
+		myFile.write(incoming, SD_CAPTURE_BLOCK_SIZE);
 		myFile.close();
 	}
 }
@@ -173,6 +171,8 @@ void SDCard::readSendMsg(SchedulerRX& msgStruct)
 				&msgStruct.node[i].data[0], &msgStruct.node[i].data[1], &msgStruct.node[i].data[2], &msgStruct.node[i].data[3], &msgStruct.node[i].data[4], &msgStruct.node[i].data[5], &msgStruct.node[i].data[6], &msgStruct.node[i].data[7],
 				&msgStruct.node[i].isOn, &msgStruct.node[i].isDel);
 
+			msgStruct.node[i].isOn = false;
+
 			if (!strcmp(s1, "(null)"))
 			{
 				char *temp = '\0';
@@ -228,39 +228,35 @@ void SDCard::readSendMsg(SchedulerRX& msgStruct)
 // Reads in CAN Capture
 void SDCard::readLogFile(char* filename)
 {
-	//char fileLoc[20] = "CANLOG/";
-	//strcat(fileLoc, filename);
-	// File created and opened for writing
-	//SerialUSB.println(filename);
 	myFile = SD.open(filename, FILE_READ);
-	char tempStr[64];
+	char tempStr[MSG_STRING_LENGTH];
 	int messageNum, id;
 	float time;
 	uint8_t length = 0;
 	byte msg[8];
-	bool sendIt = true;
 
-	// readBytesUntil is reading an empty line after each line and I dont know why
-	// sendIt prevents sending the same message twice after the empty line
 	while (myFile.available())
 	{
-		myFile.readBytesUntil('\n', tempStr, 64);
+		myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
 		sscanf(tempStr, "%d %f %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length, &msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
+		
 		/*
-		SerialUSB.println(tempStr);
-		SerialUSB.print("ID: ");
+		SerialUSB.print(tempStr);
+		SerialUSB.print(" ");
+		SerialUSB.print(messageNum);
+		SerialUSB.print(" ");
+		SerialUSB.print(time);
+		SerialUSB.print(" ");
 		SerialUSB.print(id);
-		SerialUSB.print("  Length: ");
-		SerialUSB.print(length);
-		SerialUSB.print("  MSG: ");
-		SerialUSB.println(msg[0]);
+		SerialUSB.print(" ");
+		SerialUSB.println(length);
+		SerialUSB.print(" ");
+		SerialUSB.print(msg[0]);
+		SerialUSB.println("");
 		*/
-		if (sendIt)
-		{
-			can1.sendFrame(id, msg, length, false);
-			delay(8);
-		}
-		sendIt = !sendIt;
+		
+		can1.sendFrame(id, msg, length, false);
+		delay(6);
 
 		if (Touch_getXY())
 		{

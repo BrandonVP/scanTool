@@ -19,7 +19,6 @@
 // #define SERIAL_CAPTURE(x) Serial.print(x);
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
 #define SD_CAPTURE(x) SDCardBuffer(x)
-//#define SD_CAPTURE(x) sdCard.writeFileS("canlog/capture.txt", x);
 
 // States
 #define START_BYTE              (0)
@@ -33,6 +32,7 @@
 #define ENDING_BYTE             (0xFD)
 #define PACKET_SIZE             (0x09)
 
+
 class CANBus
 {
 protected:
@@ -44,15 +44,12 @@ protected:
 private:
 	// Def for getMSG()
 	typedef byte buff[8];
-	char buffer[54];
 	bool hasVIN = false;
 	String vehicleVIN;
 	char VIN[18];
 	char fullDir[17];
 	char PIDDir[17];
-	char capture_filename[10] = { 'C', 'a', 'p', '0', '0', '.', 't', 'x', 't' };
-	uint8_t captureNumber = 0;
-
+	uint32_t messageNum = 0;
 	uint8_t state = 0;
 	uint8_t packetIndex = 0;
 
@@ -101,6 +98,6 @@ public:
 	uint32_t getBaud1();
 	String getVIN();
 	bool VINReady();
-	void incCaptureFile();
+	void resetMessageNum();
 };
 #endif
