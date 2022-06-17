@@ -439,7 +439,7 @@ void CaptureButtons()
 					uint8_t index = 0;
 					char filename[12];
 					//char* a1 = filename;
-					
+
 					drawkeyboard();
 					while (setName)
 					{
@@ -1993,10 +1993,10 @@ bool drawCANLog()
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 2:
-		drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(425, 80, 475, 165, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(425, 165, 475, 250, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
 		drawSquareBtn(131, 275, 216, 315, F("Play"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -2037,14 +2037,23 @@ void drawCANLogScroll()
 		{
 			char temp[13];
 			sprintf(temp, "%s", fileList[(g_var8[POS0] + i)]);
-			drawSquareBtn(140, y, 420, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			drawSquareBtn(135, y, 420, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
 		}
 		else
 		{
-			drawSquareBtn(140, y, 420, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			drawSquareBtn(135, y, 420, y + 35, "", menuBackground, menuBtnBorder, menuBtnText, LEFT);
 		}
 		y = y + 35;
 	}
+}
+
+//
+void logDeleteConfirmation()
+{
+	char buf[13];
+	strcpy(buf, fileList[g_var16[POS0]]);
+	strcat(buf, "?");
+	drawErrorMSG(F("Confirmation"), F("Delete File"), buf);
 }
 
 // Buttons for the capture playback program
@@ -2053,44 +2062,45 @@ void CANLogButtons()
 	// Touch screen controls
 	if (Touch_getXY())
 	{
-		if ((x >= 150) && (x <= 410))
+		if ((x >= 135) && (x <= 420))
 		{
 			if ((y >= 60) && (y <= 95))
 			{
-				waitForItRect(150, 60, 410, 95);
+				waitForItRect(135, 60, 420, 95);
 				g_var16[POS0] = 0 + g_var8[POS0];
 			}
 			if ((y >= 95) && (y <= 130))
 			{
-				waitForItRect(150, 95, 410, 130);
+				waitForItRect(135, 95, 420, 130);
 				g_var16[POS0] = 1 + g_var8[POS0];
 			}
 			if ((y >= 130) && (y <= 165))
 			{
-				waitForItRect(150, 130, 410, 165);
+				waitForItRect(135, 130, 420, 165);
 				g_var16[POS0] = 2 + g_var8[POS0];
 			}
 			if ((y >= 165) && (y <= 200))
 			{
-				waitForItRect(150, 165, 410, 200);
+				waitForItRect(135, 165, 420, 200);
 				g_var16[POS0] = 3 + g_var8[POS0];
 			}
 			if ((y >= 200) && (y <= 235))
 			{
-				waitForItRect(150, 200, 410, 235);
+				waitForItRect(135, 200, 420, 235);
 				g_var16[POS0] = 4 + g_var8[POS0];
 			}
 			if ((y >= 235) && (y <= 270))
 			{
-				waitForItRect(150, 235, 410, 270);
+				waitForItRect(135, 235, 420, 270);
 				g_var16[POS0] = 5 + g_var8[POS0];
 			}
 		}
-		if ((x >= 420) && (x <= 470))
+		if ((x >= 425) && (x <= 475))
 		{
 			if ((y >= 80) && (y <= 160))
 			{
-				waitForItRect(420, 80, 470, 160);
+				waitForItRect(425, 80, 475, 165);
+				// Scroll up
 				if (g_var8[POS0] > 0)
 				{
 					g_var8[POS0]--;
@@ -2098,11 +2108,12 @@ void CANLogButtons()
 				}
 			}
 		}
-		if ((x >= 420) && (x <= 470))
+		if ((x >= 425) && (x <= 475))
 		{
 			if ((y >= 160) && (y <= 240))
 			{
-				waitForItRect(420, 160, 470, 240);
+				waitForItRect(425, 165, 475, 250);
+				// Scroill down
 				if (g_var8[POS0] < 100)
 				{
 					g_var8[POS0]++;
@@ -2119,27 +2130,27 @@ void CANLogButtons()
 				// Play
 				waitForItRect(131, 275, 216, 315);
 				drawSquareBtn(131, 275, 216, 315, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				delay(200);
-				sdCard.readLogFile(fileLoc);
-				delay(200);
-				myTouch.read();
-				drawSquareBtn(131, 275, 216, 315, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 
+				sdCard.readLogFile(fileLoc);
+
+				drawSquareBtn(131, 275, 216, 315, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			}
 			if ((x >= 216) && (x <= 301))
 			{
 				// Delete
 				waitForItRect(216, 275, 301, 315);
-				drawErrorMSG(F("Confirmation"), F("Permenently"), F("Delete File?"));
+				logDeleteConfirmation();
 				state = 1;
 			}
 			if ((x >= 301) && (x <= 386))
 			{
 				// Split
 				waitForItRect(301, 275, 386, 315);
-				uint32_t temp = sdCard.fileLength(fileLoc);
+				uint32_t fileSize = sdCard.fileLength(fileLoc);
+				// TODO Find a faster way to do this task
+
 				sdCard.tempCopy(fileLoc);
-				sdCard.split("canlog/temp.txt", temp);
+				sdCard.split("canlog/temp.txt", fileSize);
 				sdCard.deleteFile("canlog/temp.txt");
 				drawCANLogScroll();
 			}

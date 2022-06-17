@@ -86,7 +86,7 @@ uint16_t g_var16[8];
 uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
-char keyboardInput[9]; //= {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',};
+char keyboardInput[9];
 uint8_t keypadInput[4] = {0, 0, 0, 0};
 
 // Used for converting keypad input to appropriate hex place
@@ -101,6 +101,7 @@ uint32_t CAN0Mask = 0x7FF;
 uint32_t CAN1Filter = 0x000;
 uint32_t CAN1Mask = 0x7FF;
 
+// TODO need more than 10
 // Holds CAN Bus capture replay filenames
 char fileList[10][13];
 
@@ -455,7 +456,9 @@ void pageControl()
 		else if (state == 1)
 		{
 			char fileLocation[20] = "CANLOG/";
-			strcat(fileLocation, fileList[g_var16[POS0] - 1]);
+			strcat(fileLocation, fileList[g_var16[POS0]]);
+			Serial.print("fileLocation: ");
+			Serial.println(fileLocation);
 			uint8_t input = errorMSGButton(2);
 			switch (input)
 			{

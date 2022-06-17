@@ -38,7 +38,7 @@
 // Inpacts reading and writing from SD card class and message streaming from the canbus class
 #define MSG_STRING_LENGTH       (67)
 #define SD_CAPTURE_NUM_MSG      (10)
-#define SD_CAPTURE_BLOCK_SIZE   (670) // SD_CAPTURE_NUM_MSG * MSG_STRING_LENGTH
+#define SD_CAPTURE_BLOCK_SIZE   (SD_CAPTURE_NUM_MSG * MSG_STRING_LENGTH) // SD_CAPTURE_NUM_MSG * MSG_STRING_LENGTH
 
 
 //#define DEBUG(x)

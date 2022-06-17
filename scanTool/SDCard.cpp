@@ -19,7 +19,7 @@ bool SDCard::startSD()
 void SDCard::writeFile(char* filename, String incoming)
 {
 	// File created and opened for writing
-	myFile = SD.open(filename, FILE_WRITE);
+	File myFile = SD.open(filename, FILE_WRITE);
 
 	// Check if file was sucsefully open
 	if (myFile)
@@ -29,6 +29,7 @@ void SDCard::writeFile(char* filename, String incoming)
 	}
 }
 
+// 
 void SDCard::setSDFilename(char* filename)
 {
 	for (uint8_t i = 0; i < 50; i++)
@@ -38,14 +39,16 @@ void SDCard::setSDFilename(char* filename)
 	char* a1 = SDfilename;
 	memcpy(a1, "canlog/", 7);
 	strcat(SDfilename, filename);
-	SerialUSB.println(SDfilename);
+	//SerialUSB.println(SDfilename);
 }
 
 // Write string to SD Card
-void SDCard::writeFileS(uint8_t* incoming)
+void SDCard::writeFileS(char* incoming)
 {
 	// File created and opened for writing
-	myFile = SD.open(SDfilename, FILE_WRITE);
+	File myFile = SD.open(SDfilename, FILE_WRITE);
+
+	//SerialUSB.println(incoming);
 
 	// Check if file was sucsefully open
 	if (myFile)
@@ -59,7 +62,7 @@ void SDCard::writeFileS(uint8_t* incoming)
 void SDCard::writeFile(char* filename, int incoming, int base)
 {
 	// File created and opened for writing
-	myFile = SD.open(filename, FILE_WRITE);
+	File myFile = SD.open(filename, FILE_WRITE);
 
 	// Check if file was sucsefully open
 	if (myFile)
@@ -73,7 +76,7 @@ void SDCard::writeFile(char* filename, int incoming, int base)
 void SDCard::writeFileln(char* filename)
 {
 	// File created and opened for writing
-	myFile = SD.open(filename, FILE_WRITE);
+	File myFile = SD.open(filename, FILE_WRITE);
 
 	// Check if file was sucsefully open
 	if (myFile)
@@ -92,7 +95,7 @@ void SDCard::writeSendMsg(SchedulerRX msgStruct)
 	SD.remove("SYSTEM/CANMsg.txt");
 
 	// File created and opened for writing
-	myFile = SD.open("SYSTEM/CANMsg.txt", FILE_WRITE);
+	File myFile = SD.open("SYSTEM/CANMsg.txt", FILE_WRITE);
 
 	for (uint8_t i = 0; i < 20; i++)
 	{
@@ -101,14 +104,14 @@ void SDCard::writeSendMsg(SchedulerRX msgStruct)
 			sprintf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x \n", msgStruct.node[i].name, msgStruct.node[i].channel, msgStruct.node[i].interval, msgStruct.node[i].id,
 				msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].data[6], msgStruct.node[i].data[7],
 				msgStruct.node[i].isOn, msgStruct.node[i].isDel);
-			SerialUSB.println(msgStruct.node[i].name);
+			//SerialUSB.println(msgStruct.node[i].name);
 		}
 		else
 		{
 			sprintf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x \n", "(null)", msgStruct.node[i].channel, msgStruct.node[i].interval, msgStruct.node[i].id,
 				msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].data[6], msgStruct.node[i].data[7],
 				msgStruct.node[i].isOn, msgStruct.node[i].isDel);
-			SerialUSB.println("(null)");
+			//SerialUSB.println("(null)");
 		}
 		
 		// Copy buffer to file after confirming file was open
@@ -127,6 +130,7 @@ void SDCard::writeSendMsg(SchedulerRX msgStruct)
 // Delete SD Card file
 void SDCard::deleteFile(char* filename)
 {
+	//SerialUSB.println(filename);
 	//remove any existing file with this name
 	SD.remove(filename);
 }
@@ -138,7 +142,7 @@ void SDCard::deleteFile(char* filename)
 void SDCard::readFile(char* filename, uint8_t* arrayIn)
 {
 	// File created and opened for writing
-	myFile = SD.open(filename, FILE_READ);
+	File myFile = SD.open(filename, FILE_READ);
 	uint32_t i = 0;
 	String tempStr;
 	char c[20];
@@ -156,7 +160,7 @@ void SDCard::readFile(char* filename, uint8_t* arrayIn)
 void SDCard::readSendMsg(SchedulerRX& msgStruct)
 {
 	// File created and opened for writing
-	myFile = SD.open("SYSTEM/CANMsg.txt", FILE_READ);
+	File myFile = SD.open(F("SYSTEM/CANMsg.txt"), FILE_READ);
 
 	if (myFile)
 	{
@@ -166,7 +170,7 @@ void SDCard::readSendMsg(SchedulerRX& msgStruct)
 			char s1[9];
 
 			myFile.readBytesUntil('\n', buffer, 51);
-
+			
 			sscanf(buffer, "%s %x %x %x %x %x %x %x %x %x %x %x %x %x", s1, &msgStruct.node[i].channel, &msgStruct.node[i].interval, &msgStruct.node[i].id, 
 				&msgStruct.node[i].data[0], &msgStruct.node[i].data[1], &msgStruct.node[i].data[2], &msgStruct.node[i].data[3], &msgStruct.node[i].data[4], &msgStruct.node[i].data[5], &msgStruct.node[i].data[6], &msgStruct.node[i].data[7],
 				&msgStruct.node[i].isOn, &msgStruct.node[i].isDel);
@@ -228,35 +232,63 @@ void SDCard::readSendMsg(SchedulerRX& msgStruct)
 // Reads in CAN Capture
 void SDCard::readLogFile(char* filename)
 {
-	myFile = SD.open(filename, FILE_READ);
 	char tempStr[MSG_STRING_LENGTH];
-	int messageNum, id;
-	float time;
-	uint8_t length = 0;
-	byte msg[8];
+	unsigned int messageNum = 0;
+	unsigned int id = 0;
+	unsigned int time = 0;
+	unsigned int length = 0;
+	unsigned int msg[8];
+
+	File myFile = SD.open(filename, FILE_READ);
+
+	//SerialUSB.println("");
 
 	while (myFile.available())
 	{
 		myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
-		sscanf(tempStr, "%d %f %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length, &msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
-		
+		sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
+			&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
+
 		/*
-		SerialUSB.print(tempStr);
-		SerialUSB.print(" ");
+		SerialUSB.println(tempStr);
+		SerialUSB.print("      ");
 		SerialUSB.print(messageNum);
-		SerialUSB.print(" ");
+		SerialUSB.print("      ");
 		SerialUSB.print(time);
-		SerialUSB.print(" ");
-		SerialUSB.print(id);
-		SerialUSB.print(" ");
-		SerialUSB.println(length);
-		SerialUSB.print(" ");
-		SerialUSB.print(msg[0]);
-		SerialUSB.println("");
+		SerialUSB.print("      ");
+		SerialUSB.print(id, HEX);
+		SerialUSB.print("      ");
+		SerialUSB.print(length);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[0], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[1], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[2], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[3], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[4], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[5], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.print(msg[6], HEX);
+		SerialUSB.print("  ");
+		SerialUSB.println(msg[7], HEX);
 		*/
-		
-		can1.sendFrame(id, msg, length, false);
-		delay(6);
+
+		uint8_t data[8];
+		data[0] = (uint8_t)msg[0];
+		data[1] = (uint8_t)msg[1];
+		data[2] = (uint8_t)msg[2];
+		data[3] = (uint8_t)msg[3];
+		data[4] = (uint8_t)msg[4];
+		data[5] = (uint8_t)msg[5];
+		data[6] = (uint8_t)msg[6];
+		data[7] = (uint8_t)msg[7];
+
+		can1.sendFrame(id, data, length, false);
+		delay(5);
 
 		if (Touch_getXY())
 		{
@@ -270,6 +302,7 @@ void SDCard::readLogFile(char* filename)
 				}
 			}
 		}
+		backgroundProcess();
 	}
 	myFile.close();
 }
@@ -317,58 +350,50 @@ uint8_t SDCard::printDirectory(File dir, MyArray& list)
 	return count;
 }
 
+// Does what is says
 uint32_t SDCard::fileLength(char* filename)
 {
-	char tempStr[64];
+	String inString;
 	uint32_t length = 0;
 
-	myFile = SD.open(filename, FILE_READ);
+	File myFile = SD.open(filename, FILE_READ);
 
 	while (myFile.available())
 	{
-		myFile.readBytesUntil('\n', tempStr, 64);
+		inString = myFile.readStringUntil('\n');
 		length++;
 	}
 	myFile.close();
-	return length / 2;
+	return length;
 }
 
+// Splits file into two halves
 void SDCard::split(char* filename, uint32_t size)
 {
-	//SerialUSB.println(filename);
-
-	uint32_t fileSize;
-	String tempStr;
-	//char tempStr[64];
+	uint32_t splitFile;
+	String inString;
 	uint32_t count = 0;
 
-	//SerialUSB.println(size);
-	(size % 2 > 0) ? fileSize = (size / 2) + 1 : fileSize = size / 2;
-	//SerialUSB.println(fileSize);
+	// Split and account for missing rounded number if odd
+	(size % 2 > 0) ? splitFile = (size / 2) + 1 : splitFile = size / 2;
 
-	myFile = SD.open(filename, FILE_READ);
 	deleteFile("canlog/a.txt");
 	deleteFile("canlog/b.txt");
-
 	File myFileW1 = SD.open("canlog/a.txt", FILE_WRITE);
 	File myFileW2 = SD.open("canlog/b.txt", FILE_WRITE);
+	File myFile = SD.open(filename, FILE_READ);
 
 	while (myFile.available())
 	{
-		tempStr = myFile.readStringUntil('\n');
-		//myFile.readBytesUntil('\n', tempStr, 64);
+		inString = myFile.readStringUntil('\n');
 
-		if (count < fileSize)
+		if (count < splitFile)
 		{
-			myFileW1.println(tempStr);
-			//SerialUSB.print("a: ");
-			//SerialUSB.println(count);
+			myFileW1.print(inString);
 		}
 		else
 		{
-			myFileW2.println(tempStr);
-			//SerialUSB.print("b: ");
-			//SerialUSB.println(count);
+			myFileW2.print(inString);
 		}
 		count++;
 	}
@@ -377,20 +402,19 @@ void SDCard::split(char* filename, uint32_t size)
 	myFileW2.close();
 }
 
+// Makes a temporary copy 
 void SDCard::tempCopy(char* filename)
 {
-	//SerialUSB.println("here");
-	String tempStr;
-	myFile = SD.open(filename, FILE_READ);
+	String inString;
+
+	File myFile = SD.open(filename, FILE_READ);
 	File myFileW1 = SD.open("canlog/temp.txt", FILE_WRITE);
-	//SerialUSB.println(filename);
+
 	while (myFile.available())
 	{
-		tempStr = myFile.readStringUntil('\n');
-		//SerialUSB.println(tempStr);
-		myFileW1.println(tempStr);
+		inString = myFile.readStringUntil('\n');
+		myFileW1.println(inString);
 	}
 	myFile.close();
 	myFileW1.close();
-	//SerialUSB.println("Leaving");
 }
