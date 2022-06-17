@@ -2033,11 +2033,43 @@ void drawCANLogScroll()
 	// Draw the scroll window
 	for (uint8_t i = 0; i < MAXSCROLL; i++)
 	{
-		if ((g_var8[POS0] + i < 10))
+		if ((g_var8[POS0] + i < 20))
 		{
-			char temp[13];
-			sprintf(temp, "%s", fileList[(g_var8[POS0] + i)]);
-			drawSquareBtn(135, y, 420, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			if (fileList[(g_var8[POS0] + i)][0] != '\0')
+			{
+				// Build a string with name and size of file
+				// Note: files greater that 99999kb will overflow, 
+				//but seriously I would be impressed if someone managed to create a file that large and not crash
+
+				// Max size that will fit in GUI position
+				char temp[17];
+
+				// Remove .txt from file name
+				char incoming[13];
+				strcpy(incoming, fileList[(g_var8[POS0] + i)]);
+				char* remove = strtok(incoming, ".");
+				strcpy(temp, remove);
+
+				// Split name - size
+				strcat(temp, "-");
+
+				// Create size string 
+				char buf[5];
+				int a = (sdCard.fileSize(fileList[(g_var8[POS0] + i)]) / 1024);
+				itoa(a, buf, 10);
+
+				// Put it all together
+				strcat(temp, buf);
+				strcat(temp, "kb");
+
+				drawSquareBtn(135, y, 420, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			}
+			else
+			{
+				char temp[13];
+				sprintf(temp, "%s", fileList[(g_var8[POS0] + i)]);
+				drawSquareBtn(135, y, 420, y + 35, temp, menuBackground, menuBtnBorder, menuBtnText, LEFT);
+			}
 		}
 		else
 		{
@@ -2139,6 +2171,7 @@ void CANLogButtons()
 			{
 				// Delete
 				waitForItRect(216, 275, 301, 315);
+				SerialUSB.println(fileList[g_var16[POS0]]);
 				logDeleteConfirmation();
 				state = 1;
 			}

@@ -18,7 +18,7 @@ class SDCard
 {
  protected:
 	 bool canDir = false;
-	 typedef char MyArray[10][13];
+	 typedef char MyArray[20][13];
 	 char SDfilename[50];
  public:
 	void setSDFilename(char* );
@@ -36,6 +36,7 @@ class SDCard
 	uint32_t fileLength(char*);
 	void tempCopy(char* filename);
 	void split(char*, uint32_t);
+	uint32_t fileSize(char* );
 	uint8_t printDirectory(File dir, MyArray&);
 };
 #endif

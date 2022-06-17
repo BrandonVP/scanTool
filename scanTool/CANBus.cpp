@@ -888,7 +888,7 @@ void SDCardBuffer(char * message)
 	static char* buf = (char*)malloc((SD_CAPTURE_BLOCK_SIZE) * sizeof(char));
 	static char* a1 = buf;
 	static uint8_t count = 0;
-	//static uint8_t printBufSize = 0;
+	static uint8_t printBufSize = 0;
 	memcpy(a1, message, MSG_STRING_LENGTH);
 	a1 += MSG_STRING_LENGTH;
 	count++;
@@ -899,14 +899,14 @@ void SDCardBuffer(char * message)
 		count = 0;
 		a1 -= SD_CAPTURE_BLOCK_SIZE;
 		
-		/*
+		
 		printBufSize++;
 		if (printBufSize == 12)
 		{
 			SerialUSB.println(Can0.available());
 			printBufSize = 0;
 		}
-		*/
+		
 	}	
 }
 

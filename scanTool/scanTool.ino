@@ -103,7 +103,7 @@ uint32_t CAN1Mask = 0x7FF;
 
 // TODO need more than 10
 // Holds CAN Bus capture replay filenames
-char fileList[10][13];
+char fileList[20][13];
 
 // Determines if a PID scan was performed before displaying pid list
 bool hasPID = false;
@@ -370,7 +370,7 @@ void pageControl()
 				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
 				if (error)
 				{
-					DEBUG_ERROR("Error: Variable locked");
+					DEBUG_ERROR(F("Error: Variable locked"));
 					nextPage = 0;
 					break;
 				}
@@ -441,7 +441,7 @@ void pageControl()
 			state = 0;
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 0;
 			}
 			hasDrawn = true;
@@ -457,8 +457,6 @@ void pageControl()
 		{
 			char fileLocation[20] = "CANLOG/";
 			strcat(fileLocation, fileList[g_var16[POS0]]);
-			Serial.print("fileLocation: ");
-			Serial.println(fileLocation);
 			uint8_t input = errorMSGButton(2);
 			switch (input)
 			{
@@ -514,7 +512,7 @@ void pageControl()
 			isFinished = false;
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 0;
 			}
 			hasDrawn = true;
@@ -548,7 +546,7 @@ void pageControl()
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Current total value
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 0;
 			}
 			hasDrawn = true;
@@ -584,7 +582,7 @@ void pageControl()
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 0;
 			}
 			drawBaudScroll();
@@ -618,7 +616,7 @@ void pageControl()
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Total value
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 0;
 			}
 			state = 0;
@@ -729,7 +727,7 @@ void pageControl()
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 9;
 			}
 
@@ -775,7 +773,7 @@ void pageControl()
 				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 				if (error)
 				{
-					DEBUG_ERROR("Error: Variable locked");
+					DEBUG_ERROR(F("Error: Variable locked"));
 					nextPage = 9;
 				}
 
@@ -932,7 +930,7 @@ void pageControl()
 				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 				if (error)
 				{
-					DEBUG_ERROR("Error: Variable locked");
+					DEBUG_ERROR(F("Error: Variable locked"));
 					nextPage = 9;
 				}
 
@@ -1211,7 +1209,7 @@ void pageControl()
 				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true; // Timer
 				if (error)
 				{
-					DEBUG_ERROR("Error: Variable locked");
+					DEBUG_ERROR(F("Error: Variable locked"));
 					nextPage = 27;
 				}
 			}
@@ -1444,7 +1442,7 @@ void pageControl()
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 9;
 			}
 			hasDrawn = true;
@@ -1477,7 +1475,7 @@ void pageControl()
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
 			if (error)
 			{
-				DEBUG_ERROR("Error: Variable locked");
+				DEBUG_ERROR(F("Error: Variable locked"));
 				nextPage = 9;
 			}
 

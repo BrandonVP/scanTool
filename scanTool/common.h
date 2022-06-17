@@ -95,7 +95,7 @@ extern uint8_t selectedChannelOut;
 extern uint8_t selectedSourceOut;
 extern uint8_t graphicLoaderState;
 
-extern char fileList[10][13];
+extern char fileList[20][13];
 extern uint8_t arrayIn[80];
 extern uint8_t scroll;
 extern bool hasPID;

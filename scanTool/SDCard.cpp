@@ -248,7 +248,7 @@ void SDCard::readLogFile(char* filename)
 		myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
 		sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
 			&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
-
+		SerialUSB.println(tempStr);
 		/*
 		SerialUSB.println(tempStr);
 		SerialUSB.print("      ");
@@ -350,12 +350,22 @@ uint8_t SDCard::printDirectory(File dir, MyArray& list)
 	return count;
 }
 
+// Size of canlog file in bytes
+uint32_t SDCard::fileSize(char* filename)
+{
+	char temp[40];
+	strcpy(temp, "canlog/");
+	strcat(temp, filename);
+	File myFile = SD.open(temp, FILE_READ);
+	uint32_t size = myFile.size();
+	return size;
+}
+
 // Does what is says
 uint32_t SDCard::fileLength(char* filename)
 {
 	String inString;
 	uint32_t length = 0;
-
 	File myFile = SD.open(filename, FILE_READ);
 
 	while (myFile.available())
@@ -363,6 +373,7 @@ uint32_t SDCard::fileLength(char* filename)
 		inString = myFile.readStringUntil('\n');
 		length++;
 	}
+
 	myFile.close();
 	return length;
 }
@@ -383,20 +394,30 @@ void SDCard::split(char* filename, uint32_t size)
 	File myFileW2 = SD.open("canlog/b.txt", FILE_WRITE);
 	File myFile = SD.open(filename, FILE_READ);
 
+	// TODO FIX
 	while (myFile.available())
 	{
 		inString = myFile.readStringUntil('\n');
 
+		for (uint8_t i = 64; i < 70; i++)
+		{
+			if (inString[i] == '\r')
+			{
+				inString.remove(i);
+				break;
+			}
+		}
 		if (count < splitFile)
 		{
-			myFileW1.print(inString);
+			myFileW1.print(inString + '\n');
 		}
 		else
 		{
-			myFileW2.print(inString);
+			myFileW2.print(inString + '\n');
 		}
 		count++;
 	}
+	
 	myFile.close();
 	myFileW1.close();
 	myFileW2.close();
