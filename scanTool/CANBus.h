@@ -25,12 +25,13 @@
 #define PACKET_LENGTH           (1)
 #define CAN_BUS_ID1             (2)
 #define CAN_BUS_ID2             (3)
-#define CAN_BUS_DATA            (4)
-#define END_BYTE                (5)
+#define CAN_BUS_LENGTH          (4)
+#define CAN_BUS_DATA            (5)
+#define END_BYTE                (6)
 // 
 #define STARTING_BYTE           (0xFE)
 #define ENDING_BYTE             (0xFD)
-#define PACKET_SIZE             (0x09)
+#define PACKET_SIZE             (0x0A)
 
 
 class CANBus

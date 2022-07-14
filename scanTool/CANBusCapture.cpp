@@ -240,7 +240,8 @@ bool drawCaptureOutput()
 		drawSquareBtn(135, 55, 300, 85, F("Output"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		selectedChannelOut == 6 ? drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBackground, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		//selectedChannelOut == 6 ? drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBackground, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(135, 85, 300, 125, F("LCD"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
 		drawSquareBtn(135, 125, 300, 165, F("Serial"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -315,7 +316,8 @@ void CaptureButtons()
 					hasDrawn = false;
 					graphicLoaderState = 0;
 				}
-				else if (state == 2 && selectedChannelOut != 6) // LCD wont work with WIFI
+				else if (state == 2)
+				//else if (state == 2 && selectedChannelOut != 6) // LCD wont work with WIFI
 				{
 					// LCD
 					selectedSourceOut = 1;
