@@ -1542,9 +1542,12 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (drawAbout())
+			{
+				break;
+			}
 			hasDrawn = true;
 		}
-
 		// Call buttons if any
 
 		// Release any variable locks if page changed
@@ -1559,8 +1562,13 @@ void pageControl()
 		// Draw Page
 		if (!hasDrawn)
 		{
+			if (drawMACAddress())
+			{
+				break;
+			}
 			hasDrawn = true;
 		}
+
 
 		// Call buttons if any
 

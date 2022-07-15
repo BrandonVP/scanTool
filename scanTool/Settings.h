@@ -8,7 +8,9 @@
 #else
 	#include "WProgram.h"
 #endif
-extern void drawSettings();
+extern bool drawSettings();
+extern bool drawMACAddress();
+extern bool drawAbout();
 extern void settingsButtons();
 extern void memoryUse();
 #endif
