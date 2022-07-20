@@ -40,17 +40,16 @@ bool drawSettings()
         drawRoundBtn(310, 135, 475, 185, F("Reset"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(140, 190, 305, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-
+        drawRoundBtn(140, 190, 305, 240, F("WiFi Reset"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 190, 475, 240, F("Connect4"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
-        drawRoundBtn(140, 245, 305, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 245, 305, 295, F("Connect5"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(310, 245, 475, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 245, 475, 295, F("ConnectA"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -89,6 +88,8 @@ bool drawAbout()
 
 bool drawMACAddress()
 {
+    char serialBuffer[20];
+
     switch (graphicLoaderState)
     {
     case 0:
@@ -97,16 +98,22 @@ bool drawMACAddress()
         drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(140, 80, 305, 130, F("Mac Address"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawSquareBtn(135, 100, 479, 120, F("Wi-Fi Device"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        sprintf(serialBuffer, "%c%c%c%d%d", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
+        drawSquareBtn(135, 125, 479, 145, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 3:
-
+        drawSquareBtn(135, 165, 479, 185, F("MAC"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        sprintf(serialBuffer, "%X:%X:%X:%X:%X:%X", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
+        drawSquareBtn(135, 190, 479, 210, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 4:
-
+        drawSquareBtn(135, 230, 479, 250, F("Dongle MAC"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        sprintf(serialBuffer, "%X:%X:%X:%X:%X:%X", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
+        drawSquareBtn(135, 255, 479, 275, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 5:
-
+        Serial3.read(); // Ending byte
         break;
     case 6:
 
@@ -135,20 +142,44 @@ void settingsButtons()
             {
                 waitForIt(140, 135, 305, 185);
                 // WiFi MAC Address
+                
+                // Clear Serial3 buffer
+                while (Serial3.available())
+                {
+                    Serial3.read();
+                }
+
                 graphicLoaderState = 0;
                 nextPage = 39;
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(140, 190, 305, 240);
-                // Unused
+                // WiFi Reset
+                Serial3.write(0xBA);
+                Serial3.write(0xBF);
+                if (Serial3.read() == 0xFF); // Seccess
                 //nextPage = 41;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
-                // Unused
-                //nextPage = 43;
+                // Connect Dongle 5
+                Serial3.write(0xCA);
+                Serial3.write(0xCC);
+                Serial3.write(0xC8);
+                Serial3.write(0xC9);
+                Serial3.write(0xA3);
+                Serial3.write(0xFA);
+                Serial3.write(0xBA);
+                Serial3.write(0x2C);
+                delay(100);
+                // WiFi Reset
+                Serial3.write(0xBA);
+                Serial3.write(0xBF);
+                if (Serial3.read() == 0xFF); // Seccess
+                delay(100);
+                REQUEST_EXTERNAL_RESET;
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -170,14 +201,42 @@ void settingsButtons()
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
-                // Unused
-                //nextPage = 42;
+                // Connect Dongle 4
+                Serial3.write(0xCA);
+                Serial3.write(0xCC);
+                Serial3.write(0x8C);
+                Serial3.write(0x4B);
+                Serial3.write(0x14);
+                Serial3.write(0x9F);
+                Serial3.write(0x94);
+                Serial3.write(0x50);
+                delay(100);
+                // WiFi Reset
+                Serial3.write(0xBA);
+                Serial3.write(0xBF);
+                if (Serial3.read() == 0xFF); // Seccess
+                delay(100);
+                REQUEST_EXTERNAL_RESET;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(310, 245, 475, 295);
-                //Unused
-                //nextPage = 44;
+                // Connect Dongle ALL
+                Serial3.write(0xCA);
+                Serial3.write(0xCC);
+                Serial3.write(0xFF);
+                Serial3.write(0xFF);
+                Serial3.write(0xFF);
+                Serial3.write(0xFF);
+                Serial3.write(0xFF);
+                Serial3.write(0xFF);
+                delay(100);
+                // WiFi Reset
+                Serial3.write(0xBA);
+                Serial3.write(0xBF);
+                if (Serial3.read() == 0xFF); // Seccess
+                delay(100);
+                REQUEST_EXTERNAL_RESET;
             }
         }
     }

@@ -1560,15 +1560,29 @@ void pageControl()
 
 	case 39: //
 		// Draw Page
+		// TODO: make a non-blocking state machine
+		// TODO: Organize Serial3 commands
 		if (!hasDrawn)
 		{
+			if (isSerialOut && selectedChannelOut == 6)
+			{
+				// Cant get mac while streaming CAN Bus data over WiFi
+				// Can be fixed by printing all at once instead
+				hasDrawn = true;
+				break;
+			}
+
+			// Send command
+			Serial3.write(0xAC);
+			delay(1);
+			Serial3.write(0xAD);
+			delay(1);
 			if (drawMACAddress())
 			{
 				break;
 			}
 			hasDrawn = true;
 		}
-
 
 		// Call buttons if any
 

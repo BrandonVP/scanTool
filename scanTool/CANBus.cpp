@@ -176,6 +176,7 @@ void CANBus::sendCANOut(uint8_t channel, CAN_FRAME CANBus, bool serialOut)
 	}
 	if (channel == 2)
 	{
+		// TODO: define some stuff / organize
 		Serial3.write(0xFE);
 		Serial3.write(0x0A);
 		Serial3.write((CANBus.id >> 0) & 0xFF);
@@ -836,6 +837,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 		if (Serial3.available() > 0)
 		{
 			uint8_t recByte = Serial3.read();
+			//SerialUSB.println(recByte, 16);
 			switch (state)
 			{
 			case START_BYTE:
@@ -882,8 +884,10 @@ bool CANBus::SerialOutCAN(uint8_t config)
 				if (recByte == ENDING_BYTE)
 				{
 					state = START_BYTE;
-					sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
+					char buffer[MSG_STRING_LENGTH];
+					sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
 					SERIAL_CAPTURE(buffer);
+					return true;
 				}
 				else
 				{
