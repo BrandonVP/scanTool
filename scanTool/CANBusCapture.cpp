@@ -502,7 +502,7 @@ void drawReadInCANLCD()
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
-// Capture to LCD, max rate without filling buffer is 26ms per message (slow), useful for bench testings or filtered traffic
+// Capture to LCD, max rate without filling buffer is 22ms per message (slow), useful for bench testings or filtered traffic
 void readInCANMsg(uint8_t channel)
 {
 	myGLCD.setBackColor(VGA_WHITE);
@@ -512,12 +512,29 @@ void readInCANMsg(uint8_t channel)
 	uint8_t len;
 	if (can1.LCDOutCAN(rxBuf, len, rxId, channel))
 	{
-		char printString[50];
-		myGLCD.setColor(VGA_WHITE);
-		myGLCD.fillRect(150, (g_var16[POS0] - 5), 479, (g_var16[POS0] + 25));
-		myGLCD.setColor(VGA_BLACK);
-		sprintf(printString, "%04X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
-		myGLCD.print(printString, 150, g_var16[POS0]);
+		char printString[40];
+
+		//myGLCD.setColor(VGA_WHITE);
+		//myGLCD.fillRect(151, (g_var16[POS0] + 17), 451, (g_var16[POS0] + 24));
+		//myGLCD.setColor(VGA_BLACK);
+
+		if (g_var16[POS0] != 60)
+		{
+			myGLCD.setColor(VGA_WHITE);
+			myGLCD.fillRect(140, (g_var16[POS0] - 15), 145, (g_var16[POS0] - 5));
+			myGLCD.setColor(VGA_BLACK);
+			myGLCD.fillRect(140, (g_var16[POS0]), 145, (g_var16[POS0] + 10));
+		}
+		else
+		{
+			myGLCD.setColor(VGA_WHITE);
+			myGLCD.fillRect(140, 300, 145, 310);
+			myGLCD.setColor(VGA_BLACK);
+			myGLCD.fillRect(140, (g_var16[POS0]), 145, (g_var16[POS0] + 10));
+		}
+		
+		sprintf(printString, "%03X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
+		myGLCD.print(printString, 151, g_var16[POS0]);
 
 		if (g_var16[POS0] < 300)
 		{
