@@ -13,5 +13,6 @@ extern bool drawMACAddress();
 extern bool drawAbout();
 extern void settingsButtons();
 extern void memoryUse();
+extern void connectDongle();
 #endif
 
