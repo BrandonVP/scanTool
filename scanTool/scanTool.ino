@@ -647,8 +647,8 @@ void pageControl()
 			hasDrawn = true;
 			drawReadInCANLCD();
 			isSerialOut = false;
-			Can0.empty_rx_buff();
-			Can1.empty_rx_buff();
+			//Can0.empty_rx_buff();
+			//Can1.empty_rx_buff();
 		}
 
 		// Call buttons if any
@@ -667,8 +667,8 @@ void pageControl()
 		if (!hasDrawn)
 		{
 			isSerialOut = false;
-			Can0.empty_rx_buff();
-			Can1.empty_rx_buff();
+			//Can0.empty_rx_buff();
+			//Can1.empty_rx_buff();
 			isSDOut = true;
 			hasDrawn = true;
 		}
@@ -1741,6 +1741,7 @@ void setup()
 	// Draw the Hypertech logo
 	bmpDraw("System/HYPER.bmp", 0, 0);
 	loadRXMsg();
+	loadMACs();
 }
 
 

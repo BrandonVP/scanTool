@@ -43,7 +43,7 @@ bool drawSettings()
         drawRoundBtn(140, 190, 305, 240, F("WiFi Reset"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(310, 190, 475, 240, F("Connect4"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
         drawRoundBtn(140, 245, 305, 295, F("Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -158,33 +158,14 @@ void settingsButtons()
                 // WiFi Reset
                 Serial3.write(0xBA);
                 Serial3.write(0xBF);
-                if (Serial3.read() == 0xFF); // Seccess
-                //nextPage = 41;
+                if (Serial3.read() == 0xFF);
+                // Confirmation
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
 				graphicLoaderState = 0;
 				nextPage = 43;
-				/*
-				// Connect Dongle 5
-                Serial3.write(0xCA);
-                Serial3.write(0xCC);
-                Serial3.write(0xC8);
-                Serial3.write(0xC9);
-                Serial3.write(0xA3);
-                Serial3.write(0xFA);
-                Serial3.write(0xBA);
-                Serial3.write(0x2C);
-                delay(100);
-                // WiFi Reset
-                Serial3.write(0xBA);
-                Serial3.write(0xBF);
-                if (Serial3.read() == 0xFF); // Seccess
-                delay(100);
-                REQUEST_EXTERNAL_RESET;
-				*/
-   
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -201,27 +182,11 @@ void settingsButtons()
                 waitForIt(310, 135, 475, 185);
                 // Reset
                 REQUEST_EXTERNAL_RESET;
-                //nextPage = 40;
             }
             if ((y >= 190) && (y <= 240))
             {
-                waitForIt(310, 190, 475, 240);
-                // Connect Dongle 4
-                Serial3.write(0xCA);
-                Serial3.write(0xCC);
-                Serial3.write(0x8C);
-                Serial3.write(0x4B);
-                Serial3.write(0x14);
-                Serial3.write(0x9F);
-                Serial3.write(0x94);
-                Serial3.write(0x50);
-                delay(100);
-                // WiFi Reset
-                Serial3.write(0xBA);
-                Serial3.write(0xBF);
-                if (Serial3.read() == 0xFF); // Seccess
-                delay(100);
-                REQUEST_EXTERNAL_RESET;
+                //waitForIt(310, 190, 475, 240);
+				// Unused
             }
             if ((y >= 245) && (y <= 295))
             {
@@ -239,42 +204,25 @@ void settingsButtons()
                 // WiFi Reset
                 Serial3.write(0xBA);
                 Serial3.write(0xBF);
-                if (Serial3.read() == 0xFF); // Seccess
-                delay(100);
-                REQUEST_EXTERNAL_RESET;
+                if (Serial3.read() == 0xFF);
+				// Confirmation
             }
         }
     }
 }
 
 /*============== Connect Dongle ==============*/
-struct dongleSettings
-{
-	char name[9];
-	uint8_t data[6] = { 0, 0, 0, 0, 0, 0 };
-	bool isOn = false;
-	bool isDel = true;
-};
-
-struct savedMACs
-{
-	uint8_t nodeLength = 0;
-	dongleSettings node[10];
-};
-
 savedMACs dongle;
-uint8_t displayedMACNodePosition[4];
+uint8_t displayedMACNodePosition[5];
 
 void loadMACs()
 {
-	// TODO
-	//sdCard.readSendMsg(RXtimedMSG);
+	sdCard.readMAC(dongle);
 }
 
 void saveMACs()
 {
-	// TODO
-	//sdCard.writeSendMsg(RXtimedMSG);
+	sdCard.writeMACs(dongle);
 }
 
 bool drawMACNode(uint8_t index)
@@ -446,10 +394,36 @@ void deleteMACNode(uint8_t node)
 	}
 	dongle.node[node].isDel = true;
 	dongle.node[node].isOn = false;
-	for (uint8_t i = 0; i < 8; i++)
+	for (uint8_t i = 0; i < 6; i++)
 	{
 		dongle.node[node].data[i] = 0;
 	}
+}
+
+void serialConnect(uint8_t index)
+{
+	// TODO: Set all other node to off
+	for (uint8_t i = 0; i < 10; i++)
+	{
+		dongle.node[i].isOn = false;
+	}
+	dongle.node[index].isOn = true;
+
+	Serial3.write(0xCA);
+	Serial3.write(0xCC);
+	Serial3.write(dongle.node[index].data[0]);
+	Serial3.write(dongle.node[index].data[1]);
+	Serial3.write(dongle.node[index].data[2]);
+	Serial3.write(dongle.node[index].data[3]);
+	Serial3.write(dongle.node[index].data[4]);
+	Serial3.write(dongle.node[index].data[5]);
+	delay(100);
+	// WiFi Reset
+	Serial3.write(0xBA);
+	Serial3.write(0xBF);
+	if (Serial3.read() == 0xFF);
+	delay(100);
+	//REQUEST_EXTERNAL_RESET;
 }
 
 void dongleButtons()
@@ -462,8 +436,12 @@ void dongleButtons()
 			{
 				waitForIt(133, 55, 340, 95);
 				// On
-				dongle.node[displayedMACNodePosition[0]].isOn = !dongle.node[displayedMACNodePosition[0]].isOn;
-				dongle.node[displayedMACNodePosition[0]].isOn ? drawSquareBtn(271, 55, 340, 95, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 55, 340, 95, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				if (!dongle.node[displayedMACNodePosition[0]].isOn)
+				{
+					dongle.node[displayedMACNodePosition[0]].isOn = true;
+					serialConnect(displayedMACNodePosition[0]);
+					drawMACNode(g_var8[POS3]);
+				}
 			}
 			if ((x >= 340) && (x <= 409))
 			{
@@ -484,18 +462,16 @@ void dongleButtons()
 		}
 		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 1)
 		{
-			if ((x >= 133) && (x <= 271))
+			if ((x >= 133) && (x <= 340))
 			{
-				waitForIt(133, 100, 271, 140);
-				// Send
-				TXSend(displayedMACNodePosition[1]);
-			}
-			if ((x >= 271) && (x <= 340))
-			{
-				waitForIt(271, 100, 340, 140);
+				waitForIt(133, 100, 340, 140);
 				// On
-				dongle.node[displayedMACNodePosition[1]].isOn = !dongle.node[displayedMACNodePosition[1]].isOn;
-				dongle.node[displayedMACNodePosition[1]].isOn ? drawSquareBtn(271, 100, 340, 140, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 100, 340, 140, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				if (!dongle.node[displayedMACNodePosition[1]].isOn)
+				{
+					dongle.node[displayedMACNodePosition[1]].isOn = true;
+					serialConnect(displayedMACNodePosition[1]);
+					drawMACNode(g_var8[POS3]);
+				}
 			}
 			if ((x >= 340) && (x <= 409))
 			{
@@ -516,18 +492,16 @@ void dongleButtons()
 		}
 		if ((y >= 145) && (y <= 185) && g_var8[POS4] > 2)
 		{
-			if ((x >= 133) && (x <= 271))
+			if ((x >= 133) && (x <= 340))
 			{
-				waitForIt(133, 145, 271, 185);
-				// Send
-				TXSend(displayedMACNodePosition[2]);
-			}
-			if ((x >= 271) && (x <= 340))
-			{
-				waitForIt(271, 145, 340, 185);
+				waitForIt(133, 145, 340, 185);
 				// On
-				dongle.node[displayedMACNodePosition[2]].isOn = !dongle.node[displayedMACNodePosition[2]].isOn;
-				dongle.node[displayedMACNodePosition[2]].isOn ? drawSquareBtn(271, 145, 340, 185, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 145, 340, 185, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				if (!dongle.node[displayedMACNodePosition[2]].isOn)
+				{
+					dongle.node[displayedMACNodePosition[2]].isOn = true;
+					serialConnect(displayedMACNodePosition[2]);
+					drawMACNode(g_var8[POS3]);
+				}
 			}
 			if ((x >= 340) && (x <= 409))
 			{
@@ -548,18 +522,16 @@ void dongleButtons()
 		}
 		if ((y >= 190) && (y <= 230) && g_var8[POS4] > 3)
 		{
-			if ((x >= 133) && (x <= 271))
+			if ((x >= 133) && (x <= 340))
 			{
-				waitForIt(133, 190, 271, 230);
-				// Send
-				TXSend(displayedMACNodePosition[3]);
-			}
-			if ((x >= 271) && (x <= 340))
-			{
-				waitForIt(271, 190, 340, 230);
+				waitForIt(133, 190, 340, 230);
 				// On
-				dongle.node[displayedMACNodePosition[3]].isOn = !dongle.node[displayedMACNodePosition[3]].isOn;
-				dongle.node[displayedMACNodePosition[3]].isOn ? drawSquareBtn(271, 190, 340, 230, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 190, 340, 230, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				if (!dongle.node[displayedMACNodePosition[3]].isOn)
+				{
+					dongle.node[displayedMACNodePosition[3]].isOn = true;
+					serialConnect(displayedMACNodePosition[3]);
+					drawMACNode(g_var8[POS3]);
+				}
 			}
 			if ((x >= 340) && (x <= 409))
 			{
@@ -580,18 +552,16 @@ void dongleButtons()
 		}
 		if ((y >= 235) && (y <= 275) && g_var8[POS4] > 4)
 		{
-			if ((x >= 133) && (x <= 271))
+			if ((x >= 133) && (x <= 340))
 			{
-				waitForIt(133, 235, 271, 275);
-				// Send
-				TXSend(displayedMACNodePosition[4]);
-			}
-			if ((x >= 271) && (x <= 340))
-			{
-				waitForIt(271, 235, 340, 275);
+				waitForIt(133, 235, 340, 275);
 				// On
-				dongle.node[displayedMACNodePosition[4]].isOn = !dongle.node[displayedMACNodePosition[4]].isOn;
-				dongle.node[displayedMACNodePosition[4]].isOn ? drawSquareBtn(271, 235, 340, 275, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, 235, 340, 275, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				if (!dongle.node[displayedMACNodePosition[4]].isOn)
+				{
+					dongle.node[displayedMACNodePosition[4]].isOn = true;
+					serialConnect(displayedMACNodePosition[4]);
+					drawMACNode(g_var8[POS3]);
+				}
 			}
 			if ((x >= 340) && (x <= 409))
 			{

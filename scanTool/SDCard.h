@@ -14,6 +14,7 @@
 #define SD_CARD_CS 8
 #define ROW_DIM 100
 #include "CANBusCapture.h"
+#include "Settings.h"
 class SDCard
 {
  protected:
@@ -38,6 +39,8 @@ class SDCard
 	void split(char*, uint32_t);
 	uint32_t fileSize(char* );
 	uint8_t printDirectory(File dir, MyArray&);
+	void writeMACs(savedMACs);
+	void readMAC(savedMACs& msgStruct);
 };
 #endif
 

@@ -123,6 +123,39 @@ void SDCard::writeSendMsg(SchedulerRX msgStruct)
 	myFile.close();
 }
 
+// Saves users CAN Bus RX messages
+void SDCard::writeMACs(savedMACs msgStruct)
+{
+	char buffer[100];
+
+	// Delete old before writing new file
+	SD.remove("SYSTEM/MAC.txt");
+
+	// File created and opened for writing
+	File myFile = SD.open("SYSTEM/MAC.txt", FILE_WRITE);
+
+	for (uint8_t i = 0; i < 10; i++)
+	{
+		if (strcmp(msgStruct.node[i].name, "\0"))
+		{
+			sprintf(buffer, "%s %x %x %x %x %x %x %x %x \n", 
+				msgStruct.node[i].name, msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].isOn, msgStruct.node[i].isDel);
+		}
+		else
+		{
+			sprintf(buffer, "%s %x %x %x %x %x %x %x %x \n", 
+				"(null)", msgStruct.node[i].data[0], msgStruct.node[i].data[1], msgStruct.node[i].data[2], msgStruct.node[i].data[3], msgStruct.node[i].data[4], msgStruct.node[i].data[5], msgStruct.node[i].isOn, msgStruct.node[i].isDel);
+		}
+
+		// Copy buffer to file after confirming file was open
+		if (myFile)
+		{
+			myFile.print(buffer);
+		}
+	}
+	myFile.close();
+}
+
 
 /*=========================================================
 	Delete File Methods
@@ -224,6 +257,68 @@ void SDCard::readSendMsg(SchedulerRX& msgStruct)
 			SerialUSB.println("");
 			SerialUSB.println("");
 			*/
+		}
+		myFile.close();
+	}
+}
+
+// Reads users saved CAN Bus RX messages
+void SDCard::readMAC(savedMACs& msgStruct)
+{
+	// File created and opened for writing
+	File myFile = SD.open(F("SYSTEM/MAC.txt"), FILE_READ);
+
+	if (myFile)
+	{
+		for (uint8_t i = 0; i < 10; i++)
+		{
+			char buffer[51];
+			char s1[9];
+
+			myFile.readBytesUntil('\n', buffer, 51);
+
+			sscanf(buffer, "%s %x %x %x %x %x %x %x %x", 
+				s1, &msgStruct.node[i].data[0], &msgStruct.node[i].data[1], &msgStruct.node[i].data[2], &msgStruct.node[i].data[3], &msgStruct.node[i].data[4], &msgStruct.node[i].data[5], &msgStruct.node[i].isOn, &msgStruct.node[i].isDel);
+
+			if (!strcmp(s1, "(null)"))
+			{
+				char* temp = '\0';
+				strncpy(msgStruct.node[i].name, "\0", 9);
+			}
+			else if (s1 == NULL)
+			{
+				strncpy(msgStruct.node[i].name, "\0", 9);
+			}
+			else if (s1 == "\0")
+			{
+				strncpy(msgStruct.node[i].name, "\0", 9);
+			}
+			else
+			{
+				strncpy(msgStruct.node[i].name, s1, 9);
+			}
+
+			
+			SerialUSB.print("Index: ");
+			SerialUSB.println(i);
+			SerialUSB.println(msgStruct.node[i].name);
+			SerialUSB.print("data: ");
+			SerialUSB.print(msgStruct.node[i].data[0]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[1]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[2]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[3]);
+			SerialUSB.print(" ");
+			SerialUSB.print(msgStruct.node[i].data[4]);
+			SerialUSB.print(" ");
+			SerialUSB.println(msgStruct.node[i].data[5]);
+			SerialUSB.println(msgStruct.node[i].isOn);
+			SerialUSB.println(msgStruct.node[i].isDel);
+			SerialUSB.println("");
+			SerialUSB.println("");
+			
 		}
 		myFile.close();
 	}

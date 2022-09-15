@@ -421,6 +421,25 @@ void CaptureButtons()
 			{
 				waitForIt(310, 185, 470, 240);
 				// Start
+
+				// Clear the WiFi CAN Bus buffer
+				if (selectedChannelOut == 6)
+				{
+					uint8_t value = 0;
+					for (uint16_t i = 0; i < 1000; i++)
+					{
+						if (Serial3.available())
+						{
+							value = Serial3.read();
+						}
+					}
+				}
+				else
+				{
+					Can0.empty_rx_buff();
+					Can1.empty_rx_buff();
+				}
+
 				can1.resetMessageNum();
 				switch (selectedSourceOut)
 				{
@@ -429,8 +448,7 @@ void CaptureButtons()
 					g_var16[POS0] = 60;
 					break;
 				case 2: // Serial
-					Can0.empty_rx_buff();
-					Can1.empty_rx_buff();
+					
 					isSerialOut = true;
 					drawSquareBtn(310, 185, 470, 240, F("Start"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -472,8 +490,6 @@ void CaptureButtons()
 					{
 						filename[i] = '\0';
 					}
-					Can0.empty_rx_buff();
-					Can1.empty_rx_buff();
 					isSDOut = true;
 					hasDrawn = false;
 					graphicLoaderState = 1;
@@ -490,7 +506,7 @@ void CaptureButtons()
 				isSerialOut = false;
 				isSDOut = false;
 				drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+				//drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 			}
 		}
 	}
@@ -853,7 +869,7 @@ void sendCANFrame(uint8_t channel)
 
 /*============== Timed TX ==============*/
 SchedulerRX RXtimedMSG;
-uint8_t displayedNodePosition[4];
+uint8_t displayedNodePosition[5];
 
 void loadRXMsg()
 {
