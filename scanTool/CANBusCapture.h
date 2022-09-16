@@ -65,5 +65,6 @@ extern void editTXNodeButtons();
 extern void timedTXSend();
 extern void TXSend(uint8_t);
 extern void loadRXMsg();
+extern void playback();
 #endif
 

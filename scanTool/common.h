@@ -104,6 +104,7 @@ extern bool isSerialOut;
 extern bool isSDOut;
 extern bool isMSGSpam;
 
+extern void menuButtons();
 extern void waitForIt(int x1, int y1, int x2, int y2);
 extern void drawRoundBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);
 extern void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String button, int backgroundColor, int btnBorderColor, int btnTxtColor, int align);
@@ -111,7 +112,9 @@ extern void waitForItRect(int x1, int y1, int x2, int y2);
 extern int keypadButtons();
 extern void drawKeypad();
 extern bool loadBar(int);
-extern void drawErrorMSG(String title, String eMessage1, String eMessage2);
+extern uint8_t errorMSGButton(uint8_t);
+extern void drawErrorMSG2(String, String, String);
+extern void drawErrorMSG(String, String, String);
 extern void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);
 extern bool Touch_getXY();
 extern uint8_t keypadController(uint8_t&, uint16_t&);
@@ -119,7 +122,7 @@ extern uint8_t keypadControllerDec(uint8_t&, uint16_t&);
 extern void backgroundProcess();
 extern void drawKeypadDec();
 extern void resetKeypad();
-extern uint8_t keyboardController(uint8_t& index);
+extern uint8_t keyboardController(uint8_t&);
 extern void drawkeyboard();
 extern char keyboardInput[9];
 #endif // EXTERN_H

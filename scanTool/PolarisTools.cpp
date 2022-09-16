@@ -50,6 +50,7 @@ bool drawRZRTOOL()
         return false;
         break;
     }
+    graphicLoaderState++;
     return true;
 }
 

@@ -41,6 +41,7 @@ class SDCard
 	uint8_t printDirectory(File dir, MyArray&);
 	void writeMACs(savedMACs);
 	void readMAC(savedMACs& msgStruct);
+	void readLogFileLCD(char* filename);
 };
 #endif
 

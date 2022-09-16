@@ -50,6 +50,7 @@ bool drawVehicleTools()
         return false;
         break;
     }
+    graphicLoaderState++;
     return true;
 }
 
@@ -66,12 +67,14 @@ void VehicleToolButtons()
             {
                 waitForIt(140, 80, 305, 130);
                 // PIDSCAN
+                graphicLoaderState = 0;
                 nextPage = 10;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(140, 135, 305, 185);
                 // PID Guages
+                graphicLoaderState = 0;
                 nextPage = 12;
                 
             }
@@ -79,13 +82,13 @@ void VehicleToolButtons()
             {
                 waitForIt(140, 190, 305, 240);
                 // DTC Scan
+                graphicLoaderState = 0;
                 nextPage = 14;
             }
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
                 // Unused
-                //page = 16;
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -94,9 +97,7 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // PIDSTRM
-                nextPage = 11;
-                
-               
+                graphicLoaderState = 0;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -104,6 +105,7 @@ void VehicleToolButtons()
                 // VIN
                 can1.setFilterMask0(0x7E8, 0x7FF);
                 state = 0;
+                graphicLoaderState = 0;
                 nextPage = 13;
                 
             }
@@ -111,6 +113,7 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 190, 475, 240);
                 // DTC Clear
+                graphicLoaderState = 0;
                 nextPage = 15;
                 
                 // Initialize state machine variables to 0
@@ -120,18 +123,33 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 245, 475, 295);
                 // Unused
-                //page = 17;
             }
         }
     }
 }
 
 /*========== PID Scan Functions ==========*/
-void drawPIDSCAN()
+bool drawPIDSCAN()
 {
-    drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(141, 90, 479, 110, F("Scan supported PIDs"), themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawSquareBtn(141, 115, 479, 135, F("to SD Card"), themeBackground, themeBackground, menuBtnColor, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 3:
+        drawSquareBtn(141, 90, 479, 110, F("Scan supported PIDs"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    case 4:
+        drawSquareBtn(141, 115, 479, 135, F("to SD Card"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    case 5:
+        return false;
+        break;
+    }
+    graphicLoaderState++;
+    return true;
 }
 
 void startPIDSCAN()
@@ -293,6 +311,42 @@ void PIDStreamButtons()
                 }
             }
         }
+    }
+}
+
+void streamPIDS()
+{
+    if (hasPID == true)
+    {
+        PIDStreamButtons();
+    }
+    else
+    {
+        errorMSGButton(9);
+    }
+    if ((state == 1) && (g_var16[POS1] < PIDSAMPLES) && (millis() - g_var32[POS0] > 1000))
+    {
+        // TODO: Fix me
+        //can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
+        uint8_t PIDRequest[8] = { 0x02, 0x01, arrayIn[g_var16[POS0]], 0x00, 0x00, 0x00, 0x00, 0x00 };
+        can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
+        g_var16[POS1]++;
+        drawErrorMSG2("Samples", String(g_var16[POS1]), "Saved to SD");
+        g_var32[POS0] = millis();
+        uint8_t result = 0;
+        uint32_t wait = millis();
+        while (millis() - wait < 10)
+        {
+            backgroundProcess();
+        }
+        can1.PIDStream(result, true);
+    }
+    if ((g_var16[POS1] == PIDSAMPLES) && (state == 1) && (millis() - g_var32[POS0] > 2000))
+    {
+        state = 0;
+        g_var8[POS0] = 0;
+        drawPIDStream();
+        g_var32[POS0] = millis(); //
     }
 }
 

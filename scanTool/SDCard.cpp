@@ -2,6 +2,7 @@
 
 #include "SDCard.h"
 #include "common.h"
+#include "definitions.h"
 
 // Called at setup to initialize the SD Card
 bool SDCard::startSD()
@@ -298,7 +299,7 @@ void SDCard::readMAC(savedMACs& msgStruct)
 				strncpy(msgStruct.node[i].name, s1, 9);
 			}
 
-			
+			/*
 			SerialUSB.print("Index: ");
 			SerialUSB.println(i);
 			SerialUSB.println(msgStruct.node[i].name);
@@ -318,7 +319,7 @@ void SDCard::readMAC(savedMACs& msgStruct)
 			SerialUSB.println(msgStruct.node[i].isDel);
 			SerialUSB.println("");
 			SerialUSB.println("");
-			
+			*/
 		}
 		myFile.close();
 	}
@@ -401,6 +402,79 @@ void SDCard::readLogFile(char* filename)
 	}
 	myFile.close();
 }
+
+// Reads in CAN Capture
+void SDCard::readLogFileLCD(char* filename)
+{
+	char tempStr[MSG_STRING_LENGTH];
+	char printString[MSG_STRING_LENGTH];
+	unsigned int messageNum = 0;
+	unsigned int id = 0;
+	unsigned int time = 0;
+	unsigned int length = 0;
+	unsigned int msg[8];
+	int lineIndex = 60;
+	int count = 0;
+
+	File myFile = SD.open(filename, FILE_READ);
+	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+
+	myGLCD.setFont(SmallFont);
+
+	while (myFile.available())
+	{
+		myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
+		sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
+			&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
+		//SerialUSB.println(tempStr);
+		SerialUSB.println(myFile.position());
+		sprintf(printString, "%5d %6d %03X %d %02X %02X %02X %02X %02X %02X %02X %02X", messageNum, time, id, length, msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
+		if (count < 17)
+		{
+			myGLCD.setBackColor(VGA_WHITE);
+			myGLCD.setColor(VGA_WHITE);
+			myGLCD.setColor(VGA_BLACK);
+			myGLCD.print(printString, 135, lineIndex);
+			lineIndex += 15;
+			count++;
+		}
+		else
+		{
+			count = 0;
+			lineIndex = 60;
+			for (uint8_t i = 0; i < 5; i++)
+			{
+				while (myFile.peek() != '\n') // Go backwards until we detect the previous line separator
+					myFile.seek(myFile.position() - 1);
+
+				if (i < 4)
+				{
+					myFile.seek(myFile.position() - 1);
+				}
+				
+			}
+			
+		}
+
+
+		if (Touch_getXY())
+		{
+			if ((y >= 275) && (y <= 315))
+			{
+				if ((x >= 131) && (x <= 216))
+				{
+					// Stop
+					waitForItRect(131, 275, 216, 315);
+					return;
+				}
+			}
+		}
+		backgroundProcess();
+	}
+	myFile.close();
+	myGLCD.setFont(BigFont);
+}
+
 
 /*=========================================================
 	Create File Methods

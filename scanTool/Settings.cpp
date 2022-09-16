@@ -54,7 +54,11 @@ bool drawSettings()
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
+	case 11:
+		return false;
+		break;
     }
+	graphicLoaderState++;
     return true;
 }
 

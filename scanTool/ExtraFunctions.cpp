@@ -50,6 +50,7 @@ bool drawExtraFN()
         return false;
         break;
     }
+    graphicLoaderState++;
     return true;
 }
 
@@ -336,6 +337,7 @@ bool drawDongleSim()
         return false;
         break;
     }
+    graphicLoaderState++;
     return true;
 }
 
@@ -529,6 +531,7 @@ bool drawDongleSimFord()
         return false;
         break;
     }
+    graphicLoaderState++;
     return true;
 }
 

@@ -328,28 +328,69 @@ bool Touch_getXY()
 	return false;
 }
 
+//
+uint8_t swipe(uint32_t& minInterval)
+{
+int int_x = 0;
+int int_y = 0;
+int last_x = 0;
+int last_y = 0;
+bool first = false;
+
+	while (Touch_getXY())
+	{
+		if (!first)
+		{
+			int_x = x;
+			int_y = y;
+			first = true;
+		}
+
+		if (x > 0)
+		{
+			last_x = x;
+		}
+		if (x > 0)
+		{
+			last_y = y;
+		}
+
+		backgroundProcess();
+	}
+
+	if (millis() - minInterval > 600)
+	{
+		if (int_y < last_y && last_y - int_y > 70)
+		{
+			minInterval = millis();
+			return 1;
+		}
+		else if (int_y > last_y && int_y - last_y > 70)
+		{
+			minInterval = millis();
+			return 2;
+		}
+	}
+return 0;
+}
+
 // Manages the different App pages
 void pageControl()
 {
-	// Check menu buttons for input
-	menuButtons();
 	switch (page)
 	{
 	case 0: /*========== CANBUS ==========*/
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawCANBus())
 			{
-				graphicLoaderState++;
+				break;
 			}
-			else
-			{
-				hasDrawn = true;
-			}
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		CANBusButtons();
 
 		// Release any variable locks if page changed
@@ -361,17 +402,18 @@ void pageControl()
 		break;
 
 	case 1: // Capture
+		// TODO: Fix this hot mess. Need to be in standard format like the rest of pages.
 		switch (state)
 		{
 		case 0:
 			if (!hasDrawn && graphicLoaderState < 1)
 			{
-				bool error = false;
-				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
-				if (error)
+				error_t e = false;
+				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true;
+				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
-					nextPage = 0;
+					nextPage = CANBUS_MAIN;
 					break;
 				}
 			}
@@ -412,7 +454,7 @@ void pageControl()
 			break;
 		}
 
-		// Call buttons if any
+		// Call buttons or state machine
 		CaptureButtons();
 
 		// Release any variable locks if page changed
@@ -425,136 +467,92 @@ void pageControl()
 		break;
 
 	case 2: // Playback
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawCANLog())
 			{
-				graphicLoaderState++;
 				break;
 			}
 
-			bool error = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true;
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
-			state = 0;
-			if (error)
+			error_t e = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Scroll index
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // fileList index
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 0;
+				nextPage = CANBUS_MAIN;
 			}
-			hasDrawn = true;
+
 			drawCANLogScroll();
+
+			state = 0;
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
-		if (state == 0)
-		{
-			CANLogButtons();
-		}
-		else if (state == 1)
-		{
-			char fileLocation[20] = "CANLOG/";
-			strcat(fileLocation, fileList[g_var16[POS0]]);
-			uint8_t input = errorMSGButton(2);
-			switch (input)
-			{
-			case 1:
-				state = 0;
-				sdCard.deleteFile(fileLocation);
-				for (uint8_t i = 0; i < 10; i++)
-				{
-					for (uint8_t j = 0; j < 13; j++)
-					{
-						fileList[i][j] = '\0';
-					}
-				}
-				
-				drawCANLogScroll();
-				break;
-			case 2:
-				state = 0;
-				drawCANLogScroll();
-				break;
-			case 3:
-				state = 0;
-				drawCANLogScroll();
-				break;
-			}
-		}
+		// Call buttons or page method
+		playback();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
 			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
 			unlockVar16(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
 		break;
 
-	case 3: // Send CAN Frame
-		// Draw Page
+	case 3: // Unused
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			bool error = false;
-			// Lock global variables
-			// lockVar8(LOCK0) called from button
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Channel
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // keypad return 
-			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : error = true; // keypad index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
-			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
-			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : error = true; // keypad input total
-			state = 0;
-			isFinished = false;
-			if (error)
+			error_t e = false;
+
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 0;
+				nextPage = CANBUS_MAIN;
 			}
+
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
-		sendCANFrame(g_var8[POS0]);
+		// Call buttons or page method
+		
 
 		// Release variable Locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar8(LOCK2);
-			unlockVar16(LOCK0);
-			unlockVar16(LOCK1);
-			unlockVar16(LOCK2);
 			hasDrawn = false;
 			page = nextPage;
 		}
 		break;
 
 	case 4: // Filter Mask
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			bool error = false;
-			// Lock global variables
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Keypad return
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // Keypad index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Current total value
-			if (error)
+			if (drawFilterMask())
+			{
+				break;
+			}
+
+			error_t e = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Keypad return
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Keypad index
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Current total value
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 0;
+				nextPage = CANBUS_MAIN;
 			}
+
+			state = 1;
 			hasDrawn = true;
-			state = 0;
-			graphicLoaderState = 0;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		filterMask();
 
 		// Release any variable locks if page changed
@@ -569,60 +567,69 @@ void pageControl()
 		break;
 
 	case 5: // Set Baud
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawBaud())
 			{
-				graphicLoaderState++;
 				break;
 			}
 
-			bool error = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-			if (error)
+			error_t e = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected Baud rate array index
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 0;
+				nextPage = CANBUS_MAIN;
 			}
+
 			drawBaudScroll();
 			drawCurrentBaud();
+
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		baudButtons();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar32(LOCK0);
+			unlockVar8(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
 		break;
 
 	case 6: // Timed TX
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			bool error = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Selected index
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // User input
-			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : error = true; // Keypad index
-			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : error = true; // Scroll index
-			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : error = true; // Node position
-			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : error = true; // Keyboard index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Total value
-			if (error)
+			if (drawTimedTX())
+			{
+				break;
+			}
+
+			error_t e = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected index
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // User input
+			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : e = true; // Keypad index
+			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : e = true; // Scroll index
+			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : e = true; // Node position
+			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : e = true; // Keyboard index
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Total value
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 0;
+				nextPage = CANBUS_MAIN;
 			}
+
+			drawTXNode(g_var8[POS3]);
+
 			state = 0;
 			hasDrawn = true;
 		}
-		// Call buttons if any
+		// Call buttons or page method
 		timedTX();
 
 		// Release any variable locks if page changed
@@ -641,39 +648,51 @@ void pageControl()
 		break;
 
 	case 7: // LCD Capture
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			hasDrawn = true;
 			drawReadInCANLCD();
+
+			error_t e = false;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Min swipe interval timer
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Swipe input
+			if (e)
+			{
+				DEBUG_ERROR(F("Error: Variable locked"));
+				nextPage = CANBUS_MAIN;
+			}
+
 			isSerialOut = false;
-			//Can0.empty_rx_buff();
-			//Can1.empty_rx_buff();
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		readInCANMsg(selectedChannelOut);
+		g_var8[POS0] = swipe(g_var32[POS0]);
+		if (g_var8[POS0])
+		{
+			drawReadInCANLCD();
+		}
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(LOCK0);
+			unlockVar32(LOCK0);
 			hasDrawn = false;
 			page = nextPage;
 		}
 		break;
-
-	case 8: // SD Capture
-		// Draw Page
+   
+	case 8: // Unused
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			isSerialOut = false;
-			//Can0.empty_rx_buff();
-			//Can1.empty_rx_buff();
-			isSDOut = true;
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
+
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -684,20 +703,18 @@ void pageControl()
 		break;
 
 	case 9: /*========== VEHTOOL ==========*/
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawVehicleTools())
 			{
-				graphicLoaderState++;
+				break;
 			}
-			else
-			{
-				hasDrawn = true;
-			}
+
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		VehicleToolButtons();
 
 		// Release any variable locks if page changed
@@ -709,40 +726,40 @@ void pageControl()
 		break;
 
 	case 10: // PIDSCAN
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (hasPID)
 			{
-				page = 9;
+				page = VEHTOOL_MAIN;
+				break;
+			}
+
+			if (drawPIDSCAN())
+			{
 				break;
 			}
 
 			// Lock global variables
-			bool error = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true;
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
-			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-			if (error)
+			error_t e = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true;
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Loading bar index
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true;
+			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 9;
+				nextPage = VEHTOOL_MAIN;
 			}
 
-			// Initialize state machine variables to 0
-			state = 0;
-
-			//can1.setFilterMask0(0x7E0, 0x7F0);
-			//can1.startCAN0(0x7E0, 0x7EF);
-			drawPIDSCAN();
 			loadBar(g_var8[POS1]++);
+			state = 0;
 			isSerialOut = false;
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		startPIDSCAN();
 
 		// Release any variable locks if page changed
@@ -759,24 +776,25 @@ void pageControl()
 		break;
 
 	case 11: // PIDSTRM
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (hasPID == true)
 			{
-				state = 0;
-				// Lock global variables
-				bool error = false;
-				(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
-				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true;
-				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
-				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-				if (error)
+				drawPIDStream();
+
+				error_t e = false;
+				(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true;
+				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true;
+				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true;
+				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
-					nextPage = 9;
+					nextPage = VEHTOOL_MAIN;
 				}
 
+				state = 0;
 				isSerialOut = false;
 				can1.setFilterMask0(0x7E0, 0x1F0);
 
@@ -786,50 +804,18 @@ void pageControl()
 				}
 				sdCard.readFile(can1.getFullDir(), arrayIn);
 
-				drawPIDStream();
 				hasDrawn = true;
 			}
 			else
 			{
-				nextPage = 9;
+				nextPage = VEHTOOL_MAIN;
 				drawErrorMSG("Error", "Please Perform", "PIDSCAN First");
 				hasDrawn = true;
 			}
 		}
 
-		// Call buttons if any
-		if (hasPID == true)
-		{
-			PIDStreamButtons();
-		}
-		else
-		{
-			errorMSGButton(9);
-		}
-		if ((state == 1) && (g_var16[POS1] < PIDSAMPLES) && (millis() - g_var32[POS0] > 1000))
-		{
-			// TODO: Fix me
-			//can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
-			uint8_t PIDRequest[8] = { 0x02, 0x01, arrayIn[g_var16[POS0]], 0x00, 0x00, 0x00, 0x00, 0x00 };
-			can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
-			g_var16[POS1]++;
-			drawErrorMSG2("Samples", String(g_var16[POS1]), "Saved to SD");
-			g_var32[POS0] = millis();
-			uint8_t result = 0;
-			uint32_t wait = millis();
-			while (millis() - wait < 10)
-			{
-				backgroundProcess();
-			}
-			can1.PIDStream(result, true);
-		}
-		if ((g_var16[POS1] == PIDSAMPLES) && (state == 1) && (millis() - g_var32[POS0] > 2000))
-		{
-			state = 0;
-			g_var8[POS0] = 0;
-			drawPIDStream();
-			g_var32[POS0] = millis(); //
-		}
+		// Call buttons or page method
+		void streamPIDS();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -845,7 +831,7 @@ void pageControl()
 		break;
 
 	case 12: // PID Guages
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			drawPIDGauges();
@@ -853,7 +839,7 @@ void pageControl()
 			//can1.startPID();
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		PIDGauges();
 
 		// Release any variable locks if page changed
@@ -865,7 +851,7 @@ void pageControl()
 		break;
 
 	case 13: // VIN
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (state < 4 && !can1.VINReady())
@@ -880,7 +866,7 @@ void pageControl()
 			}
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -892,14 +878,14 @@ void pageControl()
 		break;
 
 	case 14: // 
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -910,7 +896,7 @@ void pageControl()
 		break;
 
 	case 15: // DTC
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (state == 0)
@@ -925,13 +911,13 @@ void pageControl()
 			if (state == 2)
 			{
 				// Lock global variables
-				bool error = false;
-				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : error = true;
-				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-				if (error)
+				error_t e = false;
+				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true;
+				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
-					nextPage = 9;
+					nextPage = TESTING_MAIN;
 				}
 
 				// Initialize state machine variables to 0
@@ -941,7 +927,7 @@ void pageControl()
 			}
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		clearDTC();
 
 		// Release any variable locks if page changed
@@ -955,13 +941,13 @@ void pageControl()
 		break;
 
 	case 16:
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -972,12 +958,12 @@ void pageControl()
 		break;
 
 	case 17:
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -988,20 +974,18 @@ void pageControl()
 		break;
 
 	case 18: /*========== RZRTOOL ==========*/
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawRZRTOOL())
 			{
-				graphicLoaderState++;
+				break;
 			}
-			else
-			{
-				hasDrawn = true;
-			}
+
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		RZRToolButtons();
 
 		// Release any variable locks if page changed
@@ -1013,13 +997,13 @@ void pageControl()
 		break;
 
 	case 19: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1030,13 +1014,13 @@ void pageControl()
 		break;
 
 	case 20: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1047,13 +1031,13 @@ void pageControl()
 		break;
 
 	case 21: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1064,13 +1048,13 @@ void pageControl()
 		break;
 
 	case 22: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1081,13 +1065,13 @@ void pageControl()
 		break;
 
 	case 23: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1098,13 +1082,13 @@ void pageControl()
 		break;
 
 	case 24: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1115,13 +1099,13 @@ void pageControl()
 		break;
 
 	case 25: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1132,13 +1116,13 @@ void pageControl()
 		break;
 
 	case 26: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1149,20 +1133,18 @@ void pageControl()
 		break;
 
 	case 27: /*========== EXTRAFN ==========*/
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawExtraFN())
 			{
-				graphicLoaderState++;
+				break;
 			}
-			else
-			{
-				hasDrawn = true;
-			}
+
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		extraFNButtons();
 
 		// Release any variable locks if page changed
@@ -1174,14 +1156,14 @@ void pageControl()
 		break;
 
 	case 28: // OBD CAN Simulator
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			drawOBDSimulator();
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		entry();
 
 		// Release any variable locks if page changed
@@ -1193,24 +1175,25 @@ void pageControl()
 		break;
 
 	case 29: // Message Spam
-		// Draw Page
+		// Draw page and lock variables
+		// TODO: Clean up this mess
 		if (!hasDrawn)
 		{
 			if (graphicLoaderState == 1)
 			{
 				// Lock global variables
-				bool error = false;
-				(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // Keypad index
-				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // ID
-				(lockVar16(LOCK1)) ? g_var16[POS1] = 0x7FF : error = true; // Max
-				(lockVar16(LOCK2)) ? g_var16[POS2] = 0x000 : error = true; // Min
-				(lockVar16(LOCK3)) ? g_var16[POS3] = 30 : error = true; // Interval (ms)
-				(lockVar16(LOCK4)) ? g_var16[POS4] = 30 : error = true; // Keypad total
-				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true; // Timer
-				if (error)
+				error_t e = false;
+				(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Keypad index
+				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // ID
+				(lockVar16(LOCK1)) ? g_var16[POS1] = 0x7FF : e = true; // Max
+				(lockVar16(LOCK2)) ? g_var16[POS2] = 0x000 : e = true; // Min
+				(lockVar16(LOCK3)) ? g_var16[POS3] = 30 : e = true; // Interval (ms)
+				(lockVar16(LOCK4)) ? g_var16[POS4] = 30 : e = true; // Keypad total
+				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Timer
+				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
-					nextPage = 27;
+					nextPage = TESTING_MAIN;
 				}
 			}
 			
@@ -1241,7 +1224,7 @@ void pageControl()
 			return;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		if (state == 0)
 		{
 			MSGSpam();
@@ -1336,7 +1319,7 @@ void pageControl()
 		break;
 
 	case 30: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			drawkeyboard();
@@ -1345,7 +1328,7 @@ void pageControl()
 			g_var8[POS1] = 0;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		g_var8[POS0] = keyboardController(g_var8[POS1]);
 		
 		// Release any variable locks if page changed
@@ -1357,9 +1340,10 @@ void pageControl()
 		break;
 
 	case 31: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
+			// TODO: LOCKS!!!!
 			drawKeypad();
 			hasDrawn = true;
 			g_var8[POS0] = 0;
@@ -1372,7 +1356,7 @@ void pageControl()
 
 		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1383,9 +1367,10 @@ void pageControl()
 		break;
 
 	case 32: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
+			// TODO: Locks!!!!!
 			drawKeypadDec();
 			hasDrawn = true;
 			g_var8[POS0] = 0;
@@ -1398,7 +1383,7 @@ void pageControl()
 
 		g_var8[POS0] = keypadControllerDec(g_var8[POS1], g_var16[POS0]);
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1409,7 +1394,7 @@ void pageControl()
 		break;
 
 	case 33: //
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			isSerialOut = true;
@@ -1417,7 +1402,7 @@ void pageControl()
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1428,27 +1413,25 @@ void pageControl()
 		break;
 
 	case 34: // Ford Dongle
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawDongleSimFord())
 			{
-				graphicLoaderState++;
 				break;
 			}
 
-			// Lock global variables
-			bool error = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-			if (error)
+			error_t e = false;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 9;
+				nextPage = TESTING_MAIN;
 			}
 			hasDrawn = true;
 		}
 		
-		// Call buttons if any
+		// Call buttons or page method
 		dongleSimButtonsFord();
 
 		// Release any variable locks if page changed
@@ -1461,28 +1444,26 @@ void pageControl()
 		break;
 
 	case 35: // GM Dongle
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawDongleSim())
 			{
-				graphicLoaderState++;
 				break;
 			}
 
-			// Lock global variables
-			bool error = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : error = true;
-			if (error)
+			error_t e = false;
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 9;
+				nextPage = TESTING_MAIN;
 			}
 
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		dongleSimButtons();
 
 		// Release any variable locks if page changed
@@ -1495,21 +1476,18 @@ void pageControl()
 		break;
 
 	case 36: /*========== SETTINGS ==========*/
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			if (graphicLoaderState < 11)
+			if (drawSettings())
 			{
-				drawSettings();
-				graphicLoaderState++;
+				break;
 			}
-			else
-			{
-				hasDrawn = true;
-			}
+
+			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 		settingsButtons();
 
 		// Release any variable locks if page changed
@@ -1521,14 +1499,14 @@ void pageControl()
 		break;
 
 	case 37: // Memory
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			memoryUse();
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1538,8 +1516,8 @@ void pageControl()
 		}
 		break;
 
-	case 38: //
-		// Draw Page
+	case 38: // About
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			if (drawAbout())
@@ -1548,7 +1526,7 @@ void pageControl()
 			}
 			hasDrawn = true;
 		}
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1584,7 +1562,7 @@ void pageControl()
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1594,15 +1572,14 @@ void pageControl()
 		}
 		break;
 
-	case 40: //
-		// Draw Page
+	case 40: // Unused
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			// Draw Page
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1612,14 +1589,14 @@ void pageControl()
 		}
 		break;
 
-	case 41: //
-		// Draw Page
+	case 41: // Unused
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1629,14 +1606,14 @@ void pageControl()
 		}
 		break;
 
-	case 42: //
-		// Draw Page
+	case 42: // Unused
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1647,26 +1624,26 @@ void pageControl()
 		break;
 
 	case 43: // Connect Dongle
-		// Draw Page
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			bool error = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true; // Selected index
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : error = true; // User input
-			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : error = true; // Keypad index
-			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : error = true; // Scroll index
-			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : error = true; // Node position
-			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : error = true; // Keyboard index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : error = true; // Total value
-			if (error)
+			error_t e = false;
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected index
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // User input
+			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : e = true; // Keypad index
+			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : e = true; // Scroll index
+			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : e = true; // Node position
+			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : e = true; // Keyboard index
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Total value
+			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
-				nextPage = 0;
+				nextPage = SETTING_MAIN;
 			}
 			state = 0;
 			hasDrawn = true;
 		}
-		// Call buttons if any
+		// Call buttons or page method
 		connectDongle();
 
 		// Release any variable locks if page changed
@@ -1684,14 +1661,14 @@ void pageControl()
 		}
 		break;
 
-	case 44: //
-		// Draw Page
+	case 44: // Unused
+		// Draw page and lock variables
 		if (!hasDrawn)
 		{
 			hasDrawn = true;
 		}
 
-		// Call buttons if any
+		// Call buttons or page method
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -2816,6 +2793,7 @@ void SDCardOut()
 // Able to call background process from blocked loop
 void backgroundProcess()
 {
+	menuButtons();
 	updateTime();
 	serialOut();
 	SDCardOut();

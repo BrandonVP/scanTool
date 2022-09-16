@@ -11,7 +11,7 @@
 
 extern bool drawVehicleTools();
 extern void VehicleToolButtons();
-extern void drawPIDSCAN();
+extern bool drawPIDSCAN();
 extern void startPIDSCAN();
 extern void drawPIDStreamScroll();
 extern void drawPIDStream();
@@ -22,5 +22,7 @@ extern void clearDTC();
 extern void drawClearDTC();
 extern bool drawPIDGauges();
 extern uint8_t DTCButtons();
+extern void streamPIDS();
+extern void streamPIDS();
 #endif
 

@@ -24,6 +24,15 @@
 #define CENTER 2
 #define RIGHT 3
 
+#define CANBUS_MAIN 0
+#define VEHTOOL_MAIN 9
+#define UTVTOOL_MAIN 18
+#define TESTING_MAIN 27
+#define SETTING_MAIN 36
+
+// Error checking
+typedef bool error_t;
+
 // Define items to show for scroll function
 #define MAXSCROLL 6
 
@@ -42,7 +51,7 @@
 //
 #define PIDLIST "PIDScan.txt"
 
-#define VERSION "Scan Tool Ver. 4.4"
+#define VERSION "Scan Tool Ver. 4.4.1"
 
 /*
 uint8_t PIDS[193] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 

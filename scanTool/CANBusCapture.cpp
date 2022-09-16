@@ -56,6 +56,7 @@ bool drawCANBus()
 		return false;
 		break;
 	}
+	graphicLoaderState++;
 	return true;
 }
 
@@ -71,8 +72,8 @@ void CANBusButtons()
 			{
 				waitForIt(140, 80, 305, 130);
 				// Capture
-				nextPage = 1;
 				state = 0;
+				nextPage = 1;
 				graphicLoaderState = 0;
 			}
 			if ((y >= 135) && (y <= 185))
@@ -94,6 +95,7 @@ void CANBusButtons()
 			{
 				waitForIt(140, 245, 305, 295);
 				// Baud
+				graphicLoaderState = 0;
 				nextPage = 5;
 			}
 		}
@@ -113,10 +115,8 @@ void CANBusButtons()
 			}
 			if ((y >= 190) && (y <= 240))
 			{
-				//waitForIt(310, 190, 475, 240);
+				waitForIt(310, 190, 475, 240);
 				// Unused
-				//graphicLoaderState = 0;
-				//nextPage = 3;
 			}
 			if ((y >= 245) && (y <= 295))
 			{
@@ -530,10 +530,6 @@ void readInCANMsg(uint8_t channel)
 	{
 		char printString[40];
 
-		//myGLCD.setColor(VGA_WHITE);
-		//myGLCD.fillRect(151, (g_var16[POS0] + 17), 451, (g_var16[POS0] + 24));
-		//myGLCD.setColor(VGA_BLACK);
-
 		if (g_var16[POS0] != 60)
 		{
 			myGLCD.setColor(VGA_WHITE);
@@ -564,67 +560,9 @@ void readInCANMsg(uint8_t channel)
 	myGLCD.setFont(BigFont);
 }
 
-/*============== Send Frame ==============*/
-// Draw the send frame page
-bool drawSendFrame(uint8_t channel)
-{
-	switch (graphicLoaderState)
-	{
-	case 0:
-		break;
-	case 1:
-		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-		break;
-	case 3:
-		drawRoundBtn(135, 55, 259, 95, F("Channel"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 4:
-		drawRoundBtn(135, 100, 259, 145, F("ID:"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 5:
-		drawRoundBtn(261, 100, 475, 145, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 6:
-		drawRoundBtn(135, 150, 475, 190, F("FRAME"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 7:
-		myGLCD.setFont(SmallFont);
-		drawRoundBtn(134, 195, 175, 250, " " + String(can1.getCANOutData(0), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 8:
-		drawRoundBtn(177, 195, 218, 250, " " + String(can1.getCANOutData(1), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 9:
-		drawRoundBtn(220, 195, 261, 250, " " + String(can1.getCANOutData(2), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 10:
-		drawRoundBtn(263, 195, 304, 250, " " + String(can1.getCANOutData(3), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 11:
-		drawRoundBtn(306, 195, 347, 250, " " + String(can1.getCANOutData(4), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 12:
-		drawRoundBtn(349, 195, 390, 250, " " + String(can1.getCANOutData(5), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 13:
-		drawRoundBtn(392, 195, 433, 250, " " + String(can1.getCANOutData(6), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		break;
-	case 14:
-		drawRoundBtn(435, 195, 476, 250, " " + String(can1.getCANOutData(7), 16), menuBtnColor, menuBtnBorder, menuBtnText, LEFT);
-		myGLCD.setFont(BigFont);
-		break;
-	case 15:
-		drawRoundBtn(135, 255, 475, 300, F("Send"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 16:
-		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
-		break;
-	case 17:
-		return false;
-		break;
-	}
-	return true;
-}
+/*============== Timed TX ==============*/
+SchedulerRX RXtimedMSG;
+uint8_t displayedNodePosition[5];
 
 void drawSendChannel(uint8_t channel)
 {
@@ -632,244 +570,6 @@ void drawSendChannel(uint8_t channel)
 	(channel == 1) ? drawRoundBtn(333, 99, 403, 139, F("1"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(333, 99, 403, 139, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 	(channel == 2) ? drawRoundBtn(405, 99, 475, 139, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(405, 99, 475, 139, F("WIFI"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 }
-
-// Buttons for send frame program
-void sendFrameButtons(uint8_t channel)
-{
-	// Touch screen controls
-	if (Touch_getXY())
-	{
-		if ((y >= 55) && (y <= 95))
-		{
-			if ((x >= 261) && (x <= 331))
-			{
-				waitForIt(261, 55, 331, 95);
-				// Channel 0
-				drawSendChannel((g_var8[POS0] = 0));
-			}
-			if ((x >= 333) && (x <= 403))
-			{
-				waitForIt(333, 55, 403, 95);
-				// Channel 1
-				drawSendChannel((g_var8[POS0] = 1));
-			}
-			if ((x >= 405) && (x <= 475))
-			{
-				waitForIt(405, 55, 475, 95);
-				// WIFI
-				drawSendChannel((g_var8[POS0] = 2));
-			}
-		}
-		if ((x >= 261) && (x <= 475))
-		{
-			if ((y >= 100) && (y <= 145))
-			{
-				waitForIt(261, 100, 475, 145);
-				// Set ID
-				g_var8[POS2] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 1;
-				isFinished = false;
-			}
-		}
-		if ((y >= 195) && (y <= 250))
-		{
-			if ((x >= 134) && (x <= 175))
-			{
-				waitForIt(134, 195, 175, 250);
-				// Set Data[0]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 2;
-				isFinished = false;
-			}
-			if ((x >= 177) && (x <= 218))
-			{
-				waitForIt(177, 195, 218, 250);
-				// Set Data[1]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 3;
-				isFinished = false;
-			}
-			if ((x >= 220) && (x <= 261))
-			{
-				waitForIt(220, 195, 261, 250);
-				// Set Data[2]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 4;
-				isFinished = false;
-			}
-			if ((x >= 263) && (x <= 304))
-			{
-				waitForIt(263, 195, 304, 250);
-				// Set Data[3]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 5;
-				isFinished = false;
-			}
-			if ((x >= 306) && (x <= 347))
-			{
-				waitForIt(306, 195, 347, 250);
-				// Set Data[4]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 6;
-				isFinished = false;
-			}
-			if ((x >= 350) && (x <= 391))
-			{
-				waitForIt(349, 195, 390, 250);
-				// Set Data[5]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 7;
-				isFinished = false;
-			}
-			if ((x >= 392) && (x <= 433))
-			{
-				waitForIt(392, 195, 433, 250);
-				// Set Data[6]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 8;
-				isFinished = false;
-			}
-			if ((x >= 435) && (x <= 476))
-			{
-				waitForIt(435, 195, 476, 250);
-				// Set Data[7]
-				g_var8[POS2] = 0;
-				g_var16[POS0] = 0;
-				resetKeypad();
-				drawKeypad();
-				state = 9;
-				isFinished = false;
-			}
-		}
-		if ((x >= 135) && (x <= 475))
-		{
-			if ((y >= 255) && (y <= 300))
-			{
-				waitForIt(135, 255, 475, 300);
-				// Send Frame
-				can1.sendCANOut(channel, selectedChannelOut);
-			}
-		}
-	}
-}
-
-// Using this function in sendFrame switch statement to avoid writing it out 8 times
-void setData(uint8_t position)
-{
-	
-	g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
-		{
-			can1.setDataCANOut(g_var16[POS0], position);
-			isFinished = false;
-			state = 0;
-		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
-		{
-			isFinished = false;
-			state = 0;
-		}
-}
-
-// Send CAN Bus frame program
-void sendCANFrame(uint8_t channel)
-{
-	char displayText[10];
-	switch (state)
-	{
-	case 0: // Draw
-		if (!isFinished)
-		{
-			if (graphicLoaderState == 2)
-			{
-				drawSendChannel(g_var8[POS0]);
-				graphicLoaderState++;
-				break;
-			}
-
-			if (drawSendFrame(g_var8[POS0]))
-			{
-				graphicLoaderState++;
-				break;
-			}
-			else
-			{
-				graphicLoaderState = 0;
-				isFinished = true;
-			}
-		}
-		sendFrameButtons(channel);
-		break;
-	case 1: // ID
-		if (!isFinished)
-		{
-			sprintf(displayText, "%03X", can1.getCANOutID());
-			isFinished = true;
-			g_var16[POS1] = 2;
-			g_var8[POS1] = 0xFF;
-			g_var16[POS2] = 0;
-			drawRoundBtn(255, 220, 470, 260, displayText, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		}
-		// Keypad response
-		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS2]); // index, current input total
-		if (g_var8[POS1] == 0xF1) // Accept
-		{
-			can1.setIDCANOut(g_var16[POS2]);
-			drawRoundBtn(255, 220, 470, 260, String(can1.getCANOutID(), 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			isFinished = false;
-			state = 0;
-		}
-		if (g_var8[POS1] == 0xF0) // Cancel
-		{
-			isFinished = false;
-			state = 0;
-		}
-		break;
-	case 2: setData(0);
-		break;
-	case 3: setData(1);
-		break;
-	case 4: setData(2);
-		break;
-	case 5: setData(3);
-		break;
-	case 6: setData(4);
-		break;
-	case 7: setData(5);
-		break;
-	case 8: setData(6);
-		break;
-	case 9: setData(7);
-		break;
-	}
-}
-
-/*============== Timed TX ==============*/
-SchedulerRX RXtimedMSG;
-uint8_t displayedNodePosition[5];
 
 void loadRXMsg()
 {
@@ -894,58 +594,49 @@ bool drawTimedTX()
 		drawSquareBtn(132, 56, 478, 96, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		//drawSquareBtn(133, 56, 271, 95, F("Name"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 5:
-		// drawSquareBtn(202, 56, 271, 95, F("ID"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 6:
-		//drawSquareBtn(271, 56, 340, 95, F("ON"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 7:
-		//drawSquareBtn(340, 56, 409, 95, F("EDIT"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-		break;
-	case 8:
-		//drawSquareBtn(409, 56, 477, 95, F("DEL"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		drawSquareBtn(132, 55, 478, 96, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 9:
+	case 5:
 		drawSquareBtn(132, 99, 478, 141, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 10:
+	case 6:
 		drawSquareBtn(132, 144, 478, 186, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 11:
+	case 7:
 		drawSquareBtn(132, 189, 478, 231, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 12:
+	case 8:
 		drawSquareBtn(132, 279, 211, 318, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;	
-	case 13:
+	case 9:
 		drawSquareBtn(132, 234, 478, 276, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 14:
+	case 10:
 		drawSquareBtn(133, 280, 210, 317, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 15:
+	case 11:
 		drawSquareBtn(260, 279, 351, 318, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 16:
+	case 12:
 		drawSquareBtn(261, 280, 350, 317, F("Add"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 17:
+	case 13:
 		drawSquareBtn(400, 279, 478, 318, F(""), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 18:
+	case 14:
 		drawSquareBtn(401, 280, 477, 317, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
-	case 19:
-		drawTXNode(g_var8[POS3]);
+	case 15:
+		if (hasDrawn = true)
+		{
+			drawTXNode(g_var8[POS3]);
+		}
 		break;
-	case 20:
+	case 16:
 		return false;
 		break;
 	}
+	graphicLoaderState++;
 	return true;
 }
 
@@ -957,18 +648,6 @@ bool drawTXNode(uint8_t index)
 	{
 		if (!RXtimedMSG.node[i].isDel && i < 20)
 		{
-			/*
-			if (RXtimedMSG.node[i].channel > 1)
-			{
-				drawSquareBtn(133, yAxis, 202, yAxis + 40, F("WIFI"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			}
-			else
-			{
-				drawSquareBtn(133, yAxis, 202, yAxis + 40, String(RXtimedMSG.node[i].channel), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-			}
-			*/
-
-			// drawSquareBtn(202, yAxis, 271, yAxis + 40, String(RXtimedMSG.node[i].id, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			drawSquareBtn(133, yAxis, 271, yAxis + 40, RXtimedMSG.node[i].name, menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			RXtimedMSG.node[i].isOn ? drawSquareBtn(271, yAxis, 340, yAxis + 40, F("ON"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawSquareBtn(271, yAxis, 340, yAxis + 40, F("OFF"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 			drawSquareBtn(340, yAxis, 409, yAxis + 40, F("EDIT"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -1058,6 +737,8 @@ bool drawEditTXNode(uint8_t node)
 		break;
 	case 21:
 		drawSendChannel(RXtimedMSG.node[g_var8[POS0]].channel);
+		break;
+	case 22:
 		return false;
 		break;
 	}
@@ -1285,10 +966,7 @@ void timedTX()
 	switch (state)
 	{
 	case 0:
-		if (drawTimedTX())
-		{
-			graphicLoaderState++;
-		}
+		drawTimedTX();
 		timedTXButtons();
 		break;
 	case 1:
@@ -1458,13 +1136,13 @@ void timedTX()
 		g_var8[POS1] = keyboardController(g_var8[POS5]);
 		if (g_var8[POS1] == 0xF1) // Accept
 		{
-			graphicLoaderState = 0;
 			strncpy(RXtimedMSG.node[g_var8[POS0]].name, keyboardInput, 9);
-			//RXtimedMSG.node[g_var8[POS0]].name = keyboardInput;
 			for (uint8_t i = 0; i < 8; i++)
 			{
 				keyboardInput[i] = '\0';
 			}
+
+			graphicLoaderState = 0;
 			state = 2;
 		}
 		else if (g_var8[POS1] == 0xF0) // Cancel
@@ -1719,6 +1397,7 @@ bool drawBaud()
 		return false;
 		break;
 	}
+	graphicLoaderState++;
 	return true;
 }
 
@@ -1754,32 +1433,32 @@ void baudButtons()
 			if ((y >= 60) && (y <= 95))
 			{
 				waitForItRect(140, 60, 300, 95);
-				g_var32[POS0] = baudRates[0];
+				g_var8[POS0] = 0;
 			}
 			if ((y >= 95) && (y <= 130))
 			{
 				waitForItRect(140, 95, 300, 130);
-				g_var32[POS0] = baudRates[1];
+				g_var8[POS0] = 1;
 			}
 			if ((y >= 130) && (y <= 165))
 			{
 				waitForItRect(140, 130, 300, 165);
-				g_var32[POS0] = baudRates[2];
+				g_var8[POS0] = 2;
 			}
 			if ((y >= 165) && (y <= 200))
 			{
 				waitForItRect(140, 165, 300, 200);
-				g_var32[POS0] = baudRates[3];
+				g_var8[POS0] = 3;
 			}
 			if ((y >= 200) && (y <= 235))
 			{
 				waitForItRect(140, 200, 300, 235);
-				g_var32[POS0] = baudRates[4];
+				g_var8[POS0] = 4;
 			}
 			if ((y >= 235) && (y <= 270))
 			{
 				waitForItRect(140, 235, 300, 270);
-				g_var32[POS0] = baudRates[5];
+				g_var8[POS0] = 5;
 			}
 		}
 		if ((y >= 275) && (y <= 315))
@@ -1788,14 +1467,14 @@ void baudButtons()
 			{
 				// CAN0
 				waitForItRect(140, 275, 300, 315);
-				can1.setBaud0(g_var32[POS0]);
+				can1.setBaud0(baudRates[g_var8[POS0]]);
 				drawCurrentBaud();
 			}
 			if ((x >= 305) && (x <= 465))
 			{
 				// CAN21
 				waitForItRect(305, 275, 475, 315);
-				can1.setBaud1(g_var32[POS0]);
+				can1.setBaud1(baudRates[g_var8[POS0]]);
 				drawCurrentBaud();
 			}
 		}
@@ -2043,12 +1722,13 @@ bool drawCANLog()
 		drawSquareBtn(301, 275, 386, 315, F("Split"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawSquareBtn(386, 275, 479, 315, F("Conf"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(386, 275, 479, 315, F("View"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
 		return false;
 		break;
 	}
+	graphicLoaderState++;
 	return true;
 }
 
@@ -2224,10 +1904,48 @@ void CANLogButtons()
 			}
 			if ((x >= 386) && (x <= 479))
 			{
-				// Settings
+				// View
 				waitForItRect(386, 275, 479, 315);
-				//sdCard.readLogFile(fileList[g_var16[POS0]]);
+				sdCard.readLogFileLCD(fileLoc);
 			}
+		}
+	}
+}
+
+void playback()
+{
+	if (state == 0)
+	{
+		CANLogButtons();
+	}
+	else if (state == 1)
+	{
+		char fileLocation[20] = "CANLOG/";
+		strcat(fileLocation, fileList[g_var16[POS0]]);
+		uint8_t input = errorMSGButton(2);
+		switch (input)
+		{
+		case 1:
+			state = 0;
+			sdCard.deleteFile(fileLocation);
+			for (uint8_t i = 0; i < 10; i++)
+			{
+				for (uint8_t j = 0; j < 13; j++)
+				{
+					fileList[i][j] = '\0';
+				}
+			}
+
+			drawCANLogScroll();
+			break;
+		case 2:
+			state = 0;
+			drawCANLogScroll();
+			break;
+		case 3:
+			state = 0;
+			drawCANLogScroll();
+			break;
 		}
 	}
 }
