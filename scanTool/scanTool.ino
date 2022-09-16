@@ -9,19 +9,13 @@
 ===========================================================
 Read Vehicle DTCs
 Read / Clear RZR DTCs
-Switch to FATSD
+Switch to FATSD (maybe)
 Daylight savings option
-
-- SD Capture - 
-Add larger buffer / write block for SD card capture to improve performance
-SD capture file naming
 
 - Playback - 
 Redo GUI to match send
 Share folder with SD capture
-Edit / Del / View files
-Get rid of .txt from list view
-configure: adjust playback speed?
+Edit / View files (view in progress)
 Improve file split (remove/fix added return lines and fix stability)
 ===========================================================
 	End Todo List
@@ -316,6 +310,7 @@ void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t M
 	drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
+// Simplifies getting x and y coords
 bool Touch_getXY()
 {
 	if (myTouch.dataAvailable())
@@ -328,7 +323,7 @@ bool Touch_getXY()
 	return false;
 }
 
-//
+// Detect swipe guesture *blocking*
 uint8_t swipe(uint32_t& minInterval)
 {
 int int_x = 0;
@@ -360,12 +355,12 @@ bool first = false;
 
 	if (millis() - minInterval > 600)
 	{
-		if (int_y < last_y && last_y - int_y > 70)
+		if (int_y < last_y && last_y - int_y > 90)
 		{
 			minInterval = millis();
 			return 1;
 		}
-		else if (int_y > last_y && int_y - last_y > 70)
+		else if (int_y > last_y && int_y - last_y > 90)
 		{
 			minInterval = millis();
 			return 2;
@@ -2720,6 +2715,7 @@ void drawErrorMSG(String title, String eMessage1, String eMessage2)
 	drawRoundBtn(285, 180, 405, 215, "Cancel", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 }
 
+// Notification message
 void drawErrorMSG2(String title, String eMessage1, String eMessage2)
 {
 	drawSquareBtn(145, 100, 401, 220, "", menuBackground, menuBtnColor, menuBtnColor, CENTER);
@@ -2804,29 +2800,13 @@ void backgroundProcess()
 /*=========================================================
 	Main loop
 ===========================================================*/
-uint32_t testtimers = 0;
+
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
-	// SD Card testing
-	/*
-	if (millis() - testtimers > 1000)
-	{
-		SerialUSB.println(Can0.available());
-		testtimers = millis();
-	}
-	*/
 	// GUI
 	pageControl();
 
 	// Background Processes
 	backgroundProcess();
 }
-
-/*
-irqLock();
-{
-	result = removeFromRingBuffer(rxRing, msg) ? 1 : 0;
-}
-irqRelease();
-*/
