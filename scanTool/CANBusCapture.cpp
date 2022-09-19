@@ -627,7 +627,7 @@ bool drawTimedTX()
 		drawSquareBtn(401, 280, 477, 317, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 15:
-		if (hasDrawn = true)
+		if (hasDrawn == true)
 		{
 			drawTXNode(g_var8[POS3]);
 		}
@@ -636,6 +636,7 @@ bool drawTimedTX()
 		return false;
 		break;
 	}
+
 	graphicLoaderState++;
 	return true;
 }
@@ -742,6 +743,7 @@ bool drawEditTXNode(uint8_t node)
 		return false;
 		break;
 	}
+
 	graphicLoaderState++;
 	return true;
 }

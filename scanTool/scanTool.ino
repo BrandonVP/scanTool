@@ -612,11 +612,12 @@ void pageControl()
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
+			
 			if (drawTimedTX())
 			{
 				break;
 			}
-
+			
 			error_t e = false;
 			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected index
 			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // User input
