@@ -49,7 +49,7 @@ bool drawSettings()
         drawRoundBtn(140, 245, 305, 295, F("Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(310, 245, 475, 295, F("ConnectA"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 245, 475, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -195,21 +195,7 @@ void settingsButtons()
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(310, 245, 475, 295);
-                // Connect Dongle ALL
-                Serial3.write(0xCA);
-                Serial3.write(0xCC);
-                Serial3.write(0xFF);
-                Serial3.write(0xFF);
-                Serial3.write(0xFF);
-                Serial3.write(0xFF);
-                Serial3.write(0xFF);
-                Serial3.write(0xFF);
-                delay(100);
-                // WiFi Reset
-                Serial3.write(0xBA);
-                Serial3.write(0xBF);
-                if (Serial3.read() == 0xFF);
-				// Confirmation
+                // Unused
             }
         }
     }

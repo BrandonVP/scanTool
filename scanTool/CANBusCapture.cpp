@@ -35,19 +35,19 @@ bool drawCANBus()
 		drawRoundBtn(140, 135, 305, 185, F("Cap Files"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(310, 135, 475, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 135, 475, 185, F("Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
 		drawRoundBtn(140, 190, 305, 240, F("FilterMask"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 190, 475, 240, F("Auto Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
-		drawRoundBtn(140, 245, 305, 295, F("Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(140, 245, 305, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
-		drawRoundBtn(310, 245, 475, 295, F("Auto Baud"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 245, 475, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 10:
 		drawSquareBtn(150, 301, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -94,9 +94,7 @@ void CANBusButtons()
 			if ((y >= 245) && (y <= 295))
 			{
 				waitForIt(140, 245, 305, 295);
-				// Baud
-				graphicLoaderState = 0;
-				nextPage = 5;
+				// Unused
 			}
 		}
 		if ((x >= 310) && (x <= 475))
@@ -111,18 +109,20 @@ void CANBusButtons()
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(310, 135, 475, 185);
-				// Unused
+				// Baud
+				graphicLoaderState = 0;
+				nextPage = 5;
 			}
 			if ((y >= 190) && (y <= 240))
 			{
 				waitForIt(310, 190, 475, 240);
-				// Unused
+				// Find Baud
+				findBaud();
 			}
 			if ((y >= 245) && (y <= 295))
 			{
 				waitForIt(310, 245, 475, 295);
-				// Find Baud
-				findBaud();
+				// Unused
 			}
 		}
 	}

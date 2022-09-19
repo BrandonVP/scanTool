@@ -9,14 +9,25 @@
 ===========================================================
 Read Vehicle DTCs
 Read / Clear RZR DTCs
-Switch to FATSD (maybe)
-Daylight savings option
+Daylight savings option (clock menu in settings)
+
+- SD -
+Save block when ending capture
+
+- WiFi - 
+delete dongle confirmation
+
+- Swipe -
+Convert to non blocking
+Use timer to detect continuous touch
 
 - Playback - 
 Redo GUI to match send
-Share folder with SD capture
 Edit / View files (view in progress)
-Improve file split (remove/fix added return lines and fix stability)
+
+- Memory - 
+Reduce usage
+
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -89,13 +100,13 @@ const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 26843
 // List of baud rates for Baud page
 const uint32_t baudRates[6] = { 1000000, 800000, 500000, 250000, 125000, 100000 };
 
+// TODO: Why are these needed? Can the same function be done using the library?
 // Filter range / Filter Mask
 uint32_t CAN0Filter = 0x000;
 uint32_t CAN0Mask = 0x7FF;
 uint32_t CAN1Filter = 0x000;
 uint32_t CAN1Mask = 0x7FF;
 
-// TODO need more than 10
 // Holds CAN Bus capture replay filenames
 char fileList[20][13];
 
@@ -397,7 +408,8 @@ void pageControl()
 		break;
 
 	case 1: // Capture
-		// TODO: Fix this hot mess. Need to be in standard format like the rest of pages.
+		// TODO: Fix this hot mess. Need to be in standard format like the rest of the pages.
+		// Draw page and lock variables
 		switch (state)
 		{
 		case 0:
@@ -449,7 +461,7 @@ void pageControl()
 			break;
 		}
 
-		// Call buttons or state machine
+		// Call buttons or page method
 		CaptureButtons();
 
 		// Release any variable locks if page changed
@@ -516,7 +528,7 @@ void pageControl()
 		// Call buttons or page method
 		
 
-		// Release variable Locks if page changed
+		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
 			hasDrawn = false;
@@ -1845,53 +1857,6 @@ void drawMenu()
 	drawRoundBtn(5, 259, 125, 312, F("SETTING"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 }
 
-// Button functions for main menu
-void menuButtons()
-{
-	// Touch screen controls
-	if (Touch_getXY())
-	{
-		if ((x >= 5) && (x <= 125))
-		{
-			if ((y >= 32) && (y <= 83))
-			{
-				// CANBUS
-				waitForIt(5, 32, 125, 83);
-				nextPage = 0;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 88) && (y <= 140))
-			{
-				// VEHTOOL
-				waitForIt(5, 88, 125, 140);
-				nextPage = 9;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 145) && (y <= 197))
-			{
-				// RZRTOOL
-				waitForIt(5, 145, 125, 197);
-				nextPage = 18;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 202) && (y <= 254))
-			{
-				// EXTRAFN
-				waitForIt(5, 202, 125, 254);
-				nextPage = 27;
-				graphicLoaderState = 0;
-			}
-			if ((y >= 259) && (y <= 312))
-			{
-				// SETTING
-				waitForIt(5, 259, 125, 312);
-				nextPage = 36;
-				graphicLoaderState = 0;
-			}
-		}
-	}
-}
-
 // Call before using keypad to clear out old values from array used to shift input
 void resetKeypad()
 {
@@ -1900,6 +1865,7 @@ void resetKeypad()
 	keypadInput[i] = 0;
 	}
 }
+
 /*============== Hex Keypad ==============*/
 // User input keypad
 void drawKeypad()
@@ -2762,6 +2728,53 @@ uint8_t errorMSGButton(uint8_t returnPage)
 /*=========================================================
 	Background Processes
 ===========================================================*/
+// Button functions for main menu
+void menuButtons()
+{
+	// Touch screen controls
+	if (Touch_getXY())
+	{
+		if ((x >= 5) && (x <= 125))
+		{
+			if ((y >= 32) && (y <= 83))
+			{
+				// CANBUS
+				waitForIt(5, 32, 125, 83);
+				nextPage = 0;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 88) && (y <= 140))
+			{
+				// VEHTOOL
+				waitForIt(5, 88, 125, 140);
+				nextPage = 9;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 145) && (y <= 197))
+			{
+				// RZRTOOL
+				waitForIt(5, 145, 125, 197);
+				nextPage = 18;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 202) && (y <= 254))
+			{
+				// EXTRAFN
+				waitForIt(5, 202, 125, 254);
+				nextPage = 27;
+				graphicLoaderState = 0;
+			}
+			if ((y >= 259) && (y <= 312))
+			{
+				// SETTING
+				waitForIt(5, 259, 125, 312);
+				nextPage = 36;
+				graphicLoaderState = 0;
+			}
+		}
+	}
+}
+
 // Displays time on menu
 void updateTime()
 {
