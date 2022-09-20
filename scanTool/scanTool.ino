@@ -1748,7 +1748,7 @@ void setup()
 	// Only drawn at startup
 	drawMenu();
 
-	// Draw the Hypertech logo
+	// Draw the ScanTool logo
 	bmpDraw("System/HYPER.bmp", 0, 0);
 	loadRXMsg();
 	loadMACs();
