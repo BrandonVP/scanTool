@@ -17,10 +17,6 @@ Save block when ending capture
 - WiFi - 
 delete dongle confirmation
 
-- Swipe -
-Convert to non blocking
-Use timer to detect continuous touch
-
 - Playback - 
 Redo GUI to match send
 Edit / View files (view in progress)
@@ -334,22 +330,23 @@ bool Touch_getXY()
 	return false;
 }
 
-// Detect swipe guesture *blocking*
-uint8_t swipe(uint32_t& minInterval)
+uint32_t tester12 = 0;
+// Detect swipe guesture
+static int last_y = 0;
+uint8_t swipe(uint32_t& minInterval, uint32_t& testTimer1, uint8_t& initiated, uint16_t& int_x, uint16_t& int_y, uint16_t& last_x, uint16_t& last_y)
 {
-int int_x = 0;
-int int_y = 0;
-int last_x = 0;
-int last_y = 0;
-bool first = false;
-
-	while (Touch_getXY())
+if (millis() - tester12 > 500)
+{
+	SerialUSB.println(myTouch.dataAvailable());
+	tester12 = millis();
+}
+	if (Touch_getXY() == true)
 	{
-		if (!first)
+		if (!initiated)
 		{
 			int_x = x;
 			int_y = y;
-			first = true;
+			initiated = true;
 		}
 
 		if (x > 0)
@@ -360,20 +357,29 @@ bool first = false;
 		{
 			last_y = y;
 		}
-
-		backgroundProcess();
+		testTimer1 = millis();
 	}
 
-	if (millis() - minInterval > 600)
+	if (initiated == true && millis() - testTimer1 > 100)
 	{
 		if (int_y < last_y && last_y - int_y > 90)
 		{
 			minInterval = millis();
+			initiated = false;
+			int_x = 0;
+			int_y = 0;
+			last_x = 0;
+			last_y = 0;
 			return 1;
 		}
 		else if (int_y > last_y && int_y - last_y > 90)
 		{
 			minInterval = millis();
+			initiated = false;
+			int_x = 0;
+			int_y = 0;
+			last_x = 0;
+			last_y = 0;
 			return 2;
 		}
 	}
@@ -663,7 +669,14 @@ void pageControl()
 
 			error_t e = false;
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Min swipe interval timer
+			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : e = true; // Swipe timer
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 60 : e = true; // LCD Print
+			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true; // Swipe timer
+			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : e = true; // Swipe timer
+			(lockVar16(LOCK3)) ? g_var16[POS3] = 0 : e = true; // Swipe timer
+			(lockVar16(LOCK4)) ? g_var16[POS4] = 0 : e = true; // Swipe timer
 			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Swipe input
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Swipe bool
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
@@ -675,9 +688,14 @@ void pageControl()
 		}
 
 		// Call buttons or page method
-		readInCANMsg(selectedChannelOut);
-		g_var8[POS0] = swipe(g_var32[POS0]);
-		if (g_var8[POS0])
+		g_var8[POS0] = swipe(g_var32[POS0], g_var32[POS1], g_var8[POS1], g_var16[POS1], g_var16[POS2], g_var16[POS3], g_var16[POS4]);
+
+		if (!Touch_getXY())
+		{
+			readInCANMsg(selectedChannelOut);
+		}
+		
+		if (g_var8[POS0] > 0 && !Touch_getXY())
 		{
 			drawReadInCANLCD();
 		}
@@ -686,7 +704,14 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
+			unlockVar16(LOCK0);
+			unlockVar16(LOCK1);
+			unlockVar16(LOCK2);
+			unlockVar16(LOCK3);
+			unlockVar16(LOCK4);
 			unlockVar32(LOCK0);
+			unlockVar32(LOCK1);
 			hasDrawn = false;
 			page = nextPage;
 		}
