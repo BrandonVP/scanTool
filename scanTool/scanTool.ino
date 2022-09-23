@@ -20,6 +20,7 @@ delete dongle confirmation
 - Playback - 
 Redo GUI to match send
 Function menu (split, filter, edit?)
+Views stops working at end of file 
 
 - Memory - 
 Reduce usage
@@ -718,8 +719,18 @@ void pageControl()
 		{
 			readInCANMsg(selectedChannelOut);
 		}
-		
-		
+
+		if ((g_var8[POS0] == SWIPE_DOWN || g_var8[POS0] == SWIPE_UP) && !Touch_getXY())
+		{
+			g_var16[POS0] = 60;
+			drawReadInCANLCD();
+		}
+		if (g_var8[POS0] == SWIPE_RIGHT && !Touch_getXY())
+		{
+			state = 0;
+			nextPage = 1;
+			graphicLoaderState = 0;
+		}
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
