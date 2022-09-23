@@ -50,6 +50,14 @@
 //#define DEBUG_ERROR(x)  Serial.println(x);
 #define DEBUG_ERROR(x)  SerialUSB.println(x);
 
+typedef enum
+{
+    SWIPE_DOWN = 0x01,
+    SWIPE_UP = 0x02,
+    SWIPE_RIGHT = 0x03,
+    SWIPE_LEFT = 0x04
+}   SWIPE;
+
 // Harware Objects
 extern CANBus can1;
 extern SDCard sdCard;

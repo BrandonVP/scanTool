@@ -1937,7 +1937,6 @@ void playback()
 					fileList[i][j] = '\0';
 				}
 			}
-
 			drawCANLogScroll();
 			break;
 		case 2:

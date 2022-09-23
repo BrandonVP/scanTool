@@ -330,57 +330,64 @@ bool Touch_getXY()
 	return false;
 }
 
-uint32_t tester12 = 0;
 // Detect swipe guesture
-static int last_y = 0;
-uint8_t swipe(uint32_t& minInterval, uint32_t& testTimer1, uint8_t& initiated, uint16_t& int_x, uint16_t& int_y, uint16_t& last_x, uint16_t& last_y)
+uint8_t swipe(uint32_t& lastTouch, uint8_t& initiated, uint16_t& initial_x, uint16_t& initial_y, uint16_t& last_x, uint16_t& last_y)
 {
-if (millis() - tester12 > 500)
-{
-	SerialUSB.println(myTouch.dataAvailable());
-	tester12 = millis();
-}
 	if (Touch_getXY() == true)
 	{
 		if (!initiated)
 		{
-			int_x = x;
-			int_y = y;
+			initial_x = x;
+			initial_y = y;
 			initiated = true;
 		}
-
 		if (x > 0)
 		{
 			last_x = x;
 		}
-		if (x > 0)
+		if (y > 0)
 		{
 			last_y = y;
 		}
-		testTimer1 = millis();
+		lastTouch = millis();
 	}
-
-	if (initiated == true && millis() - testTimer1 > 100)
+	if (initiated == true && millis() - lastTouch > 150)
 	{
-		if (int_y < last_y && last_y - int_y > 90)
+		if (initial_y < last_y && last_y - initial_y > 90)
 		{
-			minInterval = millis();
 			initiated = false;
-			int_x = 0;
-			int_y = 0;
+			initial_x = 0;
+			initial_y = 0;
 			last_x = 0;
 			last_y = 0;
-			return 1;
+			return SWIPE_DOWN;
 		}
-		else if (int_y > last_y && int_y - last_y > 90)
+		else if (initial_y > last_y && initial_y - last_y > 90)
 		{
-			minInterval = millis();
 			initiated = false;
-			int_x = 0;
-			int_y = 0;
+			initial_x = 0;
+			initial_y = 0;
 			last_x = 0;
 			last_y = 0;
-			return 2;
+			return SWIPE_UP;
+		}
+		if (initial_x < last_x && last_x - initial_x > 80)
+		{
+			initiated = false;
+			initial_x = 0;
+			initial_y = 0;
+			last_x = 0;
+			last_y = 0;
+			return SWIPE_RIGHT;
+		}
+		else if (initial_x > last_x && initial_x - last_x > 80)
+		{
+			initiated = false;
+			initial_x = 0;
+			initial_y = 0;
+			last_x = 0;
+			last_y = 0;
+			return SWIPE_LEFT;
 		}
 	}
 return 0;
@@ -668,15 +675,14 @@ void pageControl()
 			drawReadInCANLCD();
 
 			error_t e = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Min swipe interval timer
-			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : e = true; // Swipe timer
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 60 : e = true; // LCD Print
-			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true; // Swipe timer
-			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : e = true; // Swipe timer
-			(lockVar16(LOCK3)) ? g_var16[POS3] = 0 : e = true; // Swipe timer
-			(lockVar16(LOCK4)) ? g_var16[POS4] = 0 : e = true; // Swipe timer
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Swipe input
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Swipe bool
+			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : e = true; // Time of last touch
+			(lockVar16(LOCK0)) ? g_var16[POS0] = 60 : e = true; // LCD Print line starts at y coord 60
+			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true; // Initial x postition
+			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : e = true; // Initial y postition
+			(lockVar16(LOCK3)) ? g_var16[POS3] = 0 : e = true; // Last x postition
+			(lockVar16(LOCK4)) ? g_var16[POS4] = 0 : e = true; // Last y postition
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Swipe input direction
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Bool to track initial x/y position
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
@@ -688,16 +694,22 @@ void pageControl()
 		}
 
 		// Call buttons or page method
-		g_var8[POS0] = swipe(g_var32[POS0], g_var32[POS1], g_var8[POS1], g_var16[POS1], g_var16[POS2], g_var16[POS3], g_var16[POS4]);
+		g_var8[POS0] = swipe(g_var32[POS1], g_var8[POS1], g_var16[POS1], g_var16[POS2], g_var16[POS3], g_var16[POS4]);
 
 		if (!Touch_getXY())
 		{
 			readInCANMsg(selectedChannelOut);
 		}
 		
-		if (g_var8[POS0] > 0 && !Touch_getXY())
+		if (( g_var8[POS0] == SWIPE_DOWN || g_var8[POS0] == SWIPE_UP ) && !Touch_getXY())
 		{
 			drawReadInCANLCD();
+		}
+		if (g_var8[POS0] == SWIPE_RIGHT && !Touch_getXY())
+		{
+			state = 0;
+			nextPage = 1;
+			graphicLoaderState = 0;
 		}
 
 		// Release any variable locks if page changed
