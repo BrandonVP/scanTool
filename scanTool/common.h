@@ -133,4 +133,6 @@ extern void resetKeypad();
 extern uint8_t keyboardController(uint8_t&);
 extern void drawkeyboard();
 extern char keyboardInput[9];
+extern uint8_t swipe(uint32_t& lastTouch, uint8_t& initiated, uint16_t& initial_x, uint16_t& initial_y, uint16_t& last_x, uint16_t& last_y);
+
 #endif // EXTERN_H

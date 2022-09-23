@@ -19,7 +19,7 @@ delete dongle confirmation
 
 - Playback - 
 Redo GUI to match send
-Edit / View files (view in progress)
+Function menu (split, filter, edit?)
 
 - Memory - 
 Reduce usage
@@ -496,8 +496,17 @@ void pageControl()
 			}
 
 			error_t e = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Scroll index
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // File read index
+			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : e = true; // Time of last touch
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // fileList index
+			(lockVar16(LOCK1)) ? g_var16[POS1] = 60 : e = true; // LCD Print line starts at y coord 60
+			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : e = true; // Initial x postition
+			(lockVar16(LOCK3)) ? g_var16[POS3] = 0 : e = true; // Initial y postition
+			(lockVar16(LOCK4)) ? g_var16[POS4] = 0 : e = true; // Last x postition
+			(lockVar16(LOCK5)) ? g_var16[POS5] = 0 : e = true; // Last y postition
+			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Scroll index
+			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Swipe input direction
+			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : e = true; // Bool to track initial x/y position
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
@@ -517,7 +526,16 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar8(LOCK0);
+			unlockVar8(LOCK1);
+			unlockVar8(LOCK2);
 			unlockVar16(LOCK0);
+			unlockVar16(LOCK1);
+			unlockVar16(LOCK2);
+			unlockVar16(LOCK3);
+			unlockVar16(LOCK4);
+			unlockVar16(LOCK5);
+			unlockVar32(LOCK0);
+			unlockVar32(LOCK1);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -701,16 +719,7 @@ void pageControl()
 			readInCANMsg(selectedChannelOut);
 		}
 		
-		if (( g_var8[POS0] == SWIPE_DOWN || g_var8[POS0] == SWIPE_UP ) && !Touch_getXY())
-		{
-			drawReadInCANLCD();
-		}
-		if (g_var8[POS0] == SWIPE_RIGHT && !Touch_getXY())
-		{
-			state = 0;
-			nextPage = 1;
-			graphicLoaderState = 0;
-		}
+		
 
 		// Release any variable locks if page changed
 		if (nextPage != page)

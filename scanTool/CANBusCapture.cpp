@@ -1843,6 +1843,14 @@ void CANLogButtons()
 				waitForItRect(135, 235, 420, 270);
 				g_var16[POS0] = 5 + g_var8[POS0];
 			}
+			/*
+			SerialUSB.print("g_var16[POS0]: ");
+			SerialUSB.println(g_var16[POS0]);
+			SerialUSB.print("g_var8[POS0]: ");
+			SerialUSB.println(g_var8[POS0]);
+			SerialUSB.print("fileList[g_var16[POS0]]: ");
+			SerialUSB.println(fileList[g_var16[POS0]]);
+			*/
 		}
 		if ((x >= 425) && (x <= 475))
 		{
@@ -1908,7 +1916,8 @@ void CANLogButtons()
 			{
 				// View
 				waitForItRect(386, 275, 479, 315);
-				sdCard.readLogFileLCD(fileLoc);
+				sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
+				state = 2;
 			}
 		}
 	}
@@ -1947,6 +1956,42 @@ void playback()
 			state = 0;
 			drawCANLogScroll();
 			break;
+		}
+	}
+	if (state == 2)
+	{
+		g_var8[POS0] = swipe(g_var32[POS1], g_var8[POS2], g_var16[POS2], g_var16[POS3], g_var16[POS4], g_var16[POS5]);
+		if (g_var8[POS0] == SWIPE_DOWN && !Touch_getXY())
+		{
+			char fileLoc[20] = "CANLOG/";
+			strcat(fileLoc, fileList[g_var16[POS0]]);
+			sdCard.readLogFileLCD(fileLoc, g_var32[POS0], true);
+		}
+		if (g_var8[POS0] == SWIPE_UP && !Touch_getXY())
+		{
+			char fileLoc[20] = "CANLOG/";
+			strcat(fileLoc, fileList[g_var16[POS0]]);
+			sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
+		}
+		if (g_var8[POS0] == SWIPE_RIGHT && !Touch_getXY())
+		{
+			state = 3;
+			graphicLoaderState = 0;
+			g_var8[POS0] = 0;
+			g_var32[POS0] = 0;
+		}
+		if (g_var8[POS0] == SWIPE_LEFT && !Touch_getXY())
+		{
+			// Looking for work
+		}
+	}
+	if (state == 3)
+	{
+		if (!drawCANLog())
+		{
+			state = 0;
+			
+			drawCANLogScroll();
 		}
 	}
 }

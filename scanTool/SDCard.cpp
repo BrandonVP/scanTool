@@ -404,7 +404,7 @@ void SDCard::readLogFile(char* filename)
 }
 
 // Reads in CAN Capture
-void SDCard::readLogFileLCD(char* filename)
+void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 {
 	char tempStr[MSG_STRING_LENGTH];
 	char printString[MSG_STRING_LENGTH];
@@ -414,63 +414,71 @@ void SDCard::readLogFileLCD(char* filename)
 	unsigned int length = 0;
 	unsigned int msg[8];
 	int lineIndex = 60;
-	int count = 0;
 
 	File myFile = SD.open(filename, FILE_READ);
-	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	myFile.seek(index);
+	
 
 	myGLCD.setFont(SmallFont);
 
-	while (myFile.available())
+	// Serving up some tasty pasta with this magical numbered spaghetti code! Yum!!!
+	if (isBackwards && myFile.available())
 	{
-		myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
-		sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
-			&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
-		//SerialUSB.println(tempStr);
-		SerialUSB.println(myFile.position());
-		sprintf(printString, "%5d %6d %03X %d %02X %02X %02X %02X %02X %02X %02X %02X", messageNum, time, id, length, msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
-		if (count < 17)
+		for (uint8_t k = 0; k < 35; k++) // 1 more than it should be to dump garbage
 		{
+			//SerialUSB.println(myFile.position());
+			if (myFile.position() > 66) // So tasty!
+			{
+				while (myFile.peek() != '\n') // Go backwards until it detects the previous line separator
+					myFile.seek(myFile.position() - 1);
+
+				myFile.seek(myFile.position() - 1);
+			}
+			else
+			{
+				myFile.seek(0); // Go to 0 instead of a impossible(?) negative position
+			}
+		}
+		if (myFile.position() != 0)
+		{
+			myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
+		}
+		// The problem is the last seek ends the position just before \n which mean the first read is garbage
+		// Current solution is code backs up 1 too many iterations then reads the garbage before proceeding
+		// This solutions fails for the first position because it would back up below 0, hence the > 66 check 
+		// because each line is 67 positions long.
+		// TODO: The correct solution is to end at \n so the next read will be the next line and reduce the messy code.
+	} 
+
+	if ((myFile.available()))
+	{
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	}
+	
+	for (uint8_t i = 0; i < 17; i++)
+	{
+		if ((myFile.available()))
+		{
+			//SerialUSB.println(myFile.position());
+			myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
+			if (isBackwards)
+			{
+				//SerialUSB.println(tempStr);
+			}
+			sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
+				&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
+			//SerialUSB.println(tempStr);
+			
+			sprintf(printString, "%5d %6d %03X %d %02X %02X %02X %02X %02X %02X %02X %02X", messageNum, time, id, length, msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
+			
 			myGLCD.setBackColor(VGA_WHITE);
 			myGLCD.setColor(VGA_WHITE);
 			myGLCD.setColor(VGA_BLACK);
 			myGLCD.print(printString, 135, lineIndex);
 			lineIndex += 15;
-			count++;
 		}
-		else
-		{
-			count = 0;
-			lineIndex = 60;
-			for (uint8_t i = 0; i < 5; i++)
-			{
-				while (myFile.peek() != '\n') // Go backwards until we detect the previous line separator
-					myFile.seek(myFile.position() - 1);
-
-				if (i < 4)
-				{
-					myFile.seek(myFile.position() - 1);
-				}
-				
-			}
-			
-		}
-
-
-		if (Touch_getXY())
-		{
-			if ((y >= 275) && (y <= 315))
-			{
-				if ((x >= 131) && (x <= 216))
-				{
-					// Stop
-					waitForItRect(131, 275, 216, 315);
-					return;
-				}
-			}
-		}
-		backgroundProcess();
 	}
+	index = myFile.position();
 	myFile.close();
 	myGLCD.setFont(BigFont);
 }
