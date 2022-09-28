@@ -35,7 +35,7 @@ bool drawExtraFN()
         drawRoundBtn(140, 190, 305, 240, F("Keypad D"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 190, 475, 240, F("Test"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
         drawRoundBtn(140, 245, 305, 295, F("Dongle F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
@@ -52,6 +52,26 @@ bool drawExtraFN()
     }
     graphicLoaderState++;
     return true;
+}
+
+uint32_t a1 = 0;
+uint32_t fnA()
+{
+    a1 = millis();
+    return a1;
+}
+
+uint32_t fnB()
+{
+    uint32_t b1 = 0;
+    b1 = millis();
+    return b1;
+}
+
+uint32_t fnC()
+{
+    uint32_t c1 = millis();
+    return c1;
 }
 
 // Buttons to start extra function programs
@@ -109,7 +129,68 @@ void extraFNButtons()
             {
                 waitForIt(310, 190, 475, 240);
                 // Unused
+                SerialUSB.println("");
                 //nextPage = 33;
+                SerialUSB.println("Starting Test");
+                const uint32_t loops = 10000000;
+                uint32_t timer99 = 0;
+
+                uint32_t timeA = 0;
+                uint32_t timeB = 0;
+                uint32_t timeC = 0;
+
+                uint32_t result = 0;
+                
+                timer99 = millis();
+                for (uint32_t i = 0; i < loops; i++)
+                {
+                    result = fnA();
+                    if (i == loops - 1)
+                    {
+                        SerialUSB.print("Result Value: ");
+                        SerialUSB.println(result);
+                    }
+                }
+                timeA = millis() - timer99;
+                SerialUSB.print("Time: ");
+                SerialUSB.println(timeA);
+
+                SerialUSB.println("");
+               
+                timer99 = millis();
+                for (uint32_t i = 0; i < loops; i++)
+                {
+                    result = fnB();
+                    if (i == loops - 1)
+                    {
+                        SerialUSB.print("Result Value: ");
+                        SerialUSB.println(result);
+                    }
+                }
+                timeB = millis() - timer99;
+                SerialUSB.print("Time: ");
+                SerialUSB.println(timeB);
+
+                SerialUSB.println("");
+
+                timer99 = millis();
+                for (uint32_t i = 0; i < loops; i++)
+                {
+                    result = fnC();
+                    if (i == loops - 1)
+                    {
+                        SerialUSB.print("Result Value: ");
+                        SerialUSB.println(result);
+                    }
+                }
+                timeC = millis() - timer99;
+                SerialUSB.print("Time: ");
+                SerialUSB.println(timeC);
+               
+
+
+               
+
             }
             if ((y >= 245) && (y <= 295))
             {
@@ -250,12 +331,19 @@ void sendMSG()
     uint8_t dataOut2[8] = { 0x42, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x00, 0x00 };
     uint8_t dataOut3[8] = { 0x42, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D };
     uint8_t dataOut4[8] = { 0x42, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xFF };
-    uint8_t dataOut5[8] = { 0x42, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
+    uint8_t dataOut5[8] = { 0xC2, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
     uint8_t dataOut6[8] = { 0x42, 0xBC, 0xEF, 0xDA, 0xCE, 0xAF, 0xEB, 0xCD };
-    uint8_t dataOut7[8] = { 0x42, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22 };
+    uint8_t dataOut7[8] = { 0x41, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22 };
     uint8_t dataOut8[8] = { 0x42, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11 };
 
-    can1.sendFrame(g_var16[POS0], dataOut1, 8, false);
+    if (g_var16[POS0] % 2)
+    {
+        can1.sendFrame(g_var16[POS0], dataOut1, 8, false);
+    }
+    else
+    {
+        can1.sendFrame(g_var16[POS0], dataOut2, 8, false);
+    }
 }
 
 void MSGSpam()

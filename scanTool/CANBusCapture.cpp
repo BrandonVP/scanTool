@@ -518,35 +518,104 @@ void drawReadInCANLCD()
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
-// Capture to LCD, max rate without filling buffer is 22ms per message (slow), useful for bench testings or filtered traffic
+const size_t N = 2;
+void hex2String(uint8_t value, char(&result)[N])
+{
+	//uint8_t hNibble = ((value >> 4) & 0x0f);
+	//uint8_t lNibble = (value & 0x0f);
+
+	if (((value >> 4) & 0x0f) < 10)
+	{
+		result[1] = ((value >> 4) & 0x0f) + 48;
+	}
+	else
+	{
+		result[1] = ((value >> 4) & 0x0f) + 55;
+	}
+	if ((value & 0x0f) < 10)
+	{
+		result[0] = (value & 0x0f) + 48;
+	}
+	else
+	{
+		result[0] = (value & 0x0f) + 55;
+	}
+}
+
+// Capture to LCD, max rate without filling buffer is 12ms per message (slow), useful for bench testings or filtered traffic
 void readInCANMsg(uint8_t channel)
 {
-	myGLCD.setBackColor(VGA_WHITE);
-	myGLCD.setFont(SmallFont);
+	//uint32_t test = millis();
+	
 	uint8_t rxBuf[8];
 	uint32_t rxId;
 	uint8_t len;
 	if (can1.LCDOutCAN(rxBuf, len, rxId, channel))
 	{
-		char printString[40];
+		myGLCD.setFont(SmallFont);
+		myGLCD.setBackColor(VGA_WHITE);
 
 		if (g_var16[POS0] != 60)
 		{
 			myGLCD.setColor(VGA_WHITE);
-			myGLCD.fillRect(140, (g_var16[POS0] - 15), 145, (g_var16[POS0] - 5));
+			myGLCD.fillRect(140, (g_var16[POS0] - 15), 144, (g_var16[POS0] - 5));
 			myGLCD.setColor(VGA_BLACK);
-			myGLCD.fillRect(140, (g_var16[POS0]), 145, (g_var16[POS0] + 10));
+			myGLCD.fillRect(140, (g_var16[POS0]), 144, (g_var16[POS0] + 10));
 		}
 		else
 		{
 			myGLCD.setColor(VGA_WHITE);
-			myGLCD.fillRect(140, 300, 145, 310);
+			myGLCD.fillRect(140, 300, 144, 310);
 			myGLCD.setColor(VGA_BLACK);
-			myGLCD.fillRect(140, (g_var16[POS0]), 145, (g_var16[POS0] + 10));
+			myGLCD.fillRect(140, (g_var16[POS0]), 144, (g_var16[POS0] + 10));
 		}
 		
-		sprintf(printString, "%03X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
-		myGLCD.print(printString, 151, g_var16[POS0]);
+		// LCD slows down printing this large char
+		// Rolling it out below reduced function call by 11ms!
+		// TODO: Writing a function to convert the hex value to char might decrease function call time
+		//char printString[40];
+		//sprintf(printString, "%03X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
+		//myGLCD.print(printString, 151, g_var16[POS0]);
+
+		char temp1[3];
+		char temp2[2];
+
+		sprintf(temp1, "%03X", rxId);
+		myGLCD.print(temp1, 151, g_var16[POS0]);
+
+		myGLCD.printNumI(len, 196, g_var16[POS0]);
+
+		//hex2String(rxBuf[0], temp2);
+		sprintf(temp2, "%02X", rxBuf[0]);
+		myGLCD.print(temp2, 226, g_var16[POS0]);
+
+		//hex2String(rxBuf[1], temp2);
+		sprintf(temp2, "%02X", rxBuf[1]);
+		myGLCD.print(temp2, 256, g_var16[POS0]);
+
+		//hex2String(rxBuf[2], temp2);
+		sprintf(temp2, "%02X", rxBuf[2]);
+		myGLCD.print(temp2, 286, g_var16[POS0]);
+
+		//hex2String(rxBuf[3], temp2);
+		sprintf(temp2, "%02X", rxBuf[3]);
+		myGLCD.print(temp2, 316, g_var16[POS0]);
+
+		//hex2String(rxBuf[4], temp2);
+		sprintf(temp2, "%02X", rxBuf[4]);
+		myGLCD.print(temp2, 346, g_var16[POS0]);
+
+		//hex2String(rxBuf[5], temp2);
+		sprintf(temp2, "%02X", rxBuf[5]);
+		myGLCD.print(temp2, 376, g_var16[POS0]);
+
+		//hex2String(rxBuf[6], temp2);
+		sprintf(temp2, "%02X", rxBuf[6]);
+		myGLCD.print(temp2, 406, g_var16[POS0]);
+
+		//hex2String(rxBuf[7], temp2);
+		sprintf(temp2, "%02X", rxBuf[7]);
+		myGLCD.print(temp2, 436, g_var16[POS0]);
 
 		if (g_var16[POS0] < 300)
 		{
@@ -556,8 +625,12 @@ void readInCANMsg(uint8_t channel)
 		{
 			g_var16[POS0] = 60;
 		}
+		myGLCD.setFont(BigFont);
+
+		//uint32_t temp = millis() - test;
+		//SerialUSB.print("Time: ");
+		//SerialUSB.println(temp);
 	}
-	myGLCD.setFont(BigFont);
 }
 
 /*============== Timed TX ==============*/

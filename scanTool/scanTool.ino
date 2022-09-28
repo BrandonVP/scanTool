@@ -714,12 +714,6 @@ void pageControl()
 
 		// Call buttons or page method
 		g_var8[POS0] = swipe(g_var32[POS1], g_var8[POS1], g_var16[POS1], g_var16[POS2], g_var16[POS3], g_var16[POS4]);
-
-		if (!Touch_getXY())
-		{
-			readInCANMsg(selectedChannelOut);
-		}
-
 		if ((g_var8[POS0] == SWIPE_DOWN || g_var8[POS0] == SWIPE_UP) && !Touch_getXY())
 		{
 			g_var16[POS0] = 60;
@@ -732,6 +726,10 @@ void pageControl()
 			graphicLoaderState = 0;
 		}
 
+		if (!Touch_getXY())
+		{
+			readInCANMsg(selectedChannelOut);
+		}
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
