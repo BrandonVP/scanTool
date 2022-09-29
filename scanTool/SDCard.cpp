@@ -407,7 +407,7 @@ void SDCard::readLogFile(char* filename)
 void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 {
 	char tempStr[MSG_STRING_LENGTH];
-	char printString[MSG_STRING_LENGTH];
+	//char printString[MSG_STRING_LENGTH];
 	unsigned int messageNum = 0;
 	unsigned int id = 0;
 	unsigned int time = 0;
@@ -418,7 +418,6 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 	File myFile = SD.open(filename, FILE_READ);
 	myFile.seek(index);
 	
-
 	myGLCD.setFont(SmallFont);
 
 	// Serving up some tasty pasta with this magical numbered spaghetti code! Yum!!!
@@ -455,36 +454,73 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 	}
 	
-	uint32_t timer543 = millis();
-
+	//uint32_t timer543 = millis();
 	for (uint8_t i = 0; i < 17; i++)
 	{
 		if ((myFile.available()))
 		{
 			//SerialUSB.println(myFile.position());
 			myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
-			if (isBackwards)
-			{
-				//SerialUSB.println(tempStr);
-			}
+
 			sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
 				&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
-			//SerialUSB.println(tempStr);
 			
-			sprintf(printString, "%5d %6d %03X %d %02X %02X %02X %02X %02X %02X %02X %02X", messageNum, time, id, length, msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
-			
+			// Printing it all at once increases function call time by 145ms
+			//sprintf(printString, "%5d %6d %03X %d %02X %02X %02X %02X %02X %02X %02X %02X", messageNum, time, id, length, msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
+			//myGLCD.print(printString, 135, lineIndex);
+
 			myGLCD.setBackColor(VGA_WHITE);
-			myGLCD.setColor(VGA_WHITE);
 			myGLCD.setColor(VGA_BLACK);
-			myGLCD.print(printString, 135, lineIndex);
+
+			char temp1[3];
+			char temp2[2];
+			//char temp3[6];
+
+			//sprintf(temp3, "%6d", messageNum);
+			//myGLCD.print(temp3, 135, lineIndex);
+			myGLCD.printNumI(messageNum, 135, lineIndex);
+
+			//sprintf(temp3, "%6d", time);
+			//myGLCD.print(temp3, 185, lineIndex);
+			myGLCD.printNumI(time, 185, lineIndex);
+
+			sprintf(temp1, "%03X", id);
+			myGLCD.print(temp1, 240, lineIndex);
+
+			myGLCD.printNumI(length, 270, lineIndex);
+
+			sprintf(temp2, "%02X", msg[0]);
+			myGLCD.print(temp2, 285, lineIndex);
+
+			sprintf(temp2, "%02X", msg[1]);
+			myGLCD.print(temp2, 310, lineIndex);
+
+			sprintf(temp2, "%02X", msg[2]);
+			myGLCD.print(temp2, 335, lineIndex);
+
+			sprintf(temp2, "%02X", msg[3]);
+			myGLCD.print(temp2, 360, lineIndex);
+
+			sprintf(temp2, "%02X", msg[4]);
+			myGLCD.print(temp2, 385, lineIndex);
+
+			sprintf(temp2, "%02X", msg[5]);
+			myGLCD.print(temp2, 410, lineIndex);
+
+			sprintf(temp2, "%02X", msg[6]);
+			myGLCD.print(temp2, 435, lineIndex);
+
+			sprintf(temp2, "%02X", msg[7]);
+			myGLCD.print(temp2, 460, lineIndex);
+
 			lineIndex += 15;
 		}
 	}
 	index = myFile.position();
 	myFile.close();
 	myGLCD.setFont(BigFont);
-	SerialUSB.print("Time: ");
-	SerialUSB.println(millis() - timer543);
+	//SerialUSB.print("Time: ");
+	//SerialUSB.println(millis() - timer543);
 }
 
 
