@@ -12,7 +12,7 @@ Read / Clear RZR DTCs
 Daylight savings option (clock menu in settings)
 
 - SD -
-Save block when ending capture
+Clean up SD code (blocking) (static variables)
 
 - WiFi - 
 delete dongle confirmation
@@ -2075,7 +2075,7 @@ int keypadButtons()
 			if ((x >= 145) && (x <= 305))
 			{
 				waitForIt(145, 270, 305, 310);
-				return 0x11;
+				return 0xF1;
 
 			}
 			// Cancel
@@ -2129,14 +2129,6 @@ uint8_t keypadController(uint8_t& index, uint16_t& total)
 		drawRoundBtn(255, 220, 470, 260, String(total, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		(index > 0) ? --index : 0;
 		return 0xFF;
-	}
-	if (input == 0x11)
-	{
-		return 0xF1;
-	}
-	else if (input == 0x12)
-	{
-		return 0xF0;
 	}
 	return input;
 }
@@ -2255,14 +2247,14 @@ int keypadButtonsDec()
 			if ((x >= 145) && (x <= 305))
 			{
 				waitForIt(145, 270, 305, 310);
-				return 0x11;
+				return 0xF1;
 
 			}
 			// Cancel
 			if ((x >= 315) && (x <= 470))
 			{
 				waitForIt(315, 270, 470, 310);
-				return 0x12;
+				return 0xF0;
 			}
 		}
 	}
@@ -2323,14 +2315,6 @@ uint8_t keypadControllerDec(uint8_t& index, uint16_t& total)
 		drawRoundBtn(255, 220, 470, 260, String(total), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		(index > 0) ? --index : 0;
 		return 0xFF;
-	}
-	if (input == 0x11)
-	{
-		return 0xF1;
-	}
-	else if (input == 0x12)
-	{
-		return 0xF0;
 	}
 	return input;
 }

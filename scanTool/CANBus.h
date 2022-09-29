@@ -18,7 +18,7 @@
 // Switch between usb ports
 // #define SERIAL_CAPTURE(x) Serial.print(x);
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
-#define SD_CAPTURE(x) SDCardBuffer(x)
+#define SD_CAPTURE(x, y) SDCardBuffer(x, y)
 
 // States
 #define START_BYTE              (0)
@@ -33,6 +33,7 @@
 #define ENDING_BYTE             (0xFD)
 #define PACKET_SIZE             (0x0A)
 
+extern void SDCardBuffer(char*, bool);
 
 class CANBus
 {
@@ -100,5 +101,6 @@ public:
 	String getVIN();
 	bool VINReady();
 	void resetMessageNum();
+	
 };
 #endif

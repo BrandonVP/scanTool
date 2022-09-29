@@ -44,7 +44,7 @@ void SDCard::setSDFilename(char* filename)
 }
 
 // Write string to SD Card
-void SDCard::writeFileS(char* incoming)
+void SDCard::writeFileS(char* incoming, uint8_t size)
 {
 	// File created and opened for writing
 	File myFile = SD.open(SDfilename, FILE_WRITE);
@@ -54,7 +54,7 @@ void SDCard::writeFileS(char* incoming)
 	// Check if file was sucsefully open
 	if (myFile)
 	{
-		myFile.write(incoming, SD_CAPTURE_BLOCK_SIZE);
+		myFile.write(incoming, (size * MSG_STRING_LENGTH));
 		myFile.close();
 	}
 }
@@ -455,6 +455,8 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 	}
 	
+	uint32_t timer543 = millis();
+
 	for (uint8_t i = 0; i < 17; i++)
 	{
 		if ((myFile.available()))
@@ -481,6 +483,8 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 	index = myFile.position();
 	myFile.close();
 	myGLCD.setFont(BigFont);
+	SerialUSB.print("Time: ");
+	SerialUSB.println(millis() - timer543);
 }
 
 

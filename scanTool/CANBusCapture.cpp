@@ -454,6 +454,7 @@ void CaptureButtons()
 					drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 					break;
 				case 3: // SD Card
+					// TODO: Put this in a state and remove blocking code
 					bool setName = true;
 					uint8_t result = 0;
 					uint8_t index = 0;
@@ -483,7 +484,6 @@ void CaptureButtons()
 							setName = false;
 						}
 						backgroundProcess();
-						//menuButtons();
 					}
 					sdCard.setSDFilename(filename);
 					for (uint8_t i = 0; i < 12; i++)
@@ -503,10 +503,17 @@ void CaptureButtons()
 			{
 				waitForIt(310, 245, 470, 300);
 				// Stop
+				if (isSDOut)
+				{
+					// Save messages in SD buffer
+					char empty[2];
+					SDCardBuffer(empty, true);
+				}
+					
 				isSerialOut = false;
 				isSDOut = false;
 				drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				//drawSquareBtn(310, 245, 470, 300, F("Stop"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+				
 			}
 		}
 	}
@@ -1818,8 +1825,6 @@ void drawCANLogScroll()
 	// Starting y location for list
 	uint16_t y = 60;
 
-	//drawSquareBtn(131, 80, 415, 240, "", themeBackground, themeBackground, themeBackground, CENTER);
-
 	// Draw the scroll window
 	for (uint8_t i = 0; i < MAXSCROLL; i++)
 	{
@@ -1827,10 +1832,6 @@ void drawCANLogScroll()
 		{
 			if (fileList[(g_var8[POS0] + i)][0] != '\0')
 			{
-				// Build a string with name and size of file
-				// Note: files greater that 99999kb will overflow, 
-				//but seriously I would be impressed if someone managed to create a file that large and not crash
-
 				// Max size that will fit in GUI position
 				char temp[17];
 

@@ -23,7 +23,7 @@ class SDCard
 	 char SDfilename[50];
  public:
 	void setSDFilename(char* );
-	void writeFileS(char* incoming);
+	void writeFileS(char*, uint8_t);
 	bool startSD();
 	void createDRIVE(char*);
 	void readFile(char* filename, uint8_t* arrayIn);
