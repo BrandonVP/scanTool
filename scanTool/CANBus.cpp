@@ -209,10 +209,7 @@ void CANBus::sendFrame(uint32_t id, byte* frame, uint8_t frameLength = 8, bool s
 	CANOut.length = frameLength;
 
 	// Assign object to message array
-	for (uint8_t i = 0; i < frameLength; i++)
-	{
-		CANOut.data.byte[i] = frame[i];
-	}
+	memcpy((void*)CANOut.data.byte, (const void*)frame, frameLength);
 
 	Can0.sendFrame(CANOut);
 
@@ -618,18 +615,14 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 	{
 		id = incCAN0.id;
 		len = incCAN0.length;
-		for (int count = 0; count < incCAN0.length; count++) {
-			msg[count] = incCAN0.data.bytes[count];
-		}
+		memcpy((void*)msg, (const void*)incCAN0.data.bytes, incCAN0.length);
 		return true;
 	}
 	else if (config == 2 && Can1.get_rx_buff(incCAN1))
 	{
 		id = incCAN1.id;
 		len = incCAN1.length;
-		for (int count = 0; count < incCAN1.length; count++) {
-			msg[count] = incCAN1.data.bytes[count];
-		}
+		memcpy((void*)msg, (const void*)incCAN1.data.bytes, incCAN1.length);
 		return true;
 	}
 	else if (config == 3)
@@ -638,18 +631,14 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 		{
 			id = incCAN0.id;
 			len = incCAN0.length;
-			for (int count = 0; count < incCAN0.length; count++) {
-				msg[count] = incCAN0.data.bytes[count];
-			}
+			memcpy((void*)msg, (const void*)incCAN0.data.bytes, incCAN0.length);
 			return true;
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
 			id = incCAN1.id;
 			len = incCAN1.length;
-			for (int count = 0; count < incCAN1.length; count++) {
-				msg[count] = incCAN1.data.bytes[count];
-			}
+			memcpy((void*)msg, (const void*)incCAN1.data.bytes, incCAN1.length);
 			return true;
 		}
 	}
@@ -663,9 +652,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 		{
 			id = incCAN1.id;
 			len = incCAN1.length;
-			for (int count = 0; count < incCAN1.length; count++) {
-				msg[count] = incCAN1.data.bytes[count];
-			}
+			memcpy((void*)msg, (const void*)incCAN1.data.bytes, incCAN1.length);
 			Can0.sendFrame(incCAN1);
 			return true;
 		}
@@ -676,18 +663,14 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 		{
 			id = incCAN0.id;
 			len = incCAN0.length;
-			for (int count = 0; count < incCAN0.length; count++) {
-				msg[count] = incCAN0.data.bytes[count];
-			}
+			memcpy((void*)msg, (const void*)incCAN0.data.bytes, incCAN0.length);
 			return true;
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
 			id = incCAN1.id;
 			len = incCAN1.length;
-			for (int count = 0; count < incCAN1.length; count++) {
-				msg[count] = incCAN1.data.bytes[count];
-			}
+			memcpy((void*)msg, (const void*)incCAN1.data.bytes, incCAN1.length);
 			return true;
 		}
 	}
@@ -745,18 +728,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 					state = START_BYTE;
 					id = incWIFI.id;
 					len = incWIFI.length;
-					for (uint8_t count = 0; count < 8; count++) 
-					{
-						
-						msg[count] = incWIFI.data.bytes[count];
-						//SerialUSB.println("");
-						//SerialUSB.print(msg[count]);
-						//SerialUSB.print(" = ");
-						//SerialUSB.println(incWIFI.data.bytes[count]);
-					}
-					//char buffer[MSG_STRING_LENGTH];
-					//sprintf(buffer, "%08d   %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
-					//SERIAL_CAPTURE(buffer);
+					memcpy((void*)msg, (const void*)incWIFI.data.bytes, incWIFI.length);
 					return true;
 				}
 				else

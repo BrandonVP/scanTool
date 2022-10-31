@@ -16,6 +16,7 @@ Clean up SD code (blocking) (static variables)
 
 - WiFi - 
 delete dongle confirmation
+Filter Mask
 
 - Playback - 
 Redo GUI to match send
@@ -24,6 +25,10 @@ Views stops working at end of file
 
 - Memory - 
 Reduce usage
+
+- Variables - 
+Improve
+An error leaves locks in place
 
 ===========================================================
 	End Todo List

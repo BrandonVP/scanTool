@@ -533,19 +533,19 @@ void hex2String(uint8_t value, char(&result)[N])
 
 	if (((value >> 4) & 0x0f) < 10)
 	{
-		result[1] = ((value >> 4) & 0x0f) + 48;
+		result[0] = (((value >> 4) & 0x0f) + 48);
 	}
 	else
 	{
-		result[1] = ((value >> 4) & 0x0f) + 55;
+		result[0] = (((value >> 4) & 0x0f) + 55);
 	}
 	if ((value & 0x0f) < 10)
 	{
-		result[0] = (value & 0x0f) + 48;
+		result[1] = (value & 0x0f) + 48;
 	}
 	else
 	{
-		result[0] = (value & 0x0f) + 55;
+		result[1] = (value & 0x0f) + 55;
 	}
 }
 
@@ -576,7 +576,7 @@ void readInCANMsg(uint8_t channel)
 			myGLCD.setColor(VGA_BLACK);
 			myGLCD.fillRect(140, (g_var16[POS0]), 144, (g_var16[POS0] + 10));
 		}
-		
+
 		// LCD slows down printing this large char
 		// Rolling it out below reduced function call by 11ms!
 		// TODO: Writing a function to convert the hex value to char might decrease function call time
@@ -604,7 +604,7 @@ void readInCANMsg(uint8_t channel)
 		sprintf(temp2, "%02X", rxBuf[2]);
 		myGLCD.print(temp2, 286, g_var16[POS0]);
 
-		//hex2String(rxBuf[3], temp2);
+		hex2String(rxBuf[3], temp2);
 		sprintf(temp2, "%02X", rxBuf[3]);
 		myGLCD.print(temp2, 316, g_var16[POS0]);
 
