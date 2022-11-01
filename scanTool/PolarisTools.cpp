@@ -1,10 +1,14 @@
-// 
-// 
-// 
+/*
+ ===========================================================================
+ Name        : PolarisTools.c
+ Author      : Brandon Van Pelt
+ Created     : 
+ Description : UTV CAN Bus tools
+ ===========================================================================
+ */
 
+#define _POLARISTOOLS_C
 #include "PolarisTools.h"
-#include "common.h"
-#include "definitions.h"
 
 /*=========================================================
     Polaris Tools

@@ -1,10 +1,14 @@
-// 
-// 
-// 
+/*
+ ===========================================================================
+ Name        : ExtraFunctions.c
+ Author      : Brandon Van Pelt
+ Created     : 
+ Description : Custom user functions and testing
+ ===========================================================================
+ */
 
+#define _EXTRAFUNCTIONS_C
 #include "ExtraFunctions.h"
-#include "common.h"
-#include "definitions.h"
 
 /*=========================================================
     Extra Functions
@@ -186,10 +190,6 @@ void extraFNButtons()
                 timeC = millis() - timer99;
                 SerialUSB.print("Time: ");
                 SerialUSB.println(timeC);
-               
-
-
-               
 
             }
             if ((y >= 245) && (y <= 295))
