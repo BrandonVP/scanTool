@@ -1,8 +1,14 @@
-// SDCard class manages the SD card reader hardware
+/*
+ ===========================================================================
+ Name        : SDCard.h
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description : SDCard class manages the SD card reader hardware
+ ===========================================================================
+ */
 
 #include "SDCard.h"
 #include "common.h"
-#include "definitions.h"
 
 // Called at setup to initialize the SD Card
 bool SDCard::startSD()

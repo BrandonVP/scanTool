@@ -1,4 +1,12 @@
-// CANBus.h
+/*
+ ===========================================================================
+ Name        : CANBus.h
+ Author      : Brandon Van Pelt
+ Created	 : 
+ Description : CANBus manages the CAN bus hardware
+ ===========================================================================
+ */
+
 #pragma once
 #include "SDCard.h"
 #include <due_can.h>
@@ -20,7 +28,7 @@
 #define SERIAL_CAPTURE(x) SerialUSB.print(x);
 #define SD_CAPTURE(x, y) SDCardBuffer(x, y)
 
-// States
+// States for serial transfer
 #define START_BYTE              (0)
 #define PACKET_LENGTH           (1)
 #define CAN_BUS_ID1             (2)
@@ -28,7 +36,7 @@
 #define CAN_BUS_LENGTH          (4)
 #define CAN_BUS_DATA            (5)
 #define END_BYTE                (6)
-// 
+// Serial transfer
 #define STARTING_BYTE           (0xFE)
 #define ENDING_BYTE             (0xFD)
 #define PACKET_SIZE             (0x0A)
@@ -71,36 +79,30 @@ private:
 		  0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF, 0xC0 }
 	};
 
+	int PIDStreamGauge(uint16_t, uint8_t); // Unused
+
 public:
-	uint32_t findBaudRate0();
-	uint32_t findBaudRate1();
-	uint8_t getPIDList(uint8_t, uint8_t, uint8_t);
-	bool LCDOutCAN(buff&, uint8_t&, uint32_t&, uint8_t);
-	void sendFrame(uint32_t, byte*, uint8_t, bool);
 	void startCAN0(uint32_t, uint32_t);
 	void startCAN1(uint32_t, uint32_t);
 	void setFilterMask0(uint32_t, uint32_t);
 	void setFilterMask1(uint32_t, uint32_t);
-	void setDataCANOut(uint8_t, uint8_t);
-	void setIDCANOut(uint16_t);
-	uint16_t getCANOutID();
-	uint8_t getCANOutData(uint8_t);
-	void sendCANOut(uint8_t, bool);
-	void sendCANOut(uint8_t, CAN_FRAME, bool);
-	uint8_t requestVIN(uint16_t, bool);
-	char* getFullDir();
-	bool SerialOutCAN(uint8_t);
-	bool SDOutCAN(uint8_t);
-	void startPID();
-	uint8_t PIDStream(uint8_t&, bool);
-	int PIDStreamGauge(uint16_t, uint8_t);
+	uint32_t findBaudRate0();
+	uint32_t findBaudRate1();
 	void setBaud0(uint32_t);
 	void setBaud1(uint32_t);
 	uint32_t getBaud0();
 	uint32_t getBaud1();
-	String getVIN();
+	uint8_t requestVIN(uint16_t, bool);
 	bool VINReady();
+	String getVIN();
+	char* getFullDir();
+	uint8_t getPIDList(uint8_t, uint8_t, uint8_t);
+	uint8_t PIDStream(uint8_t&, bool);
+	void sendFrame(uint32_t, byte*, uint8_t, bool);
+	bool SDOutCAN(uint8_t);
+	bool SerialOutCAN(uint8_t);
+	void sendCANOut(uint8_t, CAN_FRAME, bool);
+	bool LCDOutCAN(buff&, uint8_t&, uint32_t&, uint8_t);
 	void resetMessageNum();
-	
 };
 #endif

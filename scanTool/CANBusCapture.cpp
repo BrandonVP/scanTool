@@ -1,14 +1,15 @@
 /*
- Name:    CANBusCapture.cpp
- Created: 11/15/2020 8:54:18 AM
- Author:  Brandon Van Pelt
-*/
+ ===========================================================================
+ Name        : CANBusCapture.cpp
+ Author      : Brandon Van Pelt
+ Created	 : 11/15/2020 8:54:18 AM
+ Description : CAN Bus capture and monitor tools
+ ===========================================================================
+ */
 
-#pragma once
-
+#define _CANBUSCAPTURE_C
 #include "CANBusCapture.h"
 #include "common.h"
-#include "definitions.h"
 
 //#define DEBUG_FILTERMASK
 
@@ -525,7 +526,7 @@ void drawReadInCANLCD()
 	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 }
 
-const size_t N = 2;
+// Convert hex value (uint8_t value 0x1B --> char result[2] = {'1', 'B,}
 void hex2String(uint8_t value, char(&result)[N])
 {
 	//uint8_t hNibble = ((value >> 4) & 0x0f);
@@ -641,8 +642,7 @@ void readInCANMsg(uint8_t channel)
 }
 
 /*============== Timed TX ==============*/
-SchedulerRX RXtimedMSG;
-uint8_t displayedNodePosition[5];
+
 
 void drawSendChannel(uint8_t channel)
 {

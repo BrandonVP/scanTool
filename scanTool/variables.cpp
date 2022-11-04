@@ -1,7 +1,13 @@
-// 
-// 
-// 
+/*
+ ===========================================================================
+ Name        : Variables.cpp
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description : Memory saver
+ ===========================================================================
+ */
 
+#define _VARIABLES_C
 #include "Variables.h"
 
 /* How to use

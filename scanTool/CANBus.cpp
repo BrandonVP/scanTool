@@ -1,7 +1,13 @@
-// CANBus manages the CAN bus hardware
+/*
+ ===========================================================================
+ Name        : CANBus.cpp
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description : CANBus manages the CAN bus hardware
+ ===========================================================================
+ */
 
 #include "CANBus.h"
-#include <due_can.h>
 #include "variant.h"
 #include "PIDS.h"
 #include "common.h"
@@ -50,6 +56,7 @@ void CANBus::setBaud0(uint32_t newBaud)
 	Can0.set_baudrate(newBaud);
 }
 
+//
 void CANBus::setBaud1(uint32_t newBaud)
 {
 	Can1.set_baudrate(newBaud);
@@ -61,21 +68,25 @@ uint32_t CANBus::getBaud0()
 	return Can0.getBusSpeed();
 }
 
+//
 uint32_t CANBus::getBaud1()
 {
 	return Can1.getBusSpeed();
 }
 
+//
 uint32_t CANBus::findBaudRate0()
 {
 	return Can0.beginAutoSpeed();
 }
 
+//
 uint32_t CANBus::findBaudRate1()
 {
 	return Can1.beginAutoSpeed();
 }
 
+//
 void CANBus::resetMessageNum()
 {
 	messageNum = 0;
@@ -90,13 +101,7 @@ void ECUtraffic(CAN_FRAME* incCAN0)
 	SERIAL_CAPTURE(buffer);
 }
 
-// Set baud rates for both CAN Bus
-void CANBus::startPID()
-{
-	Can0.setRXFilter(0, 0x7E8, 0x7C8, false);
-	Can0.setCallback(0, ECUtraffic);
-}
-
+//
 bool CANBus::VINReady()
 {
 	return hasVIN;
@@ -114,56 +119,7 @@ char* CANBus::getFullDir()
 	return PIDDir;
 }
 
-void CANBus::setIDCANOut(uint16_t id)
-{
-	CANOut.id = id;
-}
-
-uint16_t CANBus::getCANOutID()
-{
-	return CANOut.id;
-}
-
-void CANBus::setDataCANOut(uint8_t value, uint8_t position)
-{
-	CANOut.data.byte[position] = value;
-}
-
-uint8_t CANBus::getCANOutData(uint8_t position)
-{
-	return CANOut.data.bytes[position];
-}
-
-void CANBus::sendCANOut(uint8_t channel, bool serialOut)
-{
-	if (channel == 0)
-	{
-		Can0.sendFrame(CANOut);
-	}
-	if (channel == 1)
-	{
-		Can1.sendFrame(CANOut);
-	}
-	if (channel == 2)
-	{
-		Serial3.write(0xFE);
-		Serial3.write(0x09);
-		Serial3.write((CANOut.id >> 0) & 0xFF);
-		Serial3.write((CANOut.id >> 8) & 0xFF);
-		for (uint8_t i = 0; i < 8; i++)
-		{
-			Serial3.write(CANOut.data.bytes[i]);
-		}
-		Serial3.write(0xFD);
-	}
-	if (serialOut)
-	{
-		char buffer[MSG_STRING_LENGTH];
-		sprintf(buffer, "%8d    %9f    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, (float)millis(), CANOut.id, CANOut.length, CANOut.data.bytes[0], CANOut.data.bytes[1], CANOut.data.bytes[2], CANOut.data.bytes[3], CANOut.data.bytes[4], CANOut.data.bytes[5], CANOut.data.bytes[6], CANOut.data.bytes[7]);
-		SERIAL_CAPTURE(buffer);
-	}
-}
-
+//
 void CANBus::sendCANOut(uint8_t channel, CAN_FRAME CANBus, bool serialOut)
 {
 	if (channel == 0)
@@ -481,8 +437,8 @@ uint8_t CANBus::PIDStream(uint8_t &value, bool saveToSD)
 			if (incCAN0.data.bytes[2] == PID_MASS_AIR_FLOW) {
 				uint16_t airFlow;
 				airFlow = ((256 * incCAN0.data.bytes[3]) + incCAN0.data.bytes[4]) / 100; //formula 100*A/255
-				//Serial.print(F("MAF: (gram/s) "));
-				//Serial.println(flow, DEC);
+				//SerialUSB.print(F("MAF: (gram/s) "));
+				//SerialUSB.println(flow, DEC);
 				if (saveToSD)
 				{
 					sdCard.writeFile(fullDir, "MAF: ");
@@ -517,11 +473,6 @@ uint8_t CANBus::PIDStream(uint8_t &value, bool saveToSD)
 			sdCard.writeFile(fullDir, " Len: ");
 			sdCard.writeFile(fullDir, incCAN0.length, HEX);
 			sdCard.writeFile(fullDir, " Data: ");
-			//Serial.print(F("ID: 0x"));
-			//Serial.print(incCAN0.id, HEX);
-			//Serial.print(F(" Len: "));
-			//Serial.print(incCAN0.length);
-			//Serial.print(F(" Data: "));
 
 			for (int count = 0; count < incCAN0.length; count++)
 			{
@@ -530,8 +481,7 @@ uint8_t CANBus::PIDStream(uint8_t &value, bool saveToSD)
 				Serial.print(" ");
 				sdCard.writeFile(fullDir, " ");
 			}
-			//Serial.print("\r\n");
-			//Serial.println("");
+
 			sdCard.writeFileln(fullDir);
 		}
 	}

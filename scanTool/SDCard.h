@@ -1,6 +1,15 @@
-// SDCard.h
+/*
+ ===========================================================================
+ Name        : SDCard.h
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description : SDCard class manages the SD card reader hardware
+ ===========================================================================
+ */
+
 #include <SD.h>
-#include "CANBus.h"
+#include "CANBusCapture.h"
+#include "Settings.h"
 
 #ifndef _SDCard_h
 #define _SDCard_h
@@ -13,8 +22,7 @@
 
 #define SD_CARD_CS 8
 #define ROW_DIM 100
-#include "CANBusCapture.h"
-#include "Settings.h"
+
 class SDCard
 {
  protected:

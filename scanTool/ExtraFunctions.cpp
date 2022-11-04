@@ -1,8 +1,8 @@
 /*
  ===========================================================================
- Name        : ExtraFunctions.c
+ Name        : ExtraFunctions.cpp
  Author      : Brandon Van Pelt
- Created     : 
+ Created     : 11/15/2020 8:27:18 AM
  Description : Custom user functions and testing
  ===========================================================================
  */

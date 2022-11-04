@@ -1,11 +1,15 @@
-// 
-// 
-// 
+/*
+ ===========================================================================
+ Name        : VehicleTools.cpp
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description : CAN Bus related vehicle tools
+ ===========================================================================
+ */
 
+#define _VEHICLETOOLS_C
 #include "VehicleTools.h"
-#include "common.h"
-#include "definitions.h"
-#include "CANBus.h"
+
 /*=========================================================
     Vehicle Tools
 ===========================================================*/

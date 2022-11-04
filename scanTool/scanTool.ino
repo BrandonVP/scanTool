@@ -30,6 +30,7 @@ Reduce usage
 Improve
 An error leaves locks in place
 
+- Move version to about
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -87,12 +88,14 @@ bool isMSGSpam = false;
 // General use variables
 uint8_t state = 0;
 bool isFinished = false;
+/*
 uint8_t g_var8[8];
 uint8_t g_var8Lock = 0;
 uint16_t g_var16[8];
 uint8_t g_var16Lock = 0;
 uint32_t g_var32[8];
 uint8_t g_var32Lock = 0;
+*/
 char keyboardInput[9];
 uint8_t keypadInput[4] = {0, 0, 0, 0};
 

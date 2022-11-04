@@ -20,7 +20,8 @@
 
 #ifdef _POLARISTOOLS_C
 
-
+bool drawRZRTOOL();
+void RZRToolButtons();
 
 #else
 
