@@ -75,7 +75,9 @@ bool drawAbout()
         drawSquareBtn(135, 120, 479, 140, F("Software Development"), themeBackground, themeBackground, menuBtnColor, CENTER);
         drawSquareBtn(135, 145, 479, 165, F("Brandon Van Pelt"), themeBackground, themeBackground, menuBtnColor, CENTER);
         drawSquareBtn(135, 170, 479, 190, F("github.com/BrandonVP"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        break;
+        drawSquareBtn(135, 195, 479, 215, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+        
+		break;
     case 3:
 
         break;

@@ -32,6 +32,7 @@ An error leaves locks in place
 
 Send
 - New messages go to open slot instead of end
+- Delete confirmation
 ===========================================================
 	End Todo List
 =========================================================*/
