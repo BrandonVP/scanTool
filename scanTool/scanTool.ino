@@ -27,10 +27,6 @@ Views stops working at end of file
 - Variables - 
 Improve
 An error leaves locks in place
-
-Send
-- Delete confirmation
-
 ===========================================================
 	End Todo List
 =========================================================*/

@@ -7,6 +7,8 @@
  ===========================================================================
  */
 
+#define TIMED_TX_MAX_SIZE 20
+
 #ifndef _CANBUSCAPTURE_H
 #define _CANBUSCAPTURE_H
 
@@ -16,7 +18,7 @@
 	#include "WProgram.h"
 #endif
 
-#define TIMED_TX_MAX_SIZE 20
+
 
 struct MessageRX
 {
@@ -33,7 +35,7 @@ struct MessageRX
 struct SchedulerRX
 {
 	uint8_t nodeLength = 0;
-	MessageRX node[20];
+	MessageRX node[TIMED_TX_MAX_SIZE];
 };
 
 #ifdef _CANBUSCAPTURE_C
