@@ -508,7 +508,7 @@ void CaptureButtons()
 				{
 					// Save messages in SD buffer
 					char empty[2];
-					SDCardBuffer(empty, true);
+					can1.SDCardBuffer(empty, true);
 				}
 					
 				isSerialOut = false;

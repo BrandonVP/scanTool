@@ -28,6 +28,7 @@ class SDCard
  protected:
 	 bool canDir = false;
 	 typedef char MyArray[20][13];
+	 char SDfilename[50];
  public:
 	void setSDFilename(char* );
 	void writeFileS(char*, uint8_t);

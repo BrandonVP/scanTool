@@ -824,10 +824,8 @@ bool CANBus::SerialOutCAN(uint8_t config)
 }
 
 // Wirte large blocks to SD card
-// TODO: Why is this not a class function?
-void SDCardBuffer(char * message, bool endCapture)
+void CANBus::SDCardBuffer(char * message, bool endCapture)
 {
-	// TODO: Reduce memory by provide some of these variables
 	static char* buf = (char*)malloc((SD_CAPTURE_BLOCK_SIZE) * sizeof(char));
 	static char* a1 = buf;
 	static uint8_t count = 0;
@@ -846,14 +844,12 @@ void SDCardBuffer(char * message, bool endCapture)
 		count = 0;
 		a1 -= SD_CAPTURE_BLOCK_SIZE;
 		
-		
 		printBufSize++;
 		if (printBufSize == 12)
 		{
 			SerialUSB.println(Can0.available());
 			printBufSize = 0;
 		}
-		
 	}	
 }
 

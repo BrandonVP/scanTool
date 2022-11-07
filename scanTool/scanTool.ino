@@ -11,9 +11,6 @@ Read Vehicle DTCs
 Read / Clear RZR DTCs
 Daylight savings option (clock menu in settings)
 
-- SD -
-Clean up SD code (blocking) (static variables)
-
 - WiFi - 
 delete dongle confirmation
 Filter Mask

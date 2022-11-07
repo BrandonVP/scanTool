@@ -39,7 +39,6 @@ void SDCard::writeFile(char* filename, String incoming)
 // 
 void SDCard::setSDFilename(char* filename)
 {
-	char SDfilename[50];
 	for (uint8_t i = 0; i < 50; i++)
 	{
 		SDfilename[i] = '\0';
@@ -53,7 +52,6 @@ void SDCard::setSDFilename(char* filename)
 // Write string to SD Card
 void SDCard::writeFileS(char* incoming, uint8_t size)
 {
-	char SDfilename[50];
 	// File created and opened for writing
 	File myFile = SD.open(SDfilename, FILE_WRITE);
 

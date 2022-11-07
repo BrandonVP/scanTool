@@ -104,5 +104,6 @@ public:
 	void sendCANOut(uint8_t, CAN_FRAME, bool);
 	bool LCDOutCAN(buff&, uint8_t&, uint32_t&, uint8_t);
 	void resetMessageNum();
+	void SDCardBuffer(char*, bool);
 };
 #endif
