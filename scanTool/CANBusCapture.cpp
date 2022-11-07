@@ -843,6 +843,20 @@ void deleteNode(uint8_t node)
 	{
 		RXtimedMSG.node[node].data[i] = 0;
 	}
+
+	// Shift remaining nodes down
+	uint8_t temp = node + 1;
+	while (((temp) < 20) && (RXtimedMSG.node[temp].isDel == false))
+	{
+		memcpy(RXtimedMSG.node[temp - 1].name, RXtimedMSG.node[temp].name, 9);
+		RXtimedMSG.node[temp - 1].isDel = RXtimedMSG.node[temp].isDel;
+		RXtimedMSG.node[temp - 1].isOn = RXtimedMSG.node[temp].isOn;
+		RXtimedMSG.node[temp - 1].id = RXtimedMSG.node[temp].id;
+		RXtimedMSG.node[temp - 1].interval = RXtimedMSG.node[temp].interval;
+		RXtimedMSG.node[temp - 1].channel = RXtimedMSG.node[temp].channel;
+		memcpy(RXtimedMSG.node[temp - 1].data, RXtimedMSG.node[temp].data, 8);
+		temp++;
+	}
 }
 
 void timedTXButtons()	

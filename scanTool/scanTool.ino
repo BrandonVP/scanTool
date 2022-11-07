@@ -28,10 +28,7 @@ Views stops working at end of file
 Improve
 An error leaves locks in place
 
-- Move version to about
-
 Send
-- New messages go to open slot instead of end
 - Delete confirmation
 ===========================================================
 	End Todo List
