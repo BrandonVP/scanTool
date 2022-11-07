@@ -829,7 +829,7 @@ bool drawEditTXNode(uint8_t node)
 
 void deleteNode(uint8_t node)
 {
-	//RXtimedMSG.node[node].name = "";
+	// Delete selected node
 	for (uint8_t i = 0; i < 9; i++)
 	{
 		RXtimedMSG.node[node].name[i] = '\0';
@@ -856,6 +856,21 @@ void deleteNode(uint8_t node)
 		RXtimedMSG.node[temp - 1].channel = RXtimedMSG.node[temp].channel;
 		memcpy(RXtimedMSG.node[temp - 1].data, RXtimedMSG.node[temp].data, 8);
 		temp++;
+	}
+
+	// Delete last node old position after it was shifted down
+	for (uint8_t i = 0; i < 9; i++)
+	{
+		RXtimedMSG.node[temp - 1].name[i] = '\0';
+	}
+	RXtimedMSG.node[temp - 1].isDel = true;
+	RXtimedMSG.node[temp - 1].isOn = false;
+	RXtimedMSG.node[temp - 1].id = 0;
+	RXtimedMSG.node[temp - 1].interval = 0;
+	RXtimedMSG.node[temp - 1].channel = 0;
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		RXtimedMSG.node[temp - 1].data[i] = 0;
 	}
 }
 
@@ -894,14 +909,15 @@ void timedTXButtons()
 				graphicLoaderState = 0;
 				g_var8[POS0] = displayedNodePosition[0];
 				state = 2;
+	
 			}
 			if ((x >= 409) && (x <= 477))
 			{
 				waitForIt(409, 55, 477, 95);
 				// Del
-				deleteNode(displayedNodePosition[0]);
-				saveRXMsg();
-				drawTXNode(g_var8[POS3]);
+				g_var8[POS6] = displayedNodePosition[0];
+				drawErrorMSG(F("Confirmation"), F("Delete Node"), String(displayedNodePosition[0] + g_var8[POS3] + 1));
+				state = 15;
 			}
 		}
 		if ((y >= 100) && (y <= 140) && g_var8[POS4] > 1)
@@ -931,9 +947,9 @@ void timedTXButtons()
 			{
 				waitForIt(409, 100, 477, 140);
 				// Del
-				deleteNode(displayedNodePosition[1]);
-				saveRXMsg();
-				drawTXNode(g_var8[POS3]);
+				g_var8[POS6] = displayedNodePosition[1];
+				drawErrorMSG(F("Confirmation"), F("Delete Node"), String(displayedNodePosition[1] + g_var8[POS3] + 1));
+				state = 15;
 			}
 		}
 		if ((y >= 145) && (y <= 185) && g_var8[POS4] > 2)
@@ -963,9 +979,9 @@ void timedTXButtons()
 			{
 				waitForIt(409, 145, 477, 185);
 				// Del
-				deleteNode(displayedNodePosition[2]);
-				saveRXMsg();
-				drawTXNode(g_var8[POS3]);
+				g_var8[POS6] = displayedNodePosition[2];
+				drawErrorMSG(F("Confirmation"), F("Delete Node"), String(displayedNodePosition[2] + g_var8[POS3] + 1));
+				state = 15;
 			}
 		}
 		if ((y >= 190) && (y <= 230) && g_var8[POS4] > 3)
@@ -995,9 +1011,9 @@ void timedTXButtons()
 			{
 				waitForIt(409, 190, 477, 230);
 				// Del
-				deleteNode(displayedNodePosition[3]);
-				saveRXMsg();
-				drawTXNode(g_var8[POS3]);
+				g_var8[POS6] = displayedNodePosition[0];
+				drawErrorMSG(F("Confirmation"), F("Delete Node"), String(displayedNodePosition[3] + g_var8[POS3] + 1));
+				state = 15;
 			}
 		}
 		if ((y >= 235) && (y <= 275) && g_var8[POS4] > 4)
@@ -1027,9 +1043,9 @@ void timedTXButtons()
 			{
 				waitForIt(409, 235, 477, 275);
 				// Del
-				deleteNode(displayedNodePosition[4]);
-				saveRXMsg();
-				drawTXNode(g_var8[POS3]);
+				g_var8[POS6] = displayedNodePosition[0];
+				drawErrorMSG(F("Confirmation"), F("Delete Node"), String(displayedNodePosition[4] + g_var8[POS3] + 1));
+				state = 15;
 			}
 		}
 		if ((y >= 280) && (y <= 317))
@@ -1078,6 +1094,7 @@ void timedTX()
 		g_var8[POS0] = findFreeTXNode();
 		// 0xFF = no free slots
 		(g_var8[POS0] == 0xFF) ? state = 0 : state = 2;
+
 		break;
 	case 2:
 		drawEditTXNode(g_var8[POS0]) ? state = 2 : state = 3;
@@ -1253,6 +1270,27 @@ void timedTX()
 		{
 			graphicLoaderState = 0;
 			state = 2;
+		}
+		break;
+	case 15:
+		uint8_t input = errorMSGButton(1, 2, 3);
+		switch (input)
+		{
+		case 1:
+			deleteNode(g_var8[POS6]);
+			saveRXMsg();
+			drawTXNode(g_var8[POS3]);
+			state = 0;
+			graphicLoaderState = 0;
+			break;
+		case 2:
+			state = 0;
+			graphicLoaderState = 0;
+			break;
+		case 3:
+			state = 0;
+			graphicLoaderState = 0;
+			break;
 		}
 		break;
 	}
@@ -2029,7 +2067,7 @@ void playback()
 	{
 		char fileLocation[20] = "CANLOG/";
 		strcat(fileLocation, fileList[g_var16[POS0]]);
-		uint8_t input = errorMSGButton(2);
+		uint8_t input = errorMSGButton(1, 2, 3);
 		switch (input)
 		{
 		case 1:

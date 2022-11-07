@@ -326,7 +326,7 @@ void streamPIDS()
     }
     else
     {
-        errorMSGButton(9);
+        errorMSGButton(1, 2, 3);
     }
     if ((state == 1) && (g_var16[POS1] < PIDSAMPLES) && (millis() - g_var32[POS0] > 1000))
     {

@@ -102,7 +102,7 @@ extern void waitForItRect(int x1, int y1, int x2, int y2);
 extern int keypadButtons();
 extern void drawKeypad();
 extern bool loadBar(int);
-extern uint8_t errorMSGButton(uint8_t);
+extern uint8_t errorMSGButton(uint8_t, uint8_t, uint8_t);
 extern void drawErrorMSG2(String, String, String);
 extern void drawErrorMSG(String, String, String);
 extern void saveRamStates(uint32_t MaxUsedHeapRAM, uint32_t MaxUsedStackRAM, uint32_t MaxUsedStaticRAM, uint32_t MinfreeRAM);

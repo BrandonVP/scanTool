@@ -30,6 +30,7 @@ An error leaves locks in place
 
 Send
 - Delete confirmation
+
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -657,6 +658,7 @@ void pageControl()
 			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : e = true; // Scroll index
 			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : e = true; // Node position
 			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : e = true; // Keyboard index
+			(lockVar8(LOCK6)) ? g_var8[POS6] = 0 : e = true; // Delete node location
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Total value
 			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Timer to prevent double tap
 			if (e)
@@ -684,6 +686,7 @@ void pageControl()
 			unlockVar8(LOCK3);
 			unlockVar8(LOCK4);
 			unlockVar8(LOCK5);
+			unlockVar8(LOCK6);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -2733,8 +2736,8 @@ void drawErrorMSG2(String title, String eMessage1, String eMessage2)
 	drawRoundBtn(365, 100, 401, 130, "X", menuBtnColor, menuBtnColor, menuBtnText, CENTER);
 }
 
-// Error Message buttons
-uint8_t errorMSGButton(uint8_t returnPage)
+// Error Message buttons, returns 0 by default
+uint8_t errorMSGButton(uint8_t confirmPage, uint8_t cancelPage, uint8_t xPage)
 {
 	// Touch screen controls
 	if (Touch_getXY())
@@ -2745,7 +2748,7 @@ uint8_t errorMSGButton(uint8_t returnPage)
 			{
 				// X
 				waitForItRect(365, 100, 415, 130);
-				return 3;
+				return xPage;
 			}
 		}
 		if ((y >= 180) && (y <= 215))
@@ -2754,13 +2757,13 @@ uint8_t errorMSGButton(uint8_t returnPage)
 			{
 				// Confirm
 				waitForItRect(155, 180, 275, 215);
-				return 1;
+				return confirmPage;
 			}
 			if ((x >= 285) && (x <= 405))
 			{
 				// Cancel
 				waitForItRect(285, 180, 405, 215);
-				return 2;
+				return cancelPage;
 			}
 		}
 	}
