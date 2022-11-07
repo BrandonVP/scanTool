@@ -643,7 +643,6 @@ void readInCANMsg(uint8_t channel)
 
 /*============== Timed TX ==============*/
 
-
 void drawSendChannel(uint8_t channel)
 {
 	(channel == 0) ? drawRoundBtn(261, 99, 331, 139, F("0"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER) : drawRoundBtn(261, 99, 331, 139, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -850,6 +849,15 @@ void timedTXButtons()
 {
 	if (Touch_getXY())
 	{
+		if (millis() - g_var32[POS0] > 50)
+		{
+
+			g_var32[POS0] = millis();
+		}
+		else
+		{
+			return;
+		}
 		if ((y >= 55) && (y <= 95) && g_var8[POS4] > 0)
 		{
 			if ((x >= 133) && (x <= 271))

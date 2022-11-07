@@ -24,14 +24,14 @@ Redo GUI to match send
 Function menu (split, filter, edit?)
 Views stops working at end of file 
 
-- Memory - 
-Reduce usage
-
 - Variables - 
 Improve
 An error leaves locks in place
 
 - Move version to about
+
+Send
+- New messages go to open slot instead of end
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -660,6 +660,7 @@ void pageControl()
 			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : e = true; // Node position
 			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : e = true; // Keyboard index
 			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Total value
+			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Timer to prevent double tap
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
@@ -677,6 +678,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar32(LOCK0);
 			unlockVar16(LOCK0);
 			unlockVar8(LOCK0);
 			unlockVar8(LOCK1);
