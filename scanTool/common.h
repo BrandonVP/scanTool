@@ -1,4 +1,3 @@
-#pragma once
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -12,6 +11,7 @@
 #include "Variables.h"
 #include "OBD_CAN_SIMULATOR.h"
 #include "definitions.h"
+#include "KeyInput.h"
 
 #define ECU_RX 0x7E8
 #define PID_LIST_TX 0x7DF
@@ -31,6 +31,14 @@
 //#define DEBUG_ERROR(x)
 //#define DEBUG_ERROR(x)  Serial.println(x);
 #define DEBUG_ERROR(x)  SerialUSB.println(x);
+
+// CAN Bus message configuration
+#define CAN0			1 // Messages on CAN0
+#define CAN1			2 // Messages on CAN1
+#define BOTH			3 // Messages on CAN0 and CAN1
+#define BRIDGE_CAN1_RX  4 // Bridge CAN0 and CAN1 but only show CAN1 RX messages (One way capture)
+#define BRIDGE_BOTH		5 // Bridge CAN0 and CAN1 and show both messages
+#define WIFI			6 // Messages over WIFI
 
 typedef enum
 {

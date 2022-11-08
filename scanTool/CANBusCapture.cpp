@@ -312,13 +312,12 @@ void CaptureButtons()
 				if (state == 1)
 				{
 					// CAN0
-					selectedChannelOut = 1;
+					selectedChannelOut = CAN0;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;
 				}
 				else if (state == 2)
-				//else if (state == 2 && selectedChannelOut != 6) // LCD wont work with WIFI
 				{
 					// LCD
 					selectedSourceOut = 1;
@@ -331,7 +330,7 @@ void CaptureButtons()
 				if (state == 1)
 				{
 					// CAN1
-					selectedChannelOut = 2;
+					selectedChannelOut = CAN1;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;
@@ -349,7 +348,7 @@ void CaptureButtons()
 				if (state == 1)
 				{
 					// CAN0/1
-					selectedChannelOut = 3;
+					selectedChannelOut = BOTH;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;
@@ -367,7 +366,7 @@ void CaptureButtons()
 				if (state == 1)
 				{
 					// CAN0/TX1
-					selectedChannelOut = 4;
+					selectedChannelOut = BRIDGE_CAN1_RX;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;
@@ -387,7 +386,7 @@ void CaptureButtons()
 				{
 					waitForIt(135, 245, 300, 285);
 					// Bridge0/1
-					selectedChannelOut = 5;
+					selectedChannelOut = BRIDGE_BOTH;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;
@@ -404,7 +403,7 @@ void CaptureButtons()
 				{
 					waitForIt(135, 285, 300, 320);
 					// WIFI
-					selectedChannelOut = 6;
+					selectedChannelOut = WIFI;
 					state = 2;
 					hasDrawn = false;
 					graphicLoaderState = 0;

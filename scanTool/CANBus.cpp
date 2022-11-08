@@ -558,24 +558,24 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
 	return -1;
 }
 
-// Send CAN Bus traffic from channel 1 or 2 to LCD
+// Used to receive CAN Bus messages in the user requested configuration
 bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 {
-	if (config == 1 && Can0.get_rx_buff(incCAN0))
+	if (config == CAN0 && Can0.get_rx_buff(incCAN0))
 	{
 		id = incCAN0.id;
 		len = incCAN0.length;
 		memcpy((void*)msg, (const void*)incCAN0.data.bytes, incCAN0.length);
 		return true;
 	}
-	else if (config == 2 && Can1.get_rx_buff(incCAN1))
+	else if (config == CAN1 && Can1.get_rx_buff(incCAN1))
 	{
 		id = incCAN1.id;
 		len = incCAN1.length;
 		memcpy((void*)msg, (const void*)incCAN1.data.bytes, incCAN1.length);
 		return true;
 	}
-	else if (config == 3)
+	else if (config == BOTH)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -592,7 +592,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 			return true;
 		}
 	}
-	else if (config == 4)
+	else if (config == BRIDGE_CAN1_RX)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -607,10 +607,11 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 			return true;
 		}
 	}
-	else if (config == 5)
+	else if (config == BRIDGE_BOTH)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
+			Can1.sendFrame(incCAN0);
 			id = incCAN0.id;
 			len = incCAN0.length;
 			memcpy((void*)msg, (const void*)incCAN0.data.bytes, incCAN0.length);
@@ -618,18 +619,18 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 		}
 		if (Can1.get_rx_buff(incCAN1))
 		{
+			Can0.sendFrame(incCAN1);
 			id = incCAN1.id;
 			len = incCAN1.length;
 			memcpy((void*)msg, (const void*)incCAN1.data.bytes, incCAN1.length);
 			return true;
 		}
 	}
-	else if (config == 6)
+	else if (config == WIFI)
 	{
 		if (Serial3.available() > 0)
 		{
 			uint8_t recByte = Serial3.read();
-			//SerialUSB.println(recByte, 16);
 			switch (state)
 			{
 			case START_BYTE:
@@ -675,6 +676,7 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 			case END_BYTE:
 				if (recByte == ENDING_BYTE)
 				{
+					// Successful packet
 					state = START_BYTE;
 					id = incWIFI.id;
 					len = incWIFI.length;
@@ -699,19 +701,19 @@ bool CANBus::SerialOutCAN(uint8_t config)
 	char buffer[MSG_STRING_LENGTH];
 
 	// Display CAN0
-	if (config == 1 && Can0.get_rx_buff(incCAN0))
+	if (config == CAN0 && Can0.get_rx_buff(incCAN0))
 	{
 		sprintf(buffer, "%8d    %9d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN1
-	else if (config == 2 && Can1.get_rx_buff(incCAN1))
+	else if ((config == CAN1) && (Can1.get_rx_buff(incCAN1)))
 	{
 		sprintf(buffer, "%8d    %9d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 		SERIAL_CAPTURE(buffer);
 	}
 	// Display CAN0 & CAN1
-	else if (config == 3)
+	else if (config == BOTH)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -724,8 +726,8 @@ bool CANBus::SerialOutCAN(uint8_t config)
 			SERIAL_CAPTURE(buffer);
 		}
 	}
-	// Forward traffic between CAN0-CAN1 and display CAN0
-	else if (config == 4)
+	// Forward traffic between CAN0-CAN1 and display CAN1
+	else if (config == BRIDGE_CAN1_RX)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -739,7 +741,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 		}
 	}
 	// Forward traffic between CAN0-CAN1 and display CAN0 & CAN1
-	else if (config == 5)
+	else if (config == BRIDGE_BOTH)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -754,12 +756,11 @@ bool CANBus::SerialOutCAN(uint8_t config)
 			Can0.sendFrame(incCAN1);
 		}
 	}
-	else if (config == 6)
+	else if (config == WIFI)
 	{
 		if (Serial3.available() > 0)
 		{
 			uint8_t recByte = Serial3.read();
-			//SerialUSB.println(recByte, 16);
 			switch (state)
 			{
 			case START_BYTE:
@@ -805,6 +806,7 @@ bool CANBus::SerialOutCAN(uint8_t config)
 			case END_BYTE:
 				if (recByte == ENDING_BYTE)
 				{
+					// Successful packet
 					state = START_BYTE;
 					char buffer[MSG_STRING_LENGTH];
 					sprintf(buffer, "%8d    %9d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\r\n", ++messageNum, millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
@@ -858,20 +860,19 @@ bool CANBus::SDOutCAN(uint8_t config)
 {
 	char buffer[67];
 	// Display CAN0
-	if (config == 1 && Can0.get_rx_buff(incCAN0))
+	if (config == CAN0 && Can0.get_rx_buff(incCAN0))
 	{
 		sprintf(buffer, "%8d    %9d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\n", ++messageNum, millis(), incCAN0.id, incCAN0.length, incCAN0.data.bytes[0], incCAN0.data.bytes[1], incCAN0.data.bytes[2], incCAN0.data.bytes[3], incCAN0.data.bytes[4], incCAN0.data.bytes[5], incCAN0.data.bytes[6], incCAN0.data.bytes[7]);
-		//sdCard.writeFileS(buffer);
 		SD_CAPTURE(buffer, false);
 	}
 	// Display CAN1
-	else if (config == 2 && Can1.get_rx_buff(incCAN1))
+	else if (config == CAN1 && Can1.get_rx_buff(incCAN1))
 	{
 		sprintf(buffer, "%8d    %9d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\n", ++messageNum, millis(), incCAN1.id, incCAN1.length, incCAN1.data.bytes[0], incCAN1.data.bytes[1], incCAN1.data.bytes[2], incCAN1.data.bytes[3], incCAN1.data.bytes[4], incCAN1.data.bytes[5], incCAN1.data.bytes[6], incCAN1.data.bytes[7]);
 		SD_CAPTURE(buffer, false);
 	}
 	// Display CAN0 & CAN1
-	else if (config == 3)
+	else if (config == BOTH)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -885,7 +886,7 @@ bool CANBus::SDOutCAN(uint8_t config)
 		}
 	}
 	// Forward traffic between CAN0-CAN1 and display CAN0
-	else if (config == 4)
+	else if (config == BRIDGE_CAN1_RX)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -899,7 +900,7 @@ bool CANBus::SDOutCAN(uint8_t config)
 		}
 	}
 	// Forward traffic between CAN0-CAN1 and display CAN0 & CAN1
-	else if (config == 5)
+	else if (config == BRIDGE_BOTH)
 	{
 		if (Can0.get_rx_buff(incCAN0))
 		{
@@ -914,12 +915,11 @@ bool CANBus::SDOutCAN(uint8_t config)
 			Can0.sendFrame(incCAN1);
 		}
 	}
-	else if (config == 6)
+	else if (config == WIFI)
 	{
 		if (Serial3.available() > 0)
 		{
 			uint8_t recByte = Serial3.read();
-			//SerialUSB.println(recByte, 16);
 			switch (state)
 			{
 			case START_BYTE:
@@ -965,6 +965,7 @@ bool CANBus::SDOutCAN(uint8_t config)
 			case END_BYTE:
 				if (recByte == ENDING_BYTE)
 				{
+					// Successful packet
 					state = START_BYTE;
 					sprintf(buffer, "%8d    %9d    %04X   %d   %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X\n", ++messageNum, millis(), incWIFI.id, incWIFI.length, incWIFI.data.bytes[0], incWIFI.data.bytes[1], incWIFI.data.bytes[2], incWIFI.data.bytes[3], incWIFI.data.bytes[4], incWIFI.data.bytes[5], incWIFI.data.bytes[6], incWIFI.data.bytes[7]);
 					SD_CAPTURE(buffer, false);
