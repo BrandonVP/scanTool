@@ -33,7 +33,6 @@ Move SD Card file name to non-blocking state
 =========================================================*/
 
 // Libraries
-#include "DueOverclock.h"
 #include <malloc.h>
 #include <memorysaver.h>
 #include <SD.h>
@@ -42,8 +41,6 @@ Move SD Card file name to non-blocking state
 #include <UTouchCD.h>
 #include <UTFT.h>
 #include <UTouch.h>
-
-#include "DueOverclock.h"
 
 // Source
 #include "ExtraFunctions.h"
@@ -1716,10 +1713,15 @@ void pageControl()
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
+			if (drawClockSpeed())
+			{
+				break;
+			}
 			hasDrawn = true;
 		}
 
 		// Call buttons or page method
+		clockSpeedButtons();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
@@ -1734,10 +1736,7 @@ void pageControl()
 // the setup function runs once when you press reset or power the board
 void setup()
 {
-	//DueOverclock.setCoreFrequency(84);
-	//DueOverclock.setCoreFrequency(92);
-	DueOverclock.setCoreFrequency(96);
-	//DueOverclock.setCoreFrequency(114);
+	DueOverclock.setCoreFrequency(MCUClockSpeed);
 
 	Serial.begin(115200);
 	Serial3.begin(115200);
@@ -2052,6 +2051,7 @@ void backgroundProcess()
 	Main loop
 ===========================================================*/
 
+uint32_t ttys = 0;
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {

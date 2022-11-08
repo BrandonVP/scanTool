@@ -12,6 +12,7 @@
 #include "OBD_CAN_SIMULATOR.h"
 #include "definitions.h"
 #include "KeyInput.h"
+#include "DueOverclock.h"
 
 #define ECU_RX 0x7E8
 #define PID_LIST_TX 0x7DF

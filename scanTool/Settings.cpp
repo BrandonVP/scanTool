@@ -2,6 +2,7 @@
 // 
 // 
 
+#define _SETTINGS_C
 #include "Settings.h"
 #include "common.h"
 #include "definitions.h"
@@ -43,13 +44,13 @@ bool drawSettings()
         drawRoundBtn(140, 190, 305, 240, F("WiFi Reset"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(310, 190, 475, 240, F("Clock"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 8:
-        drawRoundBtn(140, 245, 305, 295, F("Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-        break;
-    case 9:
-        drawRoundBtn(310, 245, 475, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawRoundBtn(310, 190, 475, 240, F("Time"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 8:
+		drawRoundBtn(140, 245, 305, 295, F("Dongle"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 9:
+		drawRoundBtn(310, 245, 475, 295, F("MCU Clock"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -196,8 +197,10 @@ void settingsButtons()
             }
             if ((y >= 245) && (y <= 295))
             {
-                waitForIt(310, 245, 475, 295);
-                // Unused
+				waitForIt(310, 245, 475, 295);
+				// MCU Clock
+				graphicLoaderState = 0;
+				nextPage = 44;
             }
         }
     }
@@ -946,3 +949,185 @@ void memoryUse()
     uint32_t MinfreeRAM = 0;
     saveRamStates(MaxUsedHeapRAM, MaxUsedStackRAM, MaxUsedStaticRAM, MinfreeRAM);
 }
+
+/*============ MCU Clock Speed ============*/
+//
+bool drawClockSpeed()
+{
+	switch (graphicLoaderState)
+	{
+	case 0:
+		break;
+	case 1:
+		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+		break;
+	case 2:
+		if (MCUClockSpeed == CLOCK_72MHZ)
+		{
+			drawRoundBtn(140, 80, 305, 130, F("72Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(140, 80, 305, 130, F("72Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 3:
+		if (MCUClockSpeed == CLOCK_78MHZ)
+		{
+			drawRoundBtn(310, 80, 475, 130, F("78Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(310, 80, 475, 130, F("78Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 4:
+		if (MCUClockSpeed == CLOCK_84MHZ)
+		{
+			drawRoundBtn(140, 135, 305, 185, F("84Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(140, 135, 305, 185, F("84Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 5:
+		if (MCUClockSpeed == CLOCK_90MHZ)
+		{
+			drawRoundBtn(310, 135, 475, 185, F("90Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(310, 135, 475, 185, F("90Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 6:
+		if (MCUClockSpeed == CLOCK_96MHZ)
+		{
+			drawRoundBtn(140, 190, 305, 240, F("96Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(140, 190, 305, 240, F("96Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 7:
+		if (MCUClockSpeed == CLOCK_102MHZ)
+		{
+			drawRoundBtn(310, 190, 475, 240, F("102Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(310, 190, 475, 240, F("102Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 8:
+		if (MCUClockSpeed == CLOCK_108MHZ)
+		{
+			drawRoundBtn(140, 245, 305, 295, F("108Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(140, 245, 305, 295, F("108Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 9:
+		if (MCUClockSpeed == CLOCK_114MHZ)
+		{
+			drawRoundBtn(310, 245, 475, 295, F("114Mhz"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		}
+		else
+		{
+			drawRoundBtn(310, 245, 475, 295, F("114Mhz"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		}
+		break;
+	case 10:
+		return false;
+		break;
+	}
+	graphicLoaderState++;
+	return true;
+}
+
+//
+void clockSpeedButtons()
+{
+	// Touch screen controls
+	if (Touch_getXY())
+	{
+		// Start Scan
+		if ((x >= 140) && (x <= 305))
+		{
+			if ((y >= 80) && (y <= 130))
+			{
+				waitForIt(140, 80, 305, 130);
+				MCUClockSpeed = CLOCK_72MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+			if ((y >= 135) && (y <= 185))
+			{
+				waitForIt(140, 135, 305, 185);
+				MCUClockSpeed = CLOCK_84MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+			if ((y >= 190) && (y <= 240))
+			{
+				waitForIt(140, 190, 305, 240);
+				MCUClockSpeed = CLOCK_96MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+			if ((y >= 245) && (y <= 295))
+			{
+				waitForIt(140, 245, 305, 295);
+				MCUClockSpeed = CLOCK_108MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+		}
+		if ((x >= 310) && (x <= 475))
+		{
+			if ((y >= 80) && (y <= 130))
+			{
+				waitForIt(310, 80, 475, 130);
+				MCUClockSpeed = CLOCK_78MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+			if ((y >= 135) && (y <= 185))
+			{
+				waitForIt(310, 135, 475, 185);
+				MCUClockSpeed = CLOCK_90MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+			if ((y >= 190) && (y <= 240))
+			{
+				waitForIt(310, 190, 475, 240);
+				MCUClockSpeed = CLOCK_102MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+			if ((y >= 245) && (y <= 295))
+			{
+				waitForIt(310, 245, 475, 295);
+				MCUClockSpeed = CLOCK_114MHZ;
+				DueOverclock.setCoreFrequency(MCUClockSpeed);
+				graphicLoaderState = 0;
+				hasDrawn = false;
+			}
+		}
+	}
+}
+
+
+/*================= Time =================*/
