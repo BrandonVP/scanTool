@@ -911,7 +911,7 @@ void timedTXButtons()
 				waitForIt(409, 55, 477, 95);
 				// Del
 				g_var8[POS6] = displayedNodePosition[0];
-				drawErrorMSG(F("Confirmation"), F("Delete Node"), (RXtimedMSG.node[(displayedNodePosition[0] + g_var8[POS3])].name));
+				drawErrorMSG(F("Confirmation"), F("Delete"), (RXtimedMSG.node[(displayedNodePosition[0] + g_var8[POS3])].name));
 				state = 15;
 			}
 		}
@@ -943,7 +943,7 @@ void timedTXButtons()
 				waitForIt(409, 100, 477, 140);
 				// Del
 				g_var8[POS6] = displayedNodePosition[1];
-				drawErrorMSG(F("Confirmation"), F("Delete Node"), (RXtimedMSG.node[(displayedNodePosition[1] + g_var8[POS3])].name));
+				drawErrorMSG(F("Confirmation"), F("Delete"), (RXtimedMSG.node[(displayedNodePosition[1] + g_var8[POS3])].name));
 				state = 15;
 			}
 		}
@@ -975,7 +975,7 @@ void timedTXButtons()
 				waitForIt(409, 145, 477, 185);
 				// Del
 				g_var8[POS6] = displayedNodePosition[2];
-				drawErrorMSG(F("Confirmation"), F("Delete Node"), (RXtimedMSG.node[(displayedNodePosition[2] + g_var8[POS3])].name));
+				drawErrorMSG(F("Confirmation"), F("Delete"), (RXtimedMSG.node[(displayedNodePosition[2] + g_var8[POS3])].name));
 				state = 15;
 			}
 		}
@@ -1007,7 +1007,7 @@ void timedTXButtons()
 				waitForIt(409, 190, 477, 230);
 				// Del
 				g_var8[POS6] = displayedNodePosition[0];
-				drawErrorMSG(F("Confirmation"), F("Delete Node"), (RXtimedMSG.node[(displayedNodePosition[3] + g_var8[POS3])].name));
+				drawErrorMSG(F("Confirmation"), F("Delete"), (RXtimedMSG.node[(displayedNodePosition[3] + g_var8[POS3])].name));
 				state = 15;
 			}
 		}
@@ -1039,7 +1039,7 @@ void timedTXButtons()
 				waitForIt(409, 235, 477, 275);
 				// Del
 				g_var8[POS6] = displayedNodePosition[0];
-				drawErrorMSG(F("Confirmation"), F("Delete Node"), (RXtimedMSG.node[(displayedNodePosition[4] + g_var8[POS3])].name));
+				drawErrorMSG(F("Confirmation"), F("Delete"), (RXtimedMSG.node[(displayedNodePosition[4] + g_var8[POS3])].name));
 				state = 15;
 			}
 		}

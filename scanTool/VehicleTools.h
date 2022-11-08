@@ -20,6 +20,12 @@
 
 #ifdef _VEHICLETOOLS_C
 
+ // Determines if a PID scan was performed before displaying pid list
+bool hasPID = false;
+
+// Holds PIDS for the pidscan function
+uint8_t arrayIn[80];
+
 bool drawVehicleTools();
 void VehicleToolButtons();
 bool drawPIDSCAN();
@@ -36,6 +42,12 @@ void drawClearDTC();
 uint8_t DTCButtons();
 
 #else
+
+// Determines if a PID scan was performed before displaying pid list
+extern bool hasPID;
+
+// Holds PIDS for the pidscan function
+extern uint8_t arrayIn[80];
 
 extern bool drawVehicleTools();
 extern void VehicleToolButtons();

@@ -42,6 +42,9 @@ struct SchedulerRX
 
 const size_t N = 2;
 
+// Holds CAN Bus capture replay filenames
+char fileList[20][13];
+
 SchedulerRX RXtimedMSG;
 uint8_t displayedNodePosition[5];
 
@@ -84,6 +87,8 @@ void CANLogButtons();
 void playback();
 
 #else
+
+extern char fileList[20][13];
 
 extern bool drawCANBus();
 extern void CANBusButtons();

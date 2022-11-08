@@ -57,11 +57,12 @@ Move SD Card file name to non-blocking state
 CANBus can1;
 SDCard sdCard;
 DS3231 rtc(SDA, SCL);
+
 // LCD display
 //(byte model, int RS, int WR, int CS, int RST, int SER)
 UTFT myGLCD(ILI9488_16, 7, 38, 9, 10);
 //RTP: byte tclk, byte tcs, byte din, byte dout, byte irq
-UTouch  myTouch(2, 6, 3, 4, 5);
+UTouch myTouch(2, 6, 3, 4, 5);
 
 // For touch controls
 int x, y;
@@ -81,29 +82,16 @@ bool isMSGSpam = false;
 
 // General use variables
 uint8_t state = 0;
+// TODO: This var is not needed, replace
 bool isFinished = false;
 
-// Used for converting keypad input to appropriate hex place
-const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };
-
-// List of baud rates for Baud page
-const uint32_t baudRates[6] = { 1000000, 800000, 500000, 250000, 125000, 100000 };
-
 // TODO: Why are these needed? Can the same function be done using the library?
+//		 Move this to a header somewhere if not
 // Filter range / Filter Mask
 uint32_t CAN0Filter = 0x000;
 uint32_t CAN0Mask = 0x7FF;
 uint32_t CAN1Filter = 0x000;
 uint32_t CAN1Mask = 0x7FF;
-
-// Holds CAN Bus capture replay filenames
-char fileList[20][13];
-
-// Determines if a PID scan was performed before displaying pid list
-bool hasPID = false;
-
-// Holds PIDS for the pidscan function
-uint8_t arrayIn[80];
 
 // Use to load pages in pieces to prevent blocking while loading entire page
 uint8_t graphicLoaderState = 0;
@@ -1782,7 +1770,7 @@ void setup()
 
 
 /*=========================================================
-	Buttons / Keypads
+	Buttons / Error Message
 ===========================================================*/
 /*****************************************************
 *           Draw Round/Square Button                 *
