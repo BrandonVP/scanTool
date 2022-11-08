@@ -33,6 +33,7 @@ Move SD Card file name to non-blocking state
 =========================================================*/
 
 // Libraries
+#include "DueOverclock.h"
 #include <malloc.h>
 #include <memorysaver.h>
 #include <SD.h>
@@ -41,6 +42,9 @@ Move SD Card file name to non-blocking state
 #include <UTouchCD.h>
 #include <UTFT.h>
 #include <UTouch.h>
+
+#include "DueOverclock.h"
+
 // Source
 #include "ExtraFunctions.h"
 #include "PolarisTools.h"
@@ -1730,6 +1734,11 @@ void pageControl()
 // the setup function runs once when you press reset or power the board
 void setup()
 {
+	//DueOverclock.setCoreFrequency(84);
+	//DueOverclock.setCoreFrequency(92);
+	DueOverclock.setCoreFrequency(96);
+	//DueOverclock.setCoreFrequency(114);
+
 	Serial.begin(115200);
 	Serial3.begin(115200);
 	SerialUSB.begin(CAN_BPS_500K);
