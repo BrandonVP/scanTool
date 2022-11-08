@@ -422,25 +422,27 @@ void CaptureButtons()
 				waitForIt(310, 185, 470, 240);
 				// Start
 
-				// Clear the WiFi CAN Bus buffer
-				if (selectedChannelOut == 6)
+				// Clear the CAN Bus message buffers
+				if (selectedChannelOut == WIFI)
 				{
-					uint8_t value = 0;
-					for (uint16_t i = 0; i < 1000; i++)
+					// Clear the Serial buffer
+					for (uint16_t i = 0; i < SERIAL_BUFFER_SIZE; i++)
 					{
-						if (Serial3.available())
+						if (Serial3.available() > 0)
 						{
-							value = Serial3.read();
+							Serial3.read();
 						}
 					}
 				}
 				else
 				{
+					// Clear the CAN Bus buffer
 					Can0.empty_rx_buff();
 					Can1.empty_rx_buff();
 				}
 
 				can1.resetMessageNum();
+
 				switch (selectedSourceOut)
 				{
 				case 1: // LCD
@@ -459,7 +461,6 @@ void CaptureButtons()
 					uint8_t result = 0;
 					uint8_t index = 0;
 					char filename[12];
-					//char* a1 = filename;
 
 					drawkeyboard();
 					while (setName)
@@ -468,11 +469,8 @@ void CaptureButtons()
 						result = keyboardController(index);
 						if (result == 0xF1) // Accept
 						{
-							//strcat(filename, keyboardInput);
 							strncpy(filename, keyboardInput, 9);
-							//a1 += index;
 							strcat(filename, ".txt");
-							//strncpy(a1, ".txt", 4);
 							for (uint8_t i = 0; i < 9; i++)
 							{
 								keyboardInput[i] = '\0';
@@ -509,11 +507,9 @@ void CaptureButtons()
 					char empty[2];
 					can1.SDCardBuffer(empty, true);
 				}
-					
 				isSerialOut = false;
 				isSDOut = false;
 				drawSquareBtn(310, 185, 470, 240, F("Start"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				
 			}
 		}
 	}

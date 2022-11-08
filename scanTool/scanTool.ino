@@ -25,7 +25,8 @@ Views stops working at end of file
 Improve
 An error leaves locks in place
 
-WiFi capture que needs emptied when started
+- CANBusCapture
+Move SD Card file name to non-blocking state
 
 ===========================================================
 	End Todo List
