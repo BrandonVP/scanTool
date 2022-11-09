@@ -51,7 +51,7 @@ typedef bool error_t;
 //
 #define PIDLIST "PIDScan.txt"
 
-#define VERSION "Version 4.6.2"
+#define VERSION "Version 4.6.3"
 
 // Used for converting keypad input to appropriate hex place
 const uint32_t hexTable[8] = { 1, 16, 256, 4096, 65536, 1048576, 16777216, 268435456 };

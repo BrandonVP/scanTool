@@ -13,9 +13,9 @@
 /* How to use
 
 * Returns true if able to lock, false if already locked *
-Lock first variable: lockVar8(LOCK0);
-Lock second variable: lockVar8(LOCK1);
-Lock another variable lockVar32(LOCK0);
+Lock first variable: lockVar8(POS0);
+Lock second variable: lockVar8(POS1);
+Lock third variable lockVar32(POS0);
 
 * Use locked variables *
 g_var8[POS0] = 0;
@@ -23,48 +23,59 @@ g_var8[POS1] = 2;
 g_var32[POS0] = g_var8[POS0] + g_var8[POS1]
 
 * Unlock variable when finished *
-Unlock first variable: unlockVar8(LOCK0);
-Unlock sewcond variable variable: unlockVar8(LOCK1);
-Unlock another variable unlockVar8(LOCK0);
+Unlock first variable: unlockVar8(POS0);
+Unlock second variable: unlockVar8(POS1);
+Unlock third variable unlockVar8(POS0);
 
 */
 
 /*Example Application
 
 bool error = false;
-(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : error = true;
+(lockVar8(POS0)) ? g_var8[POS0] = 0 : error = lockError(POS0, 8); // Comment with variable purpose
 if (error)
 {
 	DEBUG_ERROR("Error: Variable locked");
 }
 
+...
+unlockVar8(POS0);
+
 */
 
-// false if locked
+// Prints error message for failed lock attempt
+bool lockError(uint8_t position, uint8_t size)
+{
+	char buffer[20];
+	sprintf(buffer, "uint%d_t pos %d", size, position);
+	drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+	drawErrorMSG2(F("  Lock Error"), buffer, F("already locked!"));
+	return true;
+}
+
+// Returns true if locked
 bool isVar8Unlocked(uint8_t pos)
 {
-	return !((g_var8Lock) & (1 << (pos)));
+	return ((g_var8Lock) & (1 << (pos)));
 }
 
-// false if locked
+// Returns true if locked
 bool isVar16Unlocked(uint8_t pos)
 {
-	return !((g_var16Lock) & (1 << (pos)));
+	return ((g_var16Lock) & (1 << (pos)));
 }
 
-// false if locked
+// Returns true if locked
 bool isVar32Unlocked(uint8_t pos)
 {
-	return !((g_var32Lock) & (1 << (pos)));
+	return ((g_var32Lock) & (1 << (pos)));
 }
 
 bool lockVar8(uint8_t lock)
 {
-	uint8_t temp = g_var8Lock;
-
-	if ((temp | lock) > g_var8Lock)
+	uint8_t oldValue = g_var8Lock;
+	if ((g_var8Lock |= (1 << lock)) > oldValue)
 	{
-		g_var8Lock += lock;
 		return true;
 	}
 	else
@@ -75,10 +86,9 @@ bool lockVar8(uint8_t lock)
 
 bool unlockVar8(uint8_t unlock)
 {
-	uint8_t temp = g_var8Lock;
-	if ((temp ^ unlock) < g_var8Lock)
+	uint8_t oldValue = g_var8Lock;
+	if ((g_var8Lock &= ~(1 << unlock)) < oldValue)
 	{
-		g_var8Lock -= unlock;
 		return true;
 	}
 	else
@@ -89,10 +99,9 @@ bool unlockVar8(uint8_t unlock)
 
 bool lockVar16(uint8_t lock)
 {
-	uint8_t temp = g_var16Lock;
-	if ((temp | lock) > g_var16Lock)
+	uint8_t oldValue = g_var16Lock;
+	if ((g_var16Lock |= (1 << lock)) > oldValue)
 	{
-		g_var16Lock += lock;
 		return true;
 	}
 	else
@@ -103,10 +112,9 @@ bool lockVar16(uint8_t lock)
 
 bool unlockVar16(uint8_t unlock)
 {
-	uint8_t temp = g_var16Lock;
-	if ((temp ^ unlock) < g_var16Lock)
+	uint8_t oldValue = g_var16Lock;
+	if ((g_var16Lock &= ~(1 << unlock)) < oldValue)
 	{
-		g_var16Lock -= unlock;
 		return true;
 	}
 	else
@@ -117,10 +125,9 @@ bool unlockVar16(uint8_t unlock)
 
 bool lockVar32(uint8_t lock)
 {
-	uint8_t temp = g_var32Lock;
-	if ((temp | lock) > g_var32Lock)
+	uint8_t oldValue = g_var32Lock;
+	if ((g_var32Lock |= (1 << lock)) > oldValue)
 	{
-		g_var32Lock += lock;
 		return true;
 	}
 	else
@@ -131,10 +138,9 @@ bool lockVar32(uint8_t lock)
 
 bool unlockVar32(uint8_t unlock)
 {
-	uint8_t temp = g_var32Lock;
-	if ((temp ^ unlock) < g_var32Lock)
+	uint8_t oldValue = g_var32Lock;
+	if ((g_var32Lock &= ~(1 << unlock)) < oldValue)
 	{
-		g_var32Lock -= unlock;
 		return true;
 	}
 	else

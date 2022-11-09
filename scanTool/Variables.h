@@ -18,24 +18,14 @@
 	#include "WProgram.h"
 #endif
 
- // Big Endian
-#define LOCK0 0x80
-#define LOCK1 0x40
-#define LOCK2 0x20
-#define LOCK3 0x10
-#define LOCK4 0x08
-#define LOCK5 0x04
-#define LOCK6 0x02
-#define LOCK7 0x01
-
-#define POS0 7
-#define POS1 6
-#define POS2 5
-#define POS3 4
-#define POS4 3
-#define POS5 2
-#define POS6 1
-#define POS7 0
+#define POS0 0x00
+#define POS1 0x01
+#define POS2 0x02
+#define POS3 0x03
+#define POS4 0x04
+#define POS5 0x05
+#define POS6 0x06
+#define POS7 0x07
 
 #ifdef _VARIABLES_C
 
@@ -46,6 +36,17 @@ uint8_t g_var16Lock = 0;
 uint32_t g_var32[8] = { 0,0,0,0,0,0,0,0 };
 uint8_t g_var32Lock = 0;
 
+bool lockError(uint8_t, uint8_t);
+bool isVar8Unlocked(uint8_t);
+bool isVar16Unlocked(uint8_t);
+bool isVar32Unlocked(uint8_t);
+bool lockVar8(uint8_t);
+bool lockVar16(uint8_t);
+bool lockVar32(uint8_t);
+bool unlockVar8(uint8_t);
+bool unlockVar16(uint8_t);
+bool unlockVar32(uint8_t);
+
 #else
 
 extern uint8_t g_var8[8];
@@ -55,6 +56,7 @@ extern uint8_t g_var16Lock;
 extern uint32_t g_var32[8];
 extern uint8_t g_var32Lock;
 
+extern bool lockError(uint8_t, uint8_t);
 extern bool isVar8Unlocked(uint8_t);
 extern bool isVar16Unlocked(uint8_t);
 extern bool isVar32Unlocked(uint8_t);

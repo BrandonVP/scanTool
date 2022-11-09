@@ -21,13 +21,10 @@ Redo GUI to match send
 Function menu (split, filter, edit?)
 Views stops working at end of file 
 
-- Variables - 
-Improve
-An error leaves locks in place
-
 - CANBusCapture
 Move SD Card file name to non-blocking state
 
+Fix capture page
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -411,12 +408,13 @@ void pageControl()
 			if (!hasDrawn && graphicLoaderState < 1)
 			{
 				error_t e = false;
-				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true;
+				(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16);
 				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
+					delay(5000);
+					graphicLoaderState = 0;
 					nextPage = CANBUS_MAIN;
-					break;
 				}
 			}
 			if (!hasDrawn && drawCapture())
@@ -462,7 +460,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar16(LOCK0);
+			unlockVar16(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -478,25 +476,26 @@ void pageControl()
 			}
 
 			error_t e = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // File read index
-			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : e = true; // Time of last touch
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // fileList index
-			(lockVar16(LOCK1)) ? g_var16[POS1] = 60 : e = true; // LCD Print line starts at y coord 60
-			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : e = true; // Initial x postition
-			(lockVar16(LOCK3)) ? g_var16[POS3] = 0 : e = true; // Initial y postition
-			(lockVar16(LOCK4)) ? g_var16[POS4] = 0 : e = true; // Last x postition
-			(lockVar16(LOCK5)) ? g_var16[POS5] = 0 : e = true; // Last y postition
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Scroll index
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Swipe input direction
-			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : e = true; // Bool to track initial x/y position
+			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32); // File read index
+			(lockVar32(POS1)) ? g_var32[POS1] = 0 : e = lockError(POS1, 32); // Time of last touch
+			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // fileList index
+			(lockVar16(POS1)) ? g_var16[POS1] = 60 : e = lockError(POS1, 16); // LCD Print line starts at y coord 60
+			(lockVar16(POS2)) ? g_var16[POS2] = 0 : e = lockError(POS2, 16); // Initial x postition
+			(lockVar16(POS3)) ? g_var16[POS3] = 0 : e = lockError(POS3, 16); // Initial y postition
+			(lockVar16(POS4)) ? g_var16[POS4] = 0 : e = lockError(POS4, 16); // Last x postition
+			(lockVar16(POS5)) ? g_var16[POS5] = 0 : e = lockError(POS5, 16); // Last y postition
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // Scroll index
+			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8); // Swipe input direction
+			(lockVar8(POS2)) ? g_var8[POS2] = 0 : e = lockError(POS2, 8); // Bool to track initial x/y position
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = CANBUS_MAIN;
 			}
 
 			drawCANLogScroll();
-
 			state = 0;
 			hasDrawn = true;
 		}
@@ -507,17 +506,17 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar8(LOCK2);
-			unlockVar16(LOCK0);
-			unlockVar16(LOCK1);
-			unlockVar16(LOCK2);
-			unlockVar16(LOCK3);
-			unlockVar16(LOCK4);
-			unlockVar16(LOCK5);
-			unlockVar32(LOCK0);
-			unlockVar32(LOCK1);
+			unlockVar8(POS0);
+			unlockVar8(POS1);
+			unlockVar8(POS2);
+			unlockVar16(POS0);
+			unlockVar16(POS1);
+			unlockVar16(POS2);
+			unlockVar16(POS3);
+			unlockVar16(POS4);
+			unlockVar16(POS5);
+			unlockVar32(POS0);
+			unlockVar32(POS1);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -559,12 +558,14 @@ void pageControl()
 			}
 
 			error_t e = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Keypad return
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Keypad index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Current total value
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // Keypad return
+			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8); // Keypad index
+			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // Current total value
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = CANBUS_MAIN;
 			}
 
@@ -578,9 +579,9 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar16(LOCK0);
+			unlockVar8(POS0);
+			unlockVar8(POS1);
+			unlockVar16(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -596,10 +597,12 @@ void pageControl()
 			}
 
 			error_t e = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected Baud rate array index
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = true; // Selected Baud rate array index
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = CANBUS_MAIN;
 			}
 
@@ -615,7 +618,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
+			unlockVar8(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -632,18 +635,20 @@ void pageControl()
 			}
 			
 			error_t e = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected index
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // User input
-			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : e = true; // Keypad index
-			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : e = true; // Scroll index
-			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : e = true; // Node position
-			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : e = true; // Keyboard index
-			(lockVar8(LOCK6)) ? g_var8[POS6] = 0 : e = true; // Delete node location
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Total value
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Timer to prevent double tap
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);    // Selected index
+			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);    // User input
+			(lockVar8(POS2)) ? g_var8[POS2] = 0 : e = lockError(POS2, 8);    // Keypad index
+			(lockVar8(POS3)) ? g_var8[POS3] = 0 : e = lockError(POS3, 8);    // Scroll index
+			(lockVar8(POS4)) ? g_var8[POS4] = 0 : e = lockError(POS4, 8);    // Node position
+			(lockVar8(POS5)) ? g_var8[POS5] = 0 : e = lockError(POS5, 8);    // Keyboard index
+			(lockVar8(POS6)) ? g_var8[POS6] = 0 : e = lockError(POS6, 8);    // Delete node location
+			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // Total value
+			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32); // Timer to prevent double tap
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = CANBUS_MAIN;
 			}
 
@@ -658,15 +663,15 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar32(LOCK0);
-			unlockVar16(LOCK0);
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar8(LOCK2);
-			unlockVar8(LOCK3);
-			unlockVar8(LOCK4);
-			unlockVar8(LOCK5);
-			unlockVar8(LOCK6);
+			unlockVar32(POS0);
+			unlockVar16(POS0);
+			unlockVar8(POS0);
+			unlockVar8(POS1);
+			unlockVar8(POS2);
+			unlockVar8(POS3);
+			unlockVar8(POS4);
+			unlockVar8(POS5);
+			unlockVar8(POS6);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -679,17 +684,19 @@ void pageControl()
 			drawReadInCANLCD();
 
 			error_t e = false;
-			(lockVar32(LOCK1)) ? g_var32[POS1] = 0 : e = true; // Time of last touch
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 60 : e = true; // LCD Print line starts at y coord 60
-			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true; // Initial x postition
-			(lockVar16(LOCK2)) ? g_var16[POS2] = 0 : e = true; // Initial y postition
-			(lockVar16(LOCK3)) ? g_var16[POS3] = 0 : e = true; // Last x postition
-			(lockVar16(LOCK4)) ? g_var16[POS4] = 0 : e = true; // Last y postition
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Swipe input direction
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Bool to track initial x/y position
+			(lockVar32(POS1)) ? g_var32[POS1] = 0 : e = lockError(POS1, 32);  // Time of last touch
+			(lockVar16(POS0)) ? g_var16[POS0] = 60 : e = lockError(POS0, 16); // LCD Print line starts at y coord 60
+			(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16);  // Initial x postition
+			(lockVar16(POS2)) ? g_var16[POS2] = 0 : e = lockError(POS2, 16);  // Initial y postition
+			(lockVar16(POS3)) ? g_var16[POS3] = 0 : e = lockError(POS3, 16);  // Last x postition
+			(lockVar16(POS4)) ? g_var16[POS4] = 0 : e = lockError(POS4, 16);  // Last y postition
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);     // Swipe input direction
+			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);     // Bool to track initial x/y position
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = CANBUS_MAIN;
 			}
 
@@ -718,15 +725,14 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar16(LOCK0);
-			unlockVar16(LOCK1);
-			unlockVar16(LOCK2);
-			unlockVar16(LOCK3);
-			unlockVar16(LOCK4);
-			unlockVar32(LOCK0);
-			unlockVar32(LOCK1);
+			unlockVar8(POS0);
+			unlockVar8(POS1);
+			unlockVar16(POS0);
+			unlockVar16(POS1);
+			unlockVar16(POS2);
+			unlockVar16(POS3);
+			unlockVar16(POS4);
+			unlockVar32(POS1);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -790,14 +796,16 @@ void pageControl()
 
 			// Lock global variables
 			error_t e = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true;
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Loading bar index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true;
-			(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);	 // TODO: Comments
+			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);    // Loading bar index
+			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16);
+			(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16);
+			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS2, 32);
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = VEHTOOL_MAIN;
 			}
 
@@ -813,11 +821,11 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar16(LOCK0);
-			unlockVar16(LOCK1);
-			unlockVar32(LOCK0);
+			unlockVar8(POS0);
+			unlockVar8(POS1);
+			unlockVar16(POS0);
+			unlockVar16(POS1);
+			unlockVar32(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -832,13 +840,15 @@ void pageControl()
 				drawPIDStream();
 
 				error_t e = false;
-				(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true;
-				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true;
-				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true;
-				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+				(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // TODO: Comments
+				(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16);
+				(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16);
+				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);
 				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
+					delay(5000);
+					graphicLoaderState = 0;
 					nextPage = VEHTOOL_MAIN;
 				}
 
@@ -869,10 +879,10 @@ void pageControl()
 		if (nextPage != page)
 		{
 			can1.setFilterMask0(0x0, 0x0);
-			unlockVar8(LOCK0);
-			unlockVar16(LOCK0);
-			unlockVar16(LOCK1);
-			unlockVar32(LOCK0);
+			unlockVar8(POS0);
+			unlockVar16(POS0);
+			unlockVar16(POS1);
+			unlockVar32(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -960,12 +970,14 @@ void pageControl()
 			{
 				// Lock global variables
 				error_t e = false;
-				(lockVar16(LOCK1)) ? g_var16[POS1] = 0 : e = true;
-				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+				(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // TODO: Comments
+				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);
 				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
-					nextPage = TESTING_MAIN;
+					delay(5000);
+					graphicLoaderState = 0;
+					nextPage = VEHTOOL_MAIN;
 				}
 
 				// Initialize state machine variables to 0
@@ -981,8 +993,8 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar16(LOCK1);
-			unlockVar32(LOCK0);
+			unlockVar16(POS1);
+			unlockVar32(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1224,23 +1236,25 @@ void pageControl()
 
 	case 29: // Message Spam
 		// Draw page and lock variables
-		// TODO: Clean up this mess
+		// TODO: Clean up this mess / Move to testing
 		if (!hasDrawn)
 		{
 			if (graphicLoaderState == 1)
 			{
 				// Lock global variables
 				error_t e = false;
-				(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // Keypad index
-				(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // ID
-				(lockVar16(LOCK1)) ? g_var16[POS1] = 0x7FF : e = true; // Max
-				(lockVar16(LOCK2)) ? g_var16[POS2] = 0x000 : e = true; // Min
-				(lockVar16(LOCK3)) ? g_var16[POS3] = 30 : e = true; // Interval (ms)
-				(lockVar16(LOCK4)) ? g_var16[POS4] = 30 : e = true; // Keypad total
-				(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true; // Timer
+				(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);        // Keypad index
+				(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16);     // ID
+				(lockVar16(POS1)) ? g_var16[POS1] = 0x7FF : e = lockError(POS1, 16); // Max
+				(lockVar16(POS2)) ? g_var16[POS2] = 0x000 : e = lockError(POS2, 16); // Min
+				(lockVar16(POS3)) ? g_var16[POS3] = 30 : e = lockError(POS3, 16);    // Interval (ms)
+				(lockVar16(POS4)) ? g_var16[POS4] = 30 : e = lockError(POS4, 16);    // Keypad total
+				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);     // Timer
 				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
+					delay(5000);
+					graphicLoaderState = 0;
 					nextPage = TESTING_MAIN;
 				}
 			}
@@ -1354,19 +1368,19 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar8(LOCK1);
-			unlockVar16(LOCK0);
-			unlockVar16(LOCK1);
-			unlockVar16(LOCK2);
-			unlockVar16(LOCK3);
-			unlockVar16(LOCK4);
-			unlockVar32(LOCK0);
+			unlockVar8(POS1);
+			unlockVar16(POS0);
+			unlockVar16(POS1);
+			unlockVar16(POS2);
+			unlockVar16(POS3);
+			unlockVar16(POS4);
+			unlockVar32(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
 		break;
 
-	case 30: //
+	case 30: // TODO: REMOVE
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -1387,7 +1401,7 @@ void pageControl()
 		}
 		break;
 
-	case 31: //
+	case 31: // TODO: REMOVE
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -1414,7 +1428,7 @@ void pageControl()
 		}
 		break;
 
-	case 32: //
+	case 32: // TODO: REMOVE
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -1470,10 +1484,12 @@ void pageControl()
 			}
 
 			error_t e = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = TESTING_MAIN;
 			}
 			hasDrawn = true;
@@ -1485,7 +1501,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar32(LOCK0);
+			unlockVar32(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1501,10 +1517,12 @@ void pageControl()
 			}
 
 			error_t e = false;
-			(lockVar32(LOCK0)) ? g_var32[POS0] = 0 : e = true;
+			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = TESTING_MAIN;
 			}
 
@@ -1517,7 +1535,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar32(LOCK0);
+			unlockVar32(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
@@ -1584,7 +1602,7 @@ void pageControl()
 		}
 		break;
 
-	case 39: //
+	case 39: // WiFi MAC Address
 		// Draw Page
 		// TODO: make a non-blocking state machine
 		// TODO: Organize Serial3 commands
@@ -1676,16 +1694,18 @@ void pageControl()
 		if (!hasDrawn)
 		{
 			error_t e = false;
-			(lockVar8(LOCK0)) ? g_var8[POS0] = 0 : e = true; // Selected index
-			(lockVar8(LOCK1)) ? g_var8[POS1] = 0 : e = true; // User input
-			(lockVar8(LOCK2)) ? g_var8[POS2] = 0 : e = true; // Keypad index
-			(lockVar8(LOCK3)) ? g_var8[POS3] = 0 : e = true; // Scroll index
-			(lockVar8(LOCK4)) ? g_var8[POS4] = 0 : e = true; // Node position
-			(lockVar8(LOCK5)) ? g_var8[POS5] = 0 : e = true; // Keyboard index
-			(lockVar16(LOCK0)) ? g_var16[POS0] = 0 : e = true; // Total value
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);    // Selected index
+			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);    // User input
+			(lockVar8(POS2)) ? g_var8[POS2] = 0 : e = lockError(POS2, 8);    // Keypad index
+			(lockVar8(POS3)) ? g_var8[POS3] = 0 : e = lockError(POS3, 8);    // Scroll index
+			(lockVar8(POS4)) ? g_var8[POS4] = 0 : e = lockError(POS4, 8);    // Node position
+			(lockVar8(POS5)) ? g_var8[POS5] = 0 : e = lockError(POS5, 8);    // Keyboard index
+			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // Total value
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
 				nextPage = SETTING_MAIN;
 			}
 			state = 0;
@@ -1697,13 +1717,13 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			unlockVar16(LOCK0);
-			unlockVar8(LOCK0);
-			unlockVar8(LOCK1);
-			unlockVar8(LOCK2);
-			unlockVar8(LOCK3);
-			unlockVar8(LOCK4);
-			unlockVar8(LOCK5);
+			unlockVar8(POS0);
+			unlockVar8(POS1);
+			unlockVar8(POS2);
+			unlockVar8(POS3);
+			unlockVar8(POS4);
+			unlockVar8(POS5);
+			unlockVar16(POS0);
 			hasDrawn = false;
 			page = nextPage;
 		}
