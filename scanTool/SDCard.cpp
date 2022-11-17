@@ -55,8 +55,6 @@ void SDCard::writeFileS(char* incoming, uint8_t size)
 	// File created and opened for writing
 	File myFile = SD.open(SDfilename, FILE_WRITE);
 
-	//SerialUSB.println(incoming);
-
 	// Check if file was sucsefully open
 	if (myFile)
 	{

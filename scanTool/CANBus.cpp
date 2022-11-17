@@ -845,8 +845,7 @@ void CANBus::SDCardBuffer(char * message, bool endCapture)
 	static char* buf = (char*)malloc((SD_CAPTURE_BLOCK_SIZE) * sizeof(char));
 	static char* a1 = buf;
 	static uint8_t count = 0;
-	static uint8_t printBufSize = 0;
-
+	
 	if (!endCapture)
 	{
 		memcpy(a1, message, MSG_STRING_LENGTH);
@@ -856,16 +855,19 @@ void CANBus::SDCardBuffer(char * message, bool endCapture)
 
 	if ((count == SD_CAPTURE_NUM_MSG) || endCapture)
 	{
-		sdCard.writeFileS(buf, count);
+		sdCard.writeFileS(buf, count); 
+		a1 = buf;
 		count = 0;
-		a1 -= SD_CAPTURE_BLOCK_SIZE;
-		
+
+#ifdef DEBUG_SD_CAPTURE
+		static uint8_t printBufSize = 0;
 		printBufSize++;
 		if (printBufSize == 12)
 		{
 			SerialUSB.println(Can0.available());
 			printBufSize = 0;
 		}
+#endif
 	}	
 }
 

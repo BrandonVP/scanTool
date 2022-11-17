@@ -1,8 +1,11 @@
 /*
- Name:    scanTool.ino
- Created: 11/15/2020 8:27:18 AM
- Author:  Brandon Van Pelt
-*/
+ ===========================================================================
+ Name        : scanTool.ino
+ Author      : Brandon Van Pelt
+ Created	 : 11/15/2020 8:27:18 AM
+ Description : Main
+ ===========================================================================
+ */
 
 /*=========================================================
 	Todo List
@@ -25,6 +28,10 @@ Views stops working at end of file
 Move SD Card file name to non-blocking state
 
 Fix capture page
+
+Work on TODO tags
+
+Add library files directly
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -1982,6 +1989,7 @@ uint8_t errorMSGButton(uint8_t confirmPage, uint8_t cancelPage, uint8_t xPage)
 	return 0;
 }
 
+
 /*=========================================================
 	Background Processes
 ===========================================================*/
@@ -2071,7 +2079,6 @@ void backgroundProcess()
 	Main loop
 ===========================================================*/
 
-uint32_t ttys = 0;
 // Calls pageControl with a value of 1 to set view page as the home page
 void loop()
 {
