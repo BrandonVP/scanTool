@@ -467,7 +467,7 @@ void CaptureButtons()
 					{
 						// Name
 						result = keyboardController(index);
-						if (result == 0xF1) // Accept
+						if (result == KEY_ACCEPT) // Accept
 						{
 							strncpy(filename, keyboardInput, 9);
 							strcat(filename, ".txt");
@@ -477,7 +477,7 @@ void CaptureButtons()
 							}
 							setName = false;
 						}
-						else if (result == 0xF0) // Cancel
+						else if (result == KEY_CANCEL) // Cancel
 						{
 							setName = false;
 						}
@@ -1100,13 +1100,13 @@ void timedTX()
 	case 4:
 		//ID
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].id = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1115,13 +1115,13 @@ void timedTX()
 	case 5:
 		// INT
 		g_var8[POS1] = keypadControllerDec(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].interval = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1130,13 +1130,13 @@ void timedTX()
 	case 6:
 		// Data0
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[0] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1145,13 +1145,13 @@ void timedTX()
 	case 7:
 		// Data1
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[1] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1160,13 +1160,13 @@ void timedTX()
 	case 8:
 		// Data2
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[2] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1175,13 +1175,13 @@ void timedTX()
 	case 9:
 		// Data3
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[3] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1190,13 +1190,13 @@ void timedTX()
 	case 10:
 		// Data4
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[4] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1205,13 +1205,13 @@ void timedTX()
 	case 11:
 		// Data5
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[5] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1220,13 +1220,13 @@ void timedTX()
 	case 12:
 		// Data6
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[6] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1235,13 +1235,13 @@ void timedTX()
 	case 13:
 		// Data7
 		g_var8[POS1] = keypadController(g_var8[POS2], g_var16[POS0]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			graphicLoaderState = 0;
 			RXtimedMSG.node[g_var8[POS0]].data[7] = g_var16[POS0];
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1250,7 +1250,7 @@ void timedTX()
 	case 14:
 		// Name
 		g_var8[POS1] = keyboardController(g_var8[POS5]);
-		if (g_var8[POS1] == 0xF1) // Accept
+		if (g_var8[POS1] == KEY_ACCEPT) // Accept
 		{
 			strncpy(RXtimedMSG.node[g_var8[POS0]].name, keyboardInput, 9);
 			for (uint8_t i = 0; i < 8; i++)
@@ -1261,7 +1261,7 @@ void timedTX()
 			graphicLoaderState = 0;
 			state = 2;
 		}
-		else if (g_var8[POS1] == 0xF0) // Cancel
+		else if (g_var8[POS1] == KEY_CANCEL) // Cancel
 		{
 			graphicLoaderState = 0;
 			state = 2;
@@ -1771,14 +1771,14 @@ void filterMask()
 	case 2: // Set channel 0 filter
 		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
 
-		if (g_var8[POS0] == 0xF1) // Accept
+		if (g_var8[POS0] == KEY_ACCEPT) // Accept
 		{
 			state = 0;
 			graphicLoaderState = 0;
 			CAN0Filter = g_var16[POS0];
 			can1.setFilterMask0(CAN0Filter, CAN0Mask);
 		}
-		else if (g_var8[POS0] == 0xF0) // Cancel
+		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
 		{
 			state = 0;
 			graphicLoaderState = 0;
@@ -1786,14 +1786,14 @@ void filterMask()
 		break;
 	case 3:
 		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
-		if (g_var8[POS0] == 0xF1) // Accept
+		if (g_var8[POS0] == KEY_ACCEPT) // Accept
 		{
 			state = 0;
 			graphicLoaderState = 0;
 			CAN0Mask = g_var16[POS0];
 			can1.setFilterMask0(CAN0Filter, CAN0Mask);
 		}
-		else if (g_var8[POS0] == 0xF0) // Cancel
+		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
 		{
 			state = 0;
 			graphicLoaderState = 0;
@@ -1801,14 +1801,14 @@ void filterMask()
 		break;
 	case 4:
 		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
-		if (g_var8[POS0] == 0xF1) // Accept
+		if (g_var8[POS0] == KEY_ACCEPT) // Accept
 		{
 			state = 0;
 			graphicLoaderState = 0;
 			CAN1Filter = g_var16[POS0];
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
 		}
-		else if (g_var8[POS0] == 0xF0) // Cancel
+		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
 		{
 			state = 0;
 			graphicLoaderState = 0;
@@ -1816,14 +1816,14 @@ void filterMask()
 		break;
 	case 5:
 		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
-		if (g_var8[POS0] == 0xF1) // Accept
+		if (g_var8[POS0] == KEY_ACCEPT) // Accept
 		{
 			state = 0;
 			graphicLoaderState = 0;
 			CAN1Mask = g_var16[POS0];
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
 		}
-		else if (g_var8[POS0] == 0xF0) // Cancel
+		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
 		{
 			state = 0;
 			graphicLoaderState = 0;

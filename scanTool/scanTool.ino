@@ -1323,7 +1323,8 @@ void pageControl()
 			uint8_t input = keypadControllerDec(g_var8[POS1], g_var16[POS4]);
 			if (input == 0xF1)
 			{
-				g_var16[POS3] = g_var16[POS4];
+				const uint8_t RUN_TIME_OFFSET_MS = 1; // Approximate time it takes send out a single messagein ms
+				g_var16[POS3] = g_var16[POS4] - RUN_TIME_OFFSET_MS;
 				state = 0;
 				hasDrawn = false;
 				graphicLoaderState = 2;

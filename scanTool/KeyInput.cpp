@@ -180,18 +180,18 @@ int keypadButtons()
 			if ((x >= 145) && (x <= 305))
 			{
 				waitForIt(145, 270, 305, 310);
-				return 0xF1;
+				return KEY_ACCEPT;
 
 			}
 			// Cancel
 			if ((x >= 315) && (x <= 470))
 			{
 				waitForIt(315, 270, 470, 310);
-				return 0xF0;
+				return KEY_CANCEL;
 			}
 		}
 	}
-	return 0xFF;
+	return KEY_NO_CHANGE;
 }
 
 /*
@@ -215,7 +215,7 @@ uint8_t keypadController(uint8_t& index, uint16_t& total)
 		total = keypadInput[0] * hexTable[0] + keypadInput[1] * hexTable[1] + keypadInput[2] * hexTable[2];
 		drawRoundBtn(255, 220, 470, 260, String(total, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		++index;
-		return 0xFF;
+		return KEY_NO_CHANGE;
 	}
 	else if (input == 0x10)
 	{
@@ -237,7 +237,7 @@ uint8_t keypadController(uint8_t& index, uint16_t& total)
 		total = keypadInput[0] * hexTable[0] + keypadInput[1] * hexTable[1] + keypadInput[2] * hexTable[2];
 		drawRoundBtn(255, 220, 470, 260, String(total, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		(index > 0) ? --index : 0;
-		return 0xFF;
+		return KEY_NO_CHANGE;
 	}
 
 	return input;
@@ -360,18 +360,18 @@ int keypadButtonsDec()
 			if ((x >= 145) && (x <= 305))
 			{
 				waitForIt(145, 270, 305, 310);
-				return 0xF1;
+				return KEY_ACCEPT;
 
 			}
 			// Cancel
 			if ((x >= 315) && (x <= 470))
 			{
 				waitForIt(315, 270, 470, 310);
-				return 0xF0;
+				return KEY_CANCEL;
 			}
 		}
 	}
-	return 0xFF;
+	return KEY_NO_CHANGE;
 }
 
 /*
@@ -396,7 +396,7 @@ uint8_t keypadControllerDec(uint8_t& index, uint16_t& total)
 		total = keypadInput[0] * 1 + keypadInput[1] * 10 + keypadInput[2] * 100 + keypadInput[3] * 1000;
 		drawRoundBtn(255, 220, 470, 260, String(total), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		++index;
-		return 0xFF;
+		return KEY_NO_CHANGE;
 	}
 	else if (input == 0x10)
 	{
@@ -431,7 +431,7 @@ uint8_t keypadControllerDec(uint8_t& index, uint16_t& total)
 		total = keypadInput[0] * 1 + keypadInput[1] * 10 + keypadInput[2] * 100 + keypadInput[3] * 1000;
 		drawRoundBtn(255, 220, 470, 260, String(total), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		(index > 0) ? --index : 0;
-		return 0xFF;
+		return KEY_NO_CHANGE;
 	}
 
 	return input;
@@ -765,20 +765,18 @@ int keyboardButtons()
 			{
 				waitForIt(135, 275, 305, 315);
 				// Accept
-				DEBUG_KEYBOARD("Accept");
-				return 0xF1;
+				return KEY_ACCEPT;
 
 			}
 			if ((x >= 310) && (x <= 475))
 			{
 				waitForIt(310, 275, 475, 315);
 				// Cancel
-				DEBUG_KEYBOARD("Cancel");
-				return 0xF0;
+				return KEY_CANCEL;
 			}
 		}
 	}
-	return 0xFF;
+	return KEY_NO_CHANGE;
 }
 
 /*
@@ -798,14 +796,14 @@ uint8_t keyboardController(uint8_t& index)
 		keyboardInput[index] = input;
 		drawRoundBtn(245, 230, 475, 270, String(keyboardInput), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		++index;
-		return 0xFF;
+		return KEY_NO_CHANGE;
 	}
 	else if (input == 0xF2 && index > 0)
 	{
 		keyboardInput[index - 1] = 0x20;
 		drawRoundBtn(245, 230, 475, 270, String(keyboardInput), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		--index;
-		return 0xFF;
+		return KEY_NO_CHANGE;
 	}
 
 	return input;
