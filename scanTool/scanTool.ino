@@ -32,6 +32,8 @@ Fix capture page
 Work on TODO tags
 
 Add library files directly
+
+readLogFileLCD: When end of file is reached going back jumps two pages instead of one
 ===========================================================
 	End Todo List
 =========================================================*/

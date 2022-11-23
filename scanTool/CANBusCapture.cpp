@@ -1972,14 +1972,6 @@ void CANLogButtons()
 				waitForItRect(135, 235, 420, 270);
 				g_var16[POS0] = 5 + g_var8[POS0];
 			}
-			/*
-			SerialUSB.print("g_var16[POS0]: ");
-			SerialUSB.println(g_var16[POS0]);
-			SerialUSB.print("g_var8[POS0]: ");
-			SerialUSB.println(g_var8[POS0]);
-			SerialUSB.print("fileList[g_var16[POS0]]: ");
-			SerialUSB.println(fileList[g_var16[POS0]]);
-			*/
 		}
 		if ((x >= 425) && (x <= 475))
 		{

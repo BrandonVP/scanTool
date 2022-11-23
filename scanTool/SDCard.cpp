@@ -410,47 +410,39 @@ void SDCard::readLogFile(char* filename)
 // Reads in CAN Capture
 void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 {
+	#define MAX_LINES 17
 	char tempStr[MSG_STRING_LENGTH];
-	//char printString[MSG_STRING_LENGTH];
 	unsigned int messageNum = 0;
 	unsigned int id = 0;
 	unsigned int time = 0;
 	unsigned int length = 0;
 	unsigned int msg[8];
-	int lineIndex = 60;
+	int displayLineIndex = 60; // For printing to display
 
 	File myFile = SD.open(filename, FILE_READ);
 	myFile.seek(index);
 	
 	myGLCD.setFont(SmallFont);
 
-	// Serving up some tasty pasta with this magical numbered spaghetti code! Yum!!!
 	if (isBackwards && myFile.available())
 	{
+		SerialUSB.println("here");
 		for (uint8_t k = 0; k < 35; k++) // 1 more than it should be to dump garbage
 		{
-			//SerialUSB.println(myFile.position());
-			if (myFile.position() > 66) // So tasty!
+			if (myFile.position() >= MSG_STRING_LENGTH && myFile.available()) // 
 			{
-				while (myFile.peek() != '\n') // Go backwards until it detects the previous line separator
-					myFile.seek(myFile.position() - 1);
-
-				myFile.seek(myFile.position() - 1);
+				myFile.seek(myFile.position() - MSG_STRING_LENGTH);
 			}
 			else
 			{
-				myFile.seek(0); // Go to 0 instead of a impossible(?) negative position
+				// Go to start
+				myFile.seek(0); 
 			}
 		}
 		if (myFile.position() != 0)
 		{
 			myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
 		}
-		// The problem is the last seek ends the position just before \n which mean the first read is garbage
-		// Current solution is code backs up 1 too many iterations then reads the garbage before proceeding
-		// This solutions fails for the first position because it would back up below 0, hence the > 66 check 
-		// because each line is 67 positions long.
-		// TODO: The correct solution is to end at \n so the next read will be the next line and reduce the messy code.
 	} 
 
 	if ((myFile.available()))
@@ -458,73 +450,65 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 	}
 	
-	//uint32_t timer543 = millis();
-	for (uint8_t i = 0; i < 17; i++)
+	for (uint8_t i = 0; i < MAX_LINES; i++)
 	{
 		if ((myFile.available()))
 		{
-			//SerialUSB.println(myFile.position());
 			myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
 
 			sscanf(tempStr, "%d %d %x %d %x %x %x %x %x %x %x %x", &messageNum, &time, &id, &length,
 				&msg[0], &msg[1], &msg[2], &msg[3], &msg[4], &msg[5], &msg[6], &msg[7]);
-			
-			// Printing it all at once increases function call time by 145ms
-			//sprintf(printString, "%5d %6d %03X %d %02X %02X %02X %02X %02X %02X %02X %02X", messageNum, time, id, length, msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
-			//myGLCD.print(printString, 135, lineIndex);
 
 			myGLCD.setBackColor(VGA_WHITE);
 			myGLCD.setColor(VGA_BLACK);
 
 			char temp1[3];
 			char temp2[2];
-			//char temp3[6];
 
-			//sprintf(temp3, "%6d", messageNum);
-			//myGLCD.print(temp3, 135, lineIndex);
-			myGLCD.printNumI(messageNum, 135, lineIndex);
+			myGLCD.printNumI(messageNum, 135, displayLineIndex);
 
-			//sprintf(temp3, "%6d", time);
-			//myGLCD.print(temp3, 185, lineIndex);
-			myGLCD.printNumI(time, 185, lineIndex);
+			myGLCD.printNumI(time, 185, displayLineIndex);
 
 			sprintf(temp1, "%03X", id);
-			myGLCD.print(temp1, 240, lineIndex);
+			myGLCD.print(temp1, 240, displayLineIndex);
 
-			myGLCD.printNumI(length, 270, lineIndex);
+			myGLCD.printNumI(length, 270, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[0]);
-			myGLCD.print(temp2, 285, lineIndex);
+			myGLCD.print(temp2, 285, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[1]);
-			myGLCD.print(temp2, 310, lineIndex);
+			myGLCD.print(temp2, 310, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[2]);
-			myGLCD.print(temp2, 335, lineIndex);
+			myGLCD.print(temp2, 335, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[3]);
-			myGLCD.print(temp2, 360, lineIndex);
+			myGLCD.print(temp2, 360, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[4]);
-			myGLCD.print(temp2, 385, lineIndex);
+			myGLCD.print(temp2, 385, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[5]);
-			myGLCD.print(temp2, 410, lineIndex);
+			myGLCD.print(temp2, 410, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[6]);
-			myGLCD.print(temp2, 435, lineIndex);
+			myGLCD.print(temp2, 435, displayLineIndex);
 
 			sprintf(temp2, "%02X", msg[7]);
-			myGLCD.print(temp2, 460, lineIndex);
+			myGLCD.print(temp2, 460, displayLineIndex);
 
-			lineIndex += 15;
+			displayLineIndex += 15;
+
+			// Only inc if a full page was printed without hitting end of file
+			if (i == 16)
+			{
+				index = myFile.position();
+			}
 		}
 	}
-	index = myFile.position();
 	myFile.close();
 	myGLCD.setFont(BigFont);
-	//SerialUSB.print("Time: ");
-	//SerialUSB.println(millis() - timer543);
 }
 
 
