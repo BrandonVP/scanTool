@@ -22,7 +22,6 @@ Baud Rate
 - Playback - 
 Redo GUI to match send
 Function menu (split, filter, edit?)
-Views stops working at end of file 
 
 - CANBusCapture
 Move SD Card file name to non-blocking state
@@ -32,8 +31,6 @@ Fix capture page
 Work on TODO tags
 
 Add library files directly
-
-readLogFileLCD: When end of file is reached going back jumps two pages instead of one
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -496,6 +493,7 @@ void pageControl()
 			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // Scroll index
 			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8); // Swipe input direction
 			(lockVar8(POS2)) ? g_var8[POS2] = 0 : e = lockError(POS2, 8); // Bool to track initial x/y position
+			(lockVar8(POS3)) ? g_var8[POS3] = 0 : e = lockError(POS3, 8); // Bool to track end of file
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
@@ -518,6 +516,7 @@ void pageControl()
 			unlockVar8(POS0);
 			unlockVar8(POS1);
 			unlockVar8(POS2);
+			unlockVar8(POS3);
 			unlockVar16(POS0);
 			unlockVar16(POS1);
 			unlockVar16(POS2);

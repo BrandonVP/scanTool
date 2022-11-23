@@ -407,8 +407,8 @@ void SDCard::readLogFile(char* filename)
 	myFile.close();
 }
 
-// Reads in CAN Capture
-void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
+// Reads in CAN Capture and returns true when end of file is reached
+bool SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 {
 	#define MAX_LINES 17
 	char tempStr[MSG_STRING_LENGTH];
@@ -417,33 +417,18 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 	unsigned int time = 0;
 	unsigned int length = 0;
 	unsigned int msg[8];
-	int displayLineIndex = 60; // For printing to display
+	uint16_t displayLineIndex = 60; // For printing to display
+	bool endOfFile = false;
+
+	// Backup the index to the starting index of the previous page
+	if (isBackwards == true)
+	{
+		index = index -  (2 * (MAX_LINES * MSG_STRING_LENGTH)); // Subract two pages, the current page and the page to be printed
+	}
 
 	File myFile = SD.open(filename, FILE_READ);
 	myFile.seek(index);
-	
 	myGLCD.setFont(SmallFont);
-
-	if (isBackwards && myFile.available())
-	{
-		SerialUSB.println("here");
-		for (uint8_t k = 0; k < 35; k++) // 1 more than it should be to dump garbage
-		{
-			if (myFile.position() >= MSG_STRING_LENGTH && myFile.available()) // 
-			{
-				myFile.seek(myFile.position() - MSG_STRING_LENGTH);
-			}
-			else
-			{
-				// Go to start
-				myFile.seek(0); 
-			}
-		}
-		if (myFile.position() != 0)
-		{
-			myFile.readBytesUntil('\n', tempStr, MSG_STRING_LENGTH);
-		}
-	} 
 
 	if ((myFile.available()))
 	{
@@ -499,16 +484,20 @@ void SDCard::readLogFileLCD(char* filename, uint32_t &index, bool isBackwards)
 			myGLCD.print(temp2, 460, displayLineIndex);
 
 			displayLineIndex += 15;
-
-			// Only inc if a full page was printed without hitting end of file
-			if (i == 16)
-			{
-				index = myFile.position();
-			}
+		}
+		else
+		{
+			// If the file becomes unavailable before the for loop finishes then the end was reached
+			endOfFile = true;
 		}
 	}
+
+	// Increment one page - Lines per page * length of line (string)
+	index += (MAX_LINES * MSG_STRING_LENGTH);
+
 	myFile.close();
 	myGLCD.setFont(BigFont);
+	return endOfFile;
 }
 
 

@@ -2037,7 +2037,7 @@ void CANLogButtons()
 			{
 				// View
 				waitForItRect(386, 275, 479, 315);
-				sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
+				g_var8[POS3] = sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
 				state = 2;
 			}
 		}
@@ -2081,18 +2081,18 @@ void playback()
 	}
 	if (state == 2)
 	{
+		char fileLoc[20] = "CANLOG/";
+		strcat(fileLoc, fileList[g_var16[POS0]]);
+
 		g_var8[POS0] = swipe(g_var32[POS1], g_var8[POS2], g_var16[POS2], g_var16[POS3], g_var16[POS4], g_var16[POS5]);
-		if (g_var8[POS0] == SWIPE_DOWN && !Touch_getXY())
+		
+		if (( g_var8[POS0] == SWIPE_DOWN ) && ( !Touch_getXY() ))
 		{
-			char fileLoc[20] = "CANLOG/";
-			strcat(fileLoc, fileList[g_var16[POS0]]);
-			sdCard.readLogFileLCD(fileLoc, g_var32[POS0], true);
+			g_var8[POS3] = sdCard.readLogFileLCD(fileLoc, g_var32[POS0], true);
 		}
-		if (g_var8[POS0] == SWIPE_UP && !Touch_getXY())
+		if (( g_var8[POS0] == SWIPE_UP ) && ( !Touch_getXY()) && (g_var8[POS3] != true))
 		{
-			char fileLoc[20] = "CANLOG/";
-			strcat(fileLoc, fileList[g_var16[POS0]]);
-			sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
+			g_var8[POS3] = sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
 		}
 		if (g_var8[POS0] == SWIPE_RIGHT && !Touch_getXY())
 		{
@@ -2104,6 +2104,21 @@ void playback()
 		if (g_var8[POS0] == SWIPE_LEFT && !Touch_getXY())
 		{
 			// Looking for work
+		}
+
+		if (Touch_getXY())
+		{
+			if ((x >= 131) && (x <= 479))
+			{
+				if ((y >= 1) && (y <= 80))
+				{
+					g_var8[POS3] = sdCard.readLogFileLCD(fileLoc, g_var32[POS0], true);
+				}
+				if ((y >= 260) && (y <= 319) && (g_var8[POS3] != true))
+				{
+					g_var8[POS3] = sdCard.readLogFileLCD(fileLoc, g_var32[POS0], false);
+				}
+			}
 		}
 	}
 	if (state == 3)
