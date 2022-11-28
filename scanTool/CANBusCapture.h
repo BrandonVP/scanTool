@@ -18,8 +18,6 @@
 	#include "WProgram.h"
 #endif
 
-
-
 struct MessageRX
 {
 	char name[9];
@@ -89,7 +87,6 @@ void playback();
 #else
 
 extern char fileList[20][13];
-
 extern bool drawCANBus();
 extern void CANBusButtons();
 extern bool drawCapture();

@@ -71,14 +71,12 @@ void VehicleToolButtons()
             {
                 waitForIt(140, 80, 305, 130);
                 // PIDSCAN
-                graphicLoaderState = 0;
                 nextPage = 10;
             }
             if ((y >= 135) && (y <= 185))
             {
                 waitForIt(140, 135, 305, 185);
                 // PID Guages
-                graphicLoaderState = 0;
                 nextPage = 12;
                 
             }
@@ -86,7 +84,6 @@ void VehicleToolButtons()
             {
                 waitForIt(140, 190, 305, 240);
                 // DTC Scan
-                graphicLoaderState = 0;
                 nextPage = 14;
             }
             if ((y >= 245) && (y <= 295))
@@ -101,7 +98,6 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // PIDSTRM
-                graphicLoaderState = 0;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -109,15 +105,13 @@ void VehicleToolButtons()
                 // VIN
                 can1.setFilterMask0(0x7E8, 0x7FF);
                 state = 0;
-                graphicLoaderState = 0;
                 nextPage = 13;
                 
             }
             if ((y >= 190) && (y <= 240))
             {
                 waitForIt(310, 190, 475, 240);
-                // DTC Clear
-                graphicLoaderState = 0;
+                // DTC Clears
                 nextPage = 15;
                 
                 // Initialize state machine variables to 0

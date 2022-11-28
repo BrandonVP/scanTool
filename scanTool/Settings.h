@@ -1,4 +1,11 @@
-// Settings.h
+/*
+ ===========================================================================
+ Name        : Settines.h
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description : 
+ ===========================================================================
+ */
 
 #ifndef _SETTINGS_H
 #define _SETTINGS_H

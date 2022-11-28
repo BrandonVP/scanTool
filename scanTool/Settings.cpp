@@ -1,6 +1,11 @@
-// 
-// 
-// 
+/*
+ ===========================================================================
+ Name        : Settines.cpp
+ Author      : Brandon Van Pelt
+ Created	 :
+ Description :
+ ===========================================================================
+ */
 
 #define _SETTINGS_C
 #include "Settings.h"
@@ -156,7 +161,6 @@ void settingsButtons()
                     Serial3.read();
                 }
 
-                graphicLoaderState = 0;
                 nextPage = 39;
             }
             if ((y >= 190) && (y <= 240))
@@ -171,7 +175,6 @@ void settingsButtons()
             if ((y >= 245) && (y <= 295))
             {
                 waitForIt(140, 245, 305, 295);
-				graphicLoaderState = 0;
 				nextPage = 43;
             }
         }
@@ -181,7 +184,6 @@ void settingsButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // About
-                graphicLoaderState = 0;
                 nextPage = 38;
             }
             if ((y >= 135) && (y <= 185))
@@ -199,7 +201,6 @@ void settingsButtons()
             {
 				waitForIt(310, 245, 475, 295);
 				// MCU Clock
-				graphicLoaderState = 0;
 				nextPage = 44;
             }
         }

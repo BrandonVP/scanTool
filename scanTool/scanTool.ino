@@ -31,6 +31,7 @@ Fix capture page
 Work on TODO tags
 
 Add library files directly
+
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -378,12 +379,18 @@ uint8_t swipe(uint32_t& lastTouch, uint8_t& initiated, uint16_t& initial_x, uint
 return 0;
 }
 
+void pageTransition()
+{
+	hasDrawn = false;
+	graphicLoaderState = 0;
+	page = nextPage;
+}
 // Manages the different App pages
 void pageControl()
 {
 	switch (page)
 	{
-	case 0: /*========== CANBUS ==========*/
+	case CANBUS_MAIN: /*========== CANBUS ==========*/
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -400,8 +407,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -467,12 +473,11 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar16(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
-	case 2: // Playback
+	case 2: // Capture files
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -525,8 +530,7 @@ void pageControl()
 			unlockVar16(POS5);
 			unlockVar32(POS0);
 			unlockVar32(POS1);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -551,8 +555,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -590,8 +593,7 @@ void pageControl()
 			unlockVar8(POS0);
 			unlockVar8(POS1);
 			unlockVar16(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -627,8 +629,7 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar8(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -680,8 +681,7 @@ void pageControl()
 			unlockVar8(POS4);
 			unlockVar8(POS5);
 			unlockVar8(POS6);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -741,8 +741,7 @@ void pageControl()
 			unlockVar16(POS3);
 			unlockVar16(POS4);
 			unlockVar32(POS1);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
    
@@ -759,12 +758,11 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
-	case 9: /*========== VEHTOOL ==========*/
+	case VEHTOOL_MAIN: /*========== VEHTOOL ==========*/
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -782,8 +780,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -834,8 +831,7 @@ void pageControl()
 			unlockVar16(POS0);
 			unlockVar16(POS1);
 			unlockVar32(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -891,8 +887,7 @@ void pageControl()
 			unlockVar16(POS0);
 			unlockVar16(POS1);
 			unlockVar32(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -911,8 +906,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -938,8 +932,7 @@ void pageControl()
 		if (nextPage != page)
 		{
 			can1.setFilterMask0(0x0, 0x0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -956,8 +949,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1003,8 +995,7 @@ void pageControl()
 		{
 			unlockVar16(POS1);
 			unlockVar32(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1020,8 +1011,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1036,12 +1026,11 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
-	case 18: /*========== RZRTOOL ==========*/
+	case UTVTOOL_MAIN: /*========== UTV TOOLS ==========*/
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -1059,8 +1048,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1076,8 +1064,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1093,8 +1080,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1110,8 +1096,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1127,8 +1112,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1144,8 +1128,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1161,8 +1144,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1178,8 +1160,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1195,12 +1176,11 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
-	case 27: /*========== EXTRAFN ==========*/
+	case TESTING_MAIN: /*========== EXTRAFN ==========*/
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -1218,8 +1198,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1237,8 +1216,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1384,8 +1362,7 @@ void pageControl()
 			unlockVar16(POS3);
 			unlockVar16(POS4);
 			unlockVar32(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1405,8 +1382,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1432,8 +1408,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1459,8 +1434,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1478,8 +1452,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1511,8 +1484,7 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar32(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1545,12 +1517,11 @@ void pageControl()
 		if (nextPage != page)
 		{
 			unlockVar32(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
-	case 36: /*========== SETTINGS ==========*/
+	case SETTING_MAIN: /*========== SETTINGS ==========*/
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
@@ -1568,8 +1539,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1586,8 +1556,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1606,8 +1575,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1642,8 +1610,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1659,8 +1626,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1676,8 +1642,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1693,8 +1658,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1733,8 +1697,7 @@ void pageControl()
 			unlockVar8(POS4);
 			unlockVar8(POS5);
 			unlockVar16(POS0);
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 
@@ -1755,8 +1718,7 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
-			hasDrawn = false;
-			page = nextPage;
+			pageTransition();
 		}
 		break;
 	}
@@ -1769,10 +1731,10 @@ void setup()
 
 	Serial.begin(115200);
 	Serial3.begin(115200);
-	SerialUSB.begin(CAN_BPS_500K);
+	SerialUSB.begin(115200);
 
-	can1.setBaud0(500000);
-	can1.setBaud1(500000);
+	can1.setBaud0(CAN_BPS_500K);
+	can1.setBaud1(CAN_BPS_500K);
 
 	can1.startCAN0(0x000, 0x7FF);
 	can1.startCAN1(0x000, 0x7FF);
@@ -1876,23 +1838,7 @@ void drawSquareBtn(int x_start, int y_start, int x_stop, int y_stop, String butt
 	}
 }
 
-// Function complete load bar
-bool loadBar(int progress)
-{
-	if (progress >= DONE)
-	{
-		drawSquareBtn(200, 200, 400, 220, F("Finished"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-		//myGLCD.setColor(menuBtnColor);
-		//myGLCD.fillRect(200, 200, 400, 220);
-
-		return true;
-	}
-	drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
-	myGLCD.setColor(menuBtnColor);
-	myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
-	return false;
-}
-
+// Holds button down while pressed
 void waitForIt(int x1, int y1, int x2, int y2)
 {
 	myGLCD.setColor(themeBackground);
@@ -1917,6 +1863,23 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 	}
 	myGLCD.setColor(menuBtnBorder);
 	myGLCD.drawRect(x1, y1, x2, y2);
+}
+
+// Function complete load bar
+bool loadBar(int progress)
+{
+	if (progress >= DONE)
+	{
+		drawSquareBtn(200, 200, 400, 220, F("Finished"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		//myGLCD.setColor(menuBtnColor);
+		//myGLCD.fillRect(200, 200, 400, 220);
+
+		return true;
+	}
+	drawSquareBtn(199, 199, 401, 221, "", themeBackground, menuBtnBorder, menuBtnText, LEFT);
+	myGLCD.setColor(menuBtnColor);
+	myGLCD.fillRect(200, 200, (200 + (progress * 25)), 220);
+	return false;
 }
 
 // Only called once at startup to draw the menu

@@ -75,13 +75,11 @@ void CANBusButtons()
 				// Capture
 				state = 0;
 				nextPage = 1;
-				graphicLoaderState = 0;
 			}
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(140, 135, 305, 185);
 				// Playback
-				graphicLoaderState = 0;
 				nextPage = 2;
 				
 			}
@@ -89,7 +87,6 @@ void CANBusButtons()
 			{
 				waitForIt(140, 190, 305, 240);
 				// Filter Mask
-				graphicLoaderState = 0;
 				nextPage = 4;
 			}
 			if ((y >= 245) && (y <= 295))
@@ -104,14 +101,12 @@ void CANBusButtons()
 			{
 				waitForIt(310, 80, 475, 130);
 				// Timed TX
-				graphicLoaderState = 0;
 				nextPage = 6;
 			}
 			if ((y >= 135) && (y <= 185))
 			{
 				waitForIt(310, 135, 475, 185);
 				// Baud
-				graphicLoaderState = 0;
 				nextPage = 5;
 			}
 			if ((y >= 190) && (y <= 240))

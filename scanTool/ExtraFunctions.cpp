@@ -110,7 +110,6 @@ void extraFNButtons()
                 waitForIt(140, 245, 305, 295);
                 // Ford Dongle Simulator
                 nextPage = 34;
-                graphicLoaderState = 0;
             }
         }
         if ((x >= 310) && (x <= 475))
@@ -119,7 +118,6 @@ void extraFNButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // Message Spam
-                graphicLoaderState = 0;
                 state = 0;
                 nextPage = 29;
             }
@@ -197,8 +195,6 @@ void extraFNButtons()
                 waitForIt(310, 245, 475, 295);
                 // GM Dongle Simulator
                 nextPage = 35;
-                
-                graphicLoaderState = 0;
             }
         }
     }
