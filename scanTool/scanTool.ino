@@ -23,10 +23,6 @@ Function menu (split, filter, edit?)
 - CANBusCapture
 Move SD Card file name to non-blocking state
 
-Fix capture page
-
-Work on TODO tags
-
 Add library files directly
 
 ===========================================================

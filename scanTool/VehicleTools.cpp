@@ -215,6 +215,7 @@ void drawPIDStreamScroll()
     }
 }
 
+//
 void drawPIDStream()
 {
     drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
@@ -312,6 +313,7 @@ void PIDStreamButtons()
     }
 }
 
+//
 void streamPIDS()
 {
     if (hasPID == true)
@@ -376,7 +378,7 @@ bool drawPIDGauges()
     myGLCD.setBackColor(menuBtnColor);
 }
 
-// 
+// Stream PIDs
 void PIDGauges()
 {
     const float pi = 3.14159;
@@ -522,6 +524,7 @@ void drawVIN()
 }
 
 /*============== DTC ==============*/
+// Main DTC Page
 void DTC()
 {
     if (state == 0) // User input
@@ -549,6 +552,7 @@ void DTC()
     }
 }
 
+// Clears all vehicle DTC
 void clearDTC()
 {
     // Cycle through clear messages
@@ -589,6 +593,7 @@ void clearDTC()
     }
 }
 
+// Draw the main DTC page
 bool drawDTC()
 {
     switch (graphicLoaderState)

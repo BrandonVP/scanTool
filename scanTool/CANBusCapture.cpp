@@ -570,7 +570,6 @@ void readInCANMsg(uint8_t channel)
 
 		// LCD slows down printing this large char
 		// Rolling it out below reduced function call by 11ms!
-		// TODO: Writing a function to convert the hex value to char might decrease function call time
 		//char printString[40];
 		//sprintf(printString, "%03X  %d  %02X  %02X  %02X  %02X  %02X  %02X  %02X  %02X", rxId, len, rxBuf[0], rxBuf[1], rxBuf[2], rxBuf[3], rxBuf[4], rxBuf[5], rxBuf[6], rxBuf[7]);
 		//myGLCD.print(printString, 151, g_var16[POS0]);
