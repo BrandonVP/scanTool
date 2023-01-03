@@ -24,10 +24,10 @@ bool drawRZRTOOL()
         drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawRoundBtn(140, 80, 305, 130, F("RZR DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 80, 305, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 3:
-        drawRoundBtn(310, 80, 475, 130, F("Pol DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 80, 475, 130, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 4:
         drawRoundBtn(140, 135, 305, 185, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);

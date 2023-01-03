@@ -1634,39 +1634,45 @@ bool drawFilterMask()
 		drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
 		break;
 	case 2:
-		drawRoundBtn(145, 70, 200, 120, F("CAN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(140, 65, 210, 105, F("CAN"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 3:
-		drawRoundBtn(205, 70, 340, 120, F("Filter"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(210, 65, 340, 105, F("Filter"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 4:
-		drawRoundBtn(345, 70, 475, 120, F("Mask"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(340, 65, 475, 105, F("Mask"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 5:
-		drawRoundBtn(145, 125, 200, 175, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(140, 110, 210, 160, F("0"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 6:
-		drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(210, 110, 340, 160, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 7:
-		drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(340, 110, 475, 160, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 8:
-		drawRoundBtn(145, 180, 200, 230, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(140, 165, 210, 215, F("1"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 9:
-		drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(210, 165, 340, 215, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 10:
-		drawRoundBtn(345, 180, 475, 230, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(340, 165, 475, 215, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 11:
-		drawRoundBtn(145, 235, 475, 285, F("Open All Traffic"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		drawSquareBtn(140, 220, 210, 270, F("WiFi"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 12:
-		drawSquareBtn(150, 295, 479, 315, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		drawSquareBtn(210, 220, 340, 270, String(CANWiFiFilter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
 		break;
 	case 13:
+		drawSquareBtn(340, 220, 475, 270, String(CANWiFiMask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 14:
+		drawSquareBtn(140, 275, 475, 315, F("Open All Traffic"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+		break;
+	case 15:
 		return false;
 		break;
 	}
@@ -1680,11 +1686,11 @@ void filterMaskButtons()
 	// Touch screen controls
 	if (Touch_getXY())
 	{
-		if ((y >= 125) && (y <= 175))
+		if ((y >= 110) && (y <= 160))
 		{
-			if ((x >= 205) && (x <= 340))
+			if ((x >= 210) && (x <= 340))
 			{
-				waitForIt(205, 125, 340, 175);
+				waitForItRect(210, 110, 340, 160);
 				// Set CAN0 Filter
 				state = 2;
 				g_var8[POS1] = 0;
@@ -1692,9 +1698,9 @@ void filterMaskButtons()
 				resetKeypad();
 				drawKeypad();
 			}
-			if ((x >= 345) && (x <= 475))
+			if ((x >= 340) && (x <= 475))
 			{
-				waitForIt(345, 125, 475, 175);
+				waitForItRect(340, 110, 475, 160);
 				// Set CAN 0Mask
 				state = 3;
 				g_var8[POS1] = 0;
@@ -1703,11 +1709,11 @@ void filterMaskButtons()
 				drawKeypad();
 			}
 		}
-		if ((y >= 180) && (y <= 230))
+		if ((y >= 165) && (y <= 215))
 		{
 			if ((x >= 205) && (x <= 340))
 			{
-				waitForIt(205, 180, 340, 230);
+				waitForItRect(210, 165, 340, 215);
 				// Set CAN1 Filter
 				state = 4;
 				g_var8[POS1] = 0;
@@ -1715,9 +1721,9 @@ void filterMaskButtons()
 				resetKeypad();
 				drawKeypad();
 			}
-			if ((x >= 345) && (x <= 475))
+			if ((x >= 340) && (x <= 475))
 			{
-				waitForIt(345, 180, 475, 230);
+				waitForItRect(340, 165, 475, 215);
 				// Set CAN1 Mask
 				state = 5;
 				g_var8[POS1] = 0;
@@ -1726,16 +1732,37 @@ void filterMaskButtons()
 				drawKeypad();
 			}
 		}
-		if ((y >= 235) && (y <= 285))
+		if ((y >= 220) && (y <= 270))
 		{
-			if ((x >= 145) && (x <= 475))
+			if ((x >= 210) && (x <= 340))
 			{
-				waitForIt(145, 235, 475, 285);
+				waitForItRect(210, 220, 340, 270);
+				// Set WiFi Filter
+				state = 6;
+				g_var8[POS1] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
+			}
+			if ((x >= 340) && (x <= 475))
+			{
+				waitForItRect(340, 220, 475, 270);
+				// Set WiFi Mask
+				state = 7;
+				g_var8[POS1] = 0;
+				g_var16[POS0] = 0;
+				resetKeypad();
+				drawKeypad();
+			}
+		}
+		if ((y >= 275) && (y <= 315))
+		{
+			if ((x >= 140) && (x <= 475))
+			{
+				waitForItRect(140, 275, 475, 315);
 				openAllTraffic();
-				drawRoundBtn(205, 125, 340, 175, String(CAN0Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				drawRoundBtn(345, 125, 475, 175, String(CAN0Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				drawRoundBtn(205, 180, 340, 230, String(CAN1Filter, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-				drawRoundBtn(345, 180, 475, 230, String(CAN1Mask, 16), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+				graphicLoaderState = 0;
+				state = 0;
 			}
 		}
 	}
@@ -1745,9 +1772,11 @@ void filterMaskButtons()
 void openAllTraffic()
 {
 	CAN0Filter = 000;
-	CAN0Mask = 0x7FF;
+	CAN0Mask = 0x000;
 	CAN1Filter = 0x000;
-	CAN1Mask = 0x7FF;
+	CAN1Mask = 0x000;
+	CANWiFiFilter = 0x000;
+	CANWiFiMask = 0x000;
 	can1.startCAN0(CAN0Filter, CAN0Mask);
 	can1.startCAN1(CAN1Filter, CAN1Mask);
 }
@@ -1817,6 +1846,34 @@ void filterMask()
 			graphicLoaderState = 0;
 			CAN1Mask = g_var16[POS0];
 			can1.setFilterMask1(CAN1Filter, CAN1Mask);
+		}
+		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
+		{
+			state = 0;
+			graphicLoaderState = 0;
+		}
+		break;
+	case 6:
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
+		if (g_var8[POS0] == KEY_ACCEPT) // Accept
+		{
+			state = 0;
+			graphicLoaderState = 0;
+			CANWiFiFilter = g_var16[POS0];
+		}
+		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
+		{
+			state = 0;
+			graphicLoaderState = 0;
+		}
+		break;
+	case 7:
+		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
+		if (g_var8[POS0] == KEY_ACCEPT) // Accept
+		{
+			state = 0;
+			graphicLoaderState = 0;
+			CANWiFiMask = g_var16[POS0];
 		}
 		else if (g_var8[POS0] == KEY_CANCEL) // Cancel
 		{

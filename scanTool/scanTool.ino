@@ -87,16 +87,14 @@ bool isMSGSpam = false;
 
 // General use variables
 uint8_t state = 0;
-// TODO: This var is not needed, replace
-bool isFinished = false;
 
-// TODO: Why are these needed? Can the same function be done using the library?
-//		 Move this to a header somewhere if not
 // Filter range / Filter Mask
 uint32_t CAN0Filter = 0x000;
-uint32_t CAN0Mask = 0x7FF;
+uint32_t CAN0Mask = 0x000;
 uint32_t CAN1Filter = 0x000;
-uint32_t CAN1Mask = 0x7FF;
+uint32_t CAN1Mask = 0x000;
+uint32_t CANWiFiFilter = 0x000;
+uint32_t CANWiFiMask = 0x000;
 
 // Use to load pages in pieces to prevent blocking while loading entire page
 uint8_t graphicLoaderState = 0;
@@ -379,12 +377,14 @@ uint8_t swipe(uint32_t& lastTouch, uint8_t& initiated, uint16_t& initial_x, uint
 return 0;
 }
 
+// Resets variables for page change
 void pageTransition()
 {
 	hasDrawn = false;
 	graphicLoaderState = 0;
 	page = nextPage;
 }
+
 // Manages the different App pages
 void pageControl()
 {
@@ -801,11 +801,10 @@ void pageControl()
 
 			// Lock global variables
 			error_t e = false;
-			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);	 // TODO: Comments
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);	 // VIN request state
 			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);    // Loading bar index
-			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16);
-			(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16);
-			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS2, 32);
+			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // PID request range
+			(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // PID request bank 
 			if (e)
 			{
 				DEBUG_ERROR(F("Error: Variable locked"));
@@ -830,7 +829,6 @@ void pageControl()
 			unlockVar8(POS1);
 			unlockVar16(POS0);
 			unlockVar16(POS1);
-			unlockVar32(POS0);
 			pageTransition();
 		}
 		break;
@@ -955,6 +953,7 @@ void pageControl()
 
 	case 15: // DTC
 		// Draw page and lock variables
+		// TODO: fix to standard
 		if (!hasDrawn)
 		{
 			if (state == 0)
@@ -983,12 +982,12 @@ void pageControl()
 				// Initialize state machine variables to 0
 				hasDrawn = true;
 				state = 0;
-				isFinished = false;
 			}
 		}
 
 		// Call buttons or page method
-		clearDTC();
+		// // TODO: Fix
+		//clearDTC();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)

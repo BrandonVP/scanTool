@@ -531,7 +531,7 @@ void drawVIN()
 void clearDTC()
 {
     // Run once at start
-    if (millis() - g_var32[POS0] > 500 && !isFinished)
+    if (millis() - g_var32[POS0] > 500)
     {
         drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         drawSquareBtn(150, 150, 479, 170, F("Clearing DTCS..."), themeBackground, themeBackground, menuBtnColor, CENTER);
@@ -557,7 +557,7 @@ void clearDTC()
     }
 
     // Finished
-    if (state > 6 && !isFinished)
+    if (state > 6)
     {
         drawSquareBtn(150, 150, 479, 170, F("All DTCS Cleared"), themeBackground, themeBackground, menuBtnColor, CENTER);
         isFinished = true;

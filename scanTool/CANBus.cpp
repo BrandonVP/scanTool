@@ -695,7 +695,19 @@ bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 					id = incWIFI.id;
 					len = incWIFI.length;
 					memcpy((void*)msg, (const void*)incWIFI.data.bytes, incWIFI.length);
-					return true;
+
+					
+					// Filter and Mask the message
+					uint32_t filterValue = CANWiFiFilter & CANWiFiMask;
+					if (filterValue == (id & CANWiFiMask))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+
 				}
 				else
 				{

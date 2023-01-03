@@ -86,6 +86,8 @@ extern uint32_t CAN0Filter;
 extern uint32_t CAN0Mask;
 extern uint32_t CAN1Filter;
 extern uint32_t CAN1Mask;
+extern uint32_t CANWiFiFilter;
+extern uint32_t CANWiFiMask;
 
 extern const uint32_t hexTable[8];
 extern const uint32_t baudRates[6];
