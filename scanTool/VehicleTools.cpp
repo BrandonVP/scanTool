@@ -36,10 +36,10 @@ bool drawVehicleTools()
         drawRoundBtn(310, 135, 475, 185, F("VIN"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 6:
-        drawRoundBtn(140, 190, 305, 240, F("Scan DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 190, 305, 240, F(" "), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 7:
-        drawRoundBtn(310, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 190, 475, 240, F("DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
         drawRoundBtn(140, 245, 305, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
@@ -521,57 +521,104 @@ void drawVIN()
     drawSquareBtn(150, 180, 479, 200, can1.getVIN(), themeBackground, themeBackground, menuBtnColor, CENTER);
 }
 
-/*============== DTC SCAN ==============*/
-// Draw
-// Function
+/*============== DTC ==============*/
+void DTC()
+{
+    if (state == 0) // User input
+    {
+        state = DTCButtons();
+    }
+    if (state == 1) // Read DTC
+    {
+        // Future read DTCs
+    }
+    if (state == 2) // Clear DTC
+    {
+        clearDTC();
+    }
+    if (state == 3) // Reset
+    {
+        if (drawDTC())
+        {
+            return;
+        }
+        state = 0;
+        g_var8[POS0] = 0;
+        g_var16[POS1] = 0;
+        g_var32[POS0] = 0;
+    }
+}
 
-// Buttons
-
-/*============== DTC CLEAR ==============*/
 void clearDTC()
 {
-    // Run once at start
-    if (millis() - g_var32[POS0] > 500)
-    {
-        drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-        drawSquareBtn(150, 150, 479, 170, F("Clearing DTCS..."), themeBackground, themeBackground, menuBtnColor, CENTER);
-    }
-
     // Cycle through clear messages
-    if (state < 7)
+    if (g_var8[POS0] < 7)
     {
         if (millis() - g_var32[POS0] >= 400)
         {
             uint32_t IDc[7] = { 0x7D0, 0x720, 0x765, 0x737, 0x736, 0x721, 0x760 };
             byte MSGc[8] = { 0x4, 0x18, 0x00, 0xFF, 0x00, 0x55, 0x55, 0x55 };
 
-            can1.sendFrame(IDc[state], MSGc, 8, selectedChannelOut);
+            can1.sendFrame(IDc[g_var8[POS0]], MSGc, 8, selectedChannelOut);
             g_var16[POS1]++;
             g_var32[POS0] = millis();
         }
         if (g_var16[POS1] == 3)
         {
             g_var16[POS1] = 0;
-            loadBar(1 + state++);
+            loadBar(1 + g_var8[POS0]++);
         }
+
+        return;
     }
 
     // Finished
-    if (state > 6)
+    if (g_var8[POS0] == 7)
     {
         drawSquareBtn(150, 150, 479, 170, F("All DTCS Cleared"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        isFinished = true;
         loadBar(DONE);
+        g_var8[POS0]++;
+        g_var32[POS0] = millis();
+        return;
+    }
+
+    if (millis() - g_var32[POS0] >= CLEAR_DTC_RESET)
+    {
+        state = 3;
+        graphicLoaderState = 0;
     }
 }
 
-void drawClearDTC()
+bool drawDTC()
 {
-    drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    drawSquareBtn(150, 135, 460, 155, F("Turn key to run"), themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawSquareBtn(150, 160, 460, 180, F("with engine off"), themeBackground, themeBackground, menuBtnColor, CENTER);
-    drawRoundBtn(140, 190, 305, 240, F("Scan DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
-    drawRoundBtn(310, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 3:
+        drawSquareBtn(150, 110, 460, 130, F("Connect CAN0 and"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    case 4:
+        drawSquareBtn(150, 135, 460, 155, F("turn key to run"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    case 5:
+        drawSquareBtn(150, 160, 460, 180, F("with engine off"), themeBackground, themeBackground, menuBtnColor, CENTER);
+        break;
+    case 6:
+        drawRoundBtn(140, 190, 305, 240, F("Scan DTC"), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 7:
+        drawRoundBtn(310, 190, 475, 240, F("Clear DTC"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 8:
+        return false;
+        break;
+    }
+    graphicLoaderState++;
+    return true;
 }
 
 // Buttons for the DTC program
@@ -587,15 +634,17 @@ uint8_t DTCButtons()
             {
                 waitForIt(140, 190, 305, 240);
                 // Scan DTCs
-                
+                return 1;
             }
             if ((x >= 310) && (x <= 475))
             {
                 waitForIt(310, 190, 475, 240);
                 // Clear DTCs
+                drawSquareBtn(131, 60, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+                drawSquareBtn(150, 150, 479, 170, F("Clearing DTCS..."), themeBackground, themeBackground, menuBtnColor, CENTER);
                 return 2;
             }
         }
     }
-    return 1;
+    return 0;
 }

@@ -71,7 +71,6 @@ extern UTouch  myTouch;
 // General use variables
 // Any non-background process function can use
 // Initialize to 0 before use
-extern bool isFinished;
 extern uint8_t state;
 
 extern uint8_t controlPage;

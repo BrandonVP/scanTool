@@ -1701,7 +1701,7 @@ void filterMaskButtons()
 			if ((x >= 340) && (x <= 475))
 			{
 				waitForItRect(340, 110, 475, 160);
-				// Set CAN 0Mask
+				// Set CAN0 Mask
 				state = 3;
 				g_var8[POS1] = 0;
 				g_var16[POS0] = 0;

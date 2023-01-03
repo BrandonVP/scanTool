@@ -20,6 +20,8 @@
 
 #ifdef _VEHICLETOOLS_C
 
+#define CLEAR_DTC_RESET 12000 // MS counter to reset DTC page back to default
+
  // Determines if a PID scan was performed before displaying pid list
 bool hasPID = false;
 
@@ -38,7 +40,8 @@ bool drawPIDGauges();
 void PIDGauges();
 void drawVIN();
 void clearDTC();
-void drawClearDTC();
+bool drawDTC();
+void DTC();
 uint8_t DTCButtons();
 
 #else
@@ -57,9 +60,10 @@ extern void drawPIDStream();
 extern void PIDGauges();
 extern void drawVIN();
 extern void clearDTC();
-extern void drawClearDTC();
+extern bool drawDTC();
 extern bool drawPIDGauges();
 extern uint8_t DTCButtons();
+extern void DTC();
 
 #endif // _VEHICLETOOLS_C
 #endif // _VEHICLETOOLS_H

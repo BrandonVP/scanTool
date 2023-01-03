@@ -11,13 +11,10 @@
 	Todo List
 ===========================================================
 Read Vehicle DTCs
-Read / Clear RZR DTCs
 Daylight savings option (clock menu in settings)
 
 - WiFi - 
 delete dongle confirmation
-Filter Mask
-Baud Rate
 
 - Playback - 
 Redo GUI to match send
@@ -842,10 +839,10 @@ void pageControl()
 				drawPIDStream();
 
 				error_t e = false;
-				(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // TODO: Comments
-				(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16);
-				(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16);
-				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);
+				(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // Draw scroll index
+				(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // Selected PID to request
+				(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // PID samples counter
+				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32); // PID request timer
 				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
@@ -953,45 +950,37 @@ void pageControl()
 
 	case 15: // DTC
 		// Draw page and lock variables
-		// TODO: fix to standard
 		if (!hasDrawn)
 		{
-			if (state == 0)
+			if (drawDTC())
 			{
-				drawClearDTC();
-				state++;
+				break;
 			}
-			if (state == 1)
+			// Lock global variables
+			error_t e = false;
+			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // Clear DTC state
+			(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // Loadbar divider
+			(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32); // Send clear message timer
+			if (e)
 			{
-				state = DTCButtons();
+				DEBUG_ERROR(F("Error: Variable locked"));
+				delay(5000);
+				graphicLoaderState = 0;
+				nextPage = VEHTOOL_MAIN;
 			}
-			if (state == 2)
-			{
-				// Lock global variables
-				error_t e = false;
-				(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // TODO: Comments
-				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32);
-				if (e)
-				{
-					DEBUG_ERROR(F("Error: Variable locked"));
-					delay(5000);
-					graphicLoaderState = 0;
-					nextPage = VEHTOOL_MAIN;
-				}
 
-				// Initialize state machine variables to 0
-				hasDrawn = true;
-				state = 0;
-			}
+			// Initialize state machine variables to 0
+			hasDrawn = true;
+			state = 0;
 		}
 
 		// Call buttons or page method
-		// // TODO: Fix
-		//clearDTC();
+		DTC();
 
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			unlockVar8(POS0);
 			unlockVar16(POS1);
 			unlockVar32(POS0);
 			pageTransition();
@@ -1365,42 +1354,12 @@ void pageControl()
 		}
 		break;
 
-	case 30: // TODO: REMOVE
+	case 30: // Unused
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			drawkeyboard();
 			hasDrawn = true;
-			g_var8[POS0] = 0;
-			g_var8[POS1] = 0;
 		}
-
-		// Call buttons or page method
-		g_var8[POS0] = keyboardController(g_var8[POS1]);
-		
-		// Release any variable locks if page changed
-		if (nextPage != page)
-		{
-			pageTransition();
-		}
-		break;
-
-	case 31: // TODO: REMOVE
-		// Draw page and lock variables
-		if (!hasDrawn)
-		{
-			// TODO: LOCKS!!!!
-			drawKeypad();
-			hasDrawn = true;
-			g_var8[POS0] = 0;
-			g_var8[POS1] = 0;
-			g_var16[POS0] = 0;
-			keypadInput[0] = 0;
-			keypadInput[1] = 0;
-			keypadInput[2] = 0;
-		}
-
-		g_var8[POS0] = keypadController(g_var8[POS1], g_var16[POS0]);
 
 		// Call buttons or page method
 
@@ -1411,22 +1370,28 @@ void pageControl()
 		}
 		break;
 
-	case 32: // TODO: REMOVE
+	case 31: // Unused
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			// TODO: Locks!!!!!
-			drawKeypadDec();
 			hasDrawn = true;
-			g_var8[POS0] = 0;
-			g_var8[POS1] = 0;
-			g_var16[POS0] = 0;
-			keypadInput[0] = 0;
-			keypadInput[1] = 0;
-			keypadInput[2] = 0;
 		}
 
-		g_var8[POS0] = keypadControllerDec(g_var8[POS1], g_var16[POS0]);
+		// Call buttons or page method
+
+		// Release any variable locks if page changed
+		if (nextPage != page)
+		{
+			pageTransition();
+		}
+		break;
+
+	case 32: // Unused
+		// Draw page and lock variables
+		if (!hasDrawn)
+		{
+			hasDrawn = true;
+		}
 
 		// Call buttons or page method
 
