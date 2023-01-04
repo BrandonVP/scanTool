@@ -68,6 +68,7 @@ bool drawSettings()
     return true;
 }
 
+// About page for the ScanTool
 bool drawAbout()
 {
     switch (graphicLoaderState)
@@ -78,26 +79,28 @@ bool drawAbout()
         drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
         break;
     case 2:
-        drawSquareBtn(135, 120, 479, 140, F("Software Development"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        drawSquareBtn(135, 145, 479, 165, F("Brandon Van Pelt"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        drawSquareBtn(135, 170, 479, 190, F("github.com/BrandonVP"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        drawSquareBtn(135, 195, 479, 215, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
-        
+        drawSquareBtn(135, 105, 479, 125, F("Open Source"), themeBackground, themeBackground, menuBtnColor, CENTER);
 		break;
     case 3:
-
+		drawSquareBtn(135, 130, 479, 150, F("Software Development"), themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 4:
-
+		drawSquareBtn(135, 155, 479, 175, F("Brandon Van Pelt"), themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
-    case 5:
-
+	case 5:
+		drawSquareBtn(135, 180, 479, 200, F("github.com/BrandonVP"), themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	case 6:
+		drawSquareBtn(135, 205, 479, 225, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+    case 7:
         return false;
     }
     graphicLoaderState++;
     return true;
 }
 
+// Request and display the ESP8266's MAC address
 bool drawMACAddress()
 {
     char serialBuffer[20];
@@ -111,24 +114,29 @@ bool drawMACAddress()
         break;
     case 2:
         drawSquareBtn(135, 100, 479, 120, F("Wi-Fi Device"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        sprintf(serialBuffer, "%c%c%c%d%d", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
-        drawSquareBtn(135, 125, 479, 145, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 3:
-        drawSquareBtn(135, 165, 479, 185, F("MAC"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        sprintf(serialBuffer, "%X:%X:%X:%X:%X:%X", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
-        drawSquareBtn(135, 190, 479, 210, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
+		sprintf(serialBuffer, "%c%c%c%d%d", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
+		drawSquareBtn(135, 125, 479, 145, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 4:
-        drawSquareBtn(135, 230, 479, 250, F("Dongle MAC"), themeBackground, themeBackground, menuBtnColor, CENTER);
-        sprintf(serialBuffer, "%X:%X:%X:%X:%X:%X", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
-        drawSquareBtn(135, 255, 479, 275, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
+		drawSquareBtn(135, 165, 479, 185, F("MAC"), themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
     case 5:
-        Serial3.read(); // Ending byte
+		sprintf(serialBuffer, "%X:%X:%X:%X:%X:%X", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
+		drawSquareBtn(135, 190, 479, 210, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
         break;
-    case 6:
-
+	case 6:
+		drawSquareBtn(135, 230, 479, 250, F("Dongle MAC"), themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	case 7:
+		sprintf(serialBuffer, "%X:%X:%X:%X:%X:%X", Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read(), Serial3.read());
+		drawSquareBtn(135, 255, 479, 275, serialBuffer, themeBackground, themeBackground, menuBtnColor, CENTER);
+		break;
+	case 8:
+		Serial3.read(); // Ending byte
+		break;
+	case 9:
         return false;
     }
     graphicLoaderState++;
@@ -952,7 +960,7 @@ void memoryUse()
 }
 
 /*============ MCU Clock Speed ============*/
-//
+// Experiemental
 bool drawClockSpeed()
 {
 	switch (graphicLoaderState)
