@@ -33,7 +33,7 @@ void VehicleToolButtons();
 bool drawPIDSCAN();
 void startPIDSCAN();
 void drawPIDStreamScroll();
-void drawPIDStream();
+bool drawPIDStream();
 void PIDStreamButtons();
 void streamPIDS();
 bool drawPIDGauges();
@@ -56,7 +56,7 @@ extern bool drawVehicleTools();
 extern void VehicleToolButtons();
 extern bool drawPIDSCAN();
 extern void startPIDSCAN();
-extern void drawPIDStream();
+extern bool drawPIDStream();
 extern void PIDGauges();
 extern void drawVIN();
 extern void clearDTC();
@@ -64,6 +64,9 @@ extern bool drawDTC();
 extern bool drawPIDGauges();
 extern uint8_t DTCButtons();
 extern void DTC();
+extern void drawPIDStreamScroll();
+extern void streamPIDS();
+extern void PIDStreamButtons();
 
 #endif // _VEHICLETOOLS_C
 #endif // _VEHICLETOOLS_H

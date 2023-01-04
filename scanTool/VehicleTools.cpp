@@ -98,6 +98,7 @@ void VehicleToolButtons()
             {
                 waitForIt(310, 80, 475, 130);
                 // PIDSTRM
+                nextPage = 11;
             }
             if ((y >= 135) && (y <= 185))
             {
@@ -155,20 +156,25 @@ void startPIDSCAN()
     switch (state)
     {
     case 0: // Start request VIN
-        (g_var8[POS0] < 5) ? g_var8[POS0] = can1.requestVIN(g_var8[POS0], true) : loadBar(++state);
+        g_var8[POS0] = can1.requestVIN(g_var8[POS0], true);
+        if (g_var8[POS0] > 4)
+        {
+            loadBar(++g_var8[POS1]);
+            state = 1;
+        }
         break;
-    case 1: // Send PID request message
-        state = can1.getPIDList(state, g_var16[POS0], g_var16[POS1]);
-        break;
-    case 2: // Wait for response
-        state = can1.getPIDList(state, g_var16[POS0], g_var16[POS1]);
+    case 1: // Send PID request message and wait for response
+        g_var8[POS2] = can1.getPIDList(g_var8[POS2], g_var16[POS0], g_var16[POS1]);
+        if (g_var8[POS2] > 2)
+        {
+            state = g_var8[POS2];
+        }
         break;
     case 3: // Reponsed received and there is another PID bank to request
         g_var16[POS0] = g_var16[POS0] + 0x20;
         g_var16[POS1]++;
         // Change state back to PID request message
         state = 1;
-        state = can1.getPIDList(state, g_var16[POS0], g_var16[POS1]);
         loadBar(++g_var8[POS1]);
         break;
     case 4:
@@ -188,6 +194,7 @@ void startPIDSCAN()
 }
 
 /*========== PID Stream Functions ==========*/
+// Draws the list of scanned supported PIDS
 void drawPIDStreamScroll()
 {
     // Temp to hold PIDS value before strcat
@@ -215,16 +222,33 @@ void drawPIDStreamScroll()
     }
 }
 
-//
-void drawPIDStream()
+// Draws the PID stream page
+bool drawPIDStream()
 {
-    drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
-    myGLCD.setColor(menuBtnColor);
-    myGLCD.setBackColor(themeBackground);
-    drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
-    drawPIDStreamScroll();
-    drawRoundBtn(150, 275, 410, 315, F("Stream PID"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+    switch (graphicLoaderState)
+    {
+    case 0:
+        break;
+    case 1:
+        drawSquareBtn(131, 55, 479, 319, "", themeBackground, themeBackground, themeBackground, CENTER);
+        break;
+    case 3:
+        myGLCD.setColor(menuBtnColor);
+        myGLCD.setBackColor(themeBackground);
+        drawSquareBtn(420, 80, 470, 160, F("/\\"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 4:
+        drawSquareBtn(420, 160, 470, 240, F("\\/"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 5:
+        drawRoundBtn(150, 275, 410, 315, F("Stream PID"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        break;
+    case 6:
+        return false;
+        break;
+    }
+    graphicLoaderState++;
+    return true;
 }
 
 // Buttons for the PID Stream program
@@ -238,37 +262,31 @@ void PIDStreamButtons()
             if ((y >= 60) && (y <= 95))
             {
                 waitForItRect(150, 60, 410, 95);
-                SerialUSB.println(1 + g_var8[POS0]);
                 g_var16[POS0] = 1 + g_var8[POS0];
             }
             if ((y >= 95) && (y <= 130))
             {
                 waitForItRect(150, 95, 410, 130);
-                SerialUSB.println(2 + g_var8[POS0]);
                 g_var16[POS0] = 2 + g_var8[POS0];
             }
             if ((y >= 130) && (y <= 165))
             {
                 waitForItRect(150, 130, 410, 165);
-                SerialUSB.println(3 + g_var8[POS0]);
                 g_var16[POS0] = 3 + g_var8[POS0];
             }
             if ((y >= 165) && (y <= 200))
             {
                 waitForItRect(150, 165, 410, 200);
-                Serial.println(4 + g_var8[POS0]);
                 g_var16[POS0] = 4 + g_var8[POS0];
             }
             if ((y >= 200) && (y <= 235))
             {
                 waitForItRect(150, 200, 410, 235);
-                SerialUSB.println(5 + g_var8[POS0]);
                 g_var16[POS0] = 5 + g_var8[POS0];
             }
             if ((y >= 235) && (y <= 270))
             {
                 waitForItRect(150, 235, 410, 270);
-                SerialUSB.println(6 + g_var8[POS0]);
                 g_var16[POS0] = 6 + g_var8[POS0];
             }
         }
@@ -279,7 +297,15 @@ void PIDStreamButtons()
                 waitForItRect(420, 80, 470, 160);
                 if (g_var8[POS0] > 0)
                 {
-                    g_var8[POS0] = g_var8[POS0] - 12;
+                    if (g_var8[POS0] > 11)
+                    {
+                        g_var8[POS0] = g_var8[POS0] - 12;
+                    }
+                    else
+                    {
+                        g_var8[POS0] = 0;
+                    }
+                    
                     drawPIDStreamScroll();
                 }
             }
@@ -302,8 +328,6 @@ void PIDStreamButtons()
                 if (g_var16[POS0] != 0)
                 {
                     waitForItRect(150, 275, 410, 315);
-                    Serial.print("Sending PID: ");
-                    Serial.println(arrayIn[g_var16[POS0] + 1]);
                     state = 1;
                     g_var16[POS1] = 0;
                     g_var32[POS0] = 0;
@@ -313,40 +337,61 @@ void PIDStreamButtons()
     }
 }
 
-//
+// Save 5 PID samples to SD card
 void streamPIDS()
 {
-    if (hasPID == true)
+    uint8_t result = 0;
+    uint8_t rValue = 0;
+    uint8_t PIDRequest[8] = { 0x02, 0x01, arrayIn[g_var16[POS0]], 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    switch (state)
     {
+    case 0: // Waiting for user input
         PIDStreamButtons();
-    }
-    else
-    {
-        errorMSGButton(1, 2, 3);
-    }
-    if ((state == 1) && (g_var16[POS1] < PIDSAMPLES) && (millis() - g_var32[POS0] > 1000))
-    {
-        // TODO: Fix me
-        //can1.PIDStream(CAN_PID_ID, arrayIn[g_var16[POS0]], true);
-        uint8_t PIDRequest[8] = { 0x02, 0x01, arrayIn[g_var16[POS0]], 0x00, 0x00, 0x00, 0x00, 0x00 };
-        can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
-        g_var16[POS1]++;
-        drawErrorMSG2("Samples", String(g_var16[POS1]), "Saved to SD");
-        g_var32[POS0] = millis();
-        uint8_t result = 0;
-        uint32_t wait = millis();
-        while (millis() - wait < 10)
+        break;
+    case 1: // Send PID request at interval
+        if (millis() - g_var32[POS0] > 1000)
         {
-            backgroundProcess();
+            can1.sendFrame(CAN_PID_ID, PIDRequest, 8, false);
+            state = 2;
+            g_var32[POS0] = millis();
         }
-        can1.PIDStream(result, true);
-    }
-    if ((g_var16[POS1] == PIDSAMPLES) && (state == 1) && (millis() - g_var32[POS0] > 2000))
-    {
+        break;
+    case 2: // Save PID request response
+        rValue = can1.PIDStream(result, true);
+        if (rValue > 0 && g_var16[POS1] < PIDSAMPLES)
+        {
+            g_var16[POS1]++;
+            drawErrorMSG2(F("Saving"), String(g_var16[POS1]), F("Saved to SD"));
+            state = 1;
+        }
+        else if (g_var16[POS1] == PIDSAMPLES)
+        {
+            state = 3;
+            drawErrorMSG2(F("Finished"), String(g_var16[POS1]), F("Saved to SD"));
+        }
+        break;
+    case 3: // Wait for user input to clear pop up
+        if (Touch_getXY())
+        {
+            if ((x >= 365) && (x <= 401))
+            {
+                if ((y >= 100) && (y <= 130))
+                {
+                    graphicLoaderState = 0;
+                    state = 4;
+                }
+            }
+        }
+        break;
+    case 4: // Reset screen back to main PID stream page
+        if (drawPIDStream())
+        {
+            break;
+        }
+        drawPIDStreamScroll();
         state = 0;
-        g_var8[POS0] = 0;
-        drawPIDStream();
-        g_var32[POS0] = millis(); //
+        break;
     }
 }
 

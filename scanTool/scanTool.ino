@@ -781,12 +781,6 @@ void pageControl()
 		// Draw page and lock variables
 		if (!hasDrawn)
 		{
-			if (hasPID)
-			{
-				page = VEHTOOL_MAIN;
-				break;
-			}
-
 			if (drawPIDSCAN())
 			{
 				break;
@@ -796,6 +790,7 @@ void pageControl()
 			error_t e = false;
 			(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8);	 // VIN request state
 			(lockVar8(POS1)) ? g_var8[POS1] = 0 : e = lockError(POS1, 8);    // Loading bar index
+			(lockVar8(POS2)) ? g_var8[POS2] = 1 : e = lockError(POS2, 8);    // PIDSCAN state
 			(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // PID request range
 			(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // PID request bank 
 			if (e)
@@ -806,9 +801,13 @@ void pageControl()
 				nextPage = VEHTOOL_MAIN;
 			}
 
+			// Filter out some unwanted traffic
+			can1.setFilterMask0(0x7E0, 0x7D0);
+
+			// Draw the load bar
 			loadBar(g_var8[POS1]++);
+
 			state = 0;
-			isSerialOut = false;
 			hasDrawn = true;
 		}
 
@@ -818,8 +817,10 @@ void pageControl()
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
+			can1.setFilterMask0(0x000, 0x000);
 			unlockVar8(POS0);
 			unlockVar8(POS1);
+			unlockVar8(POS2);
 			unlockVar16(POS0);
 			unlockVar16(POS1);
 			pageTransition();
@@ -832,13 +833,17 @@ void pageControl()
 		{
 			if (hasPID == true)
 			{
-				drawPIDStream();
+				if (drawPIDStream())
+				{
+					break;
+				}
 
 				error_t e = false;
 				(lockVar8(POS0)) ? g_var8[POS0] = 0 : e = lockError(POS0, 8); // Draw scroll index
 				(lockVar16(POS0)) ? g_var16[POS0] = 0 : e = lockError(POS0, 16); // Selected PID to request
 				(lockVar16(POS1)) ? g_var16[POS1] = 0 : e = lockError(POS1, 16); // PID samples counter
 				(lockVar32(POS0)) ? g_var32[POS0] = 0 : e = lockError(POS0, 32); // PID request timer
+				(lockVar32(POS1)) ? g_var32[POS1] = 0 : e = lockError(POS1, 32); // No PIDSCAN timer
 				if (e)
 				{
 					DEBUG_ERROR(F("Error: Variable locked"));
@@ -847,29 +852,53 @@ void pageControl()
 					nextPage = VEHTOOL_MAIN;
 				}
 
-				state = 0;
-				isSerialOut = false;
+				// Filter out some unwanted traffic
 				can1.setFilterMask0(0x7E0, 0x1F0);
 
+				// Read in the PID scan results
 				for (int i = 0; i < 80; i++)
 				{
 					arrayIn[i] = 0x00;
 				}
 				sdCard.readFile(can1.getFullDir(), arrayIn);
 
-				hasDrawn = true;
+				// Draw the read in results to screen
+				drawPIDStreamScroll();
 			}
 			else
 			{
-				nextPage = VEHTOOL_MAIN;
-				drawErrorMSG("Error", "Please Perform", "PIDSCAN First");
-				hasDrawn = true;
+				drawErrorMSG2(F("Error"), F("Please Perform"), F("PIDSCAN First"));
+				g_var32[POS1] = millis();
 			}
+
+			state = 0;
+			hasDrawn = true;
 		}
 
-		// Call buttons or page method
-		void streamPIDS();
-
+		if(hasPID)
+		{
+			// Call buttons or page method
+			streamPIDS();
+		}
+		else // Error message buttons
+		{
+			if (Touch_getXY())
+			{
+				if ((x >= 365) && (x <= 401))
+				{
+					if ((y >= 100) && (y <= 130))
+					{
+						nextPage = VEHTOOL_MAIN;
+						break; // Added break to create a small delay preventing double tap
+					}
+				}
+			}
+			if (millis() - g_var32[POS1] > 10000)
+			{
+				nextPage = VEHTOOL_MAIN;
+			}
+		}
+	
 		// Release any variable locks if page changed
 		if (nextPage != page)
 		{
