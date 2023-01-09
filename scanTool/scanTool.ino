@@ -25,6 +25,8 @@ Move SD Card file name to non-blocking state
 
 Add library files directly
 
+Add Wi-Fi baud rate change
+Move filter mask to ESP32
 ===========================================================
 	End Todo List
 =========================================================*/
@@ -1713,7 +1715,7 @@ void pageControl()
 	}
 }
 
-// the setup function runs once when you press reset or power the board
+// The setup function runs once when the board is reset or power up
 void setup()
 {
 	DueOverclock.setCoreFrequency(MCUClockSpeed);
@@ -1854,7 +1856,7 @@ void waitForItRect(int x1, int y1, int x2, int y2)
 	myGLCD.drawRect(x1, y1, x2, y2);
 }
 
-// Function complete load bar
+// Function complete status load bar
 bool loadBar(int progress)
 {
 	if (progress >= DONE)
@@ -1947,7 +1949,7 @@ uint8_t errorMSGButton(uint8_t confirmPage, uint8_t cancelPage, uint8_t xPage)
 /*=========================================================
 	Background Processes
 ===========================================================*/
-// Button functions for main menu
+// Button functions for the main menu
 void menuButtons()
 {
 	// Touch screen controls
@@ -1994,7 +1996,7 @@ void menuButtons()
 	}
 }
 
-// Displays time on menu
+// Displays time above menu
 void updateTime()
 {
 	const uint16_t SECOND = 1000;
@@ -2018,7 +2020,7 @@ void SDCardOut()
 	(isSDOut) && (can1.SDOutCAN(selectedChannelOut));
 }
 
-// Able to call background process from blocked loop
+// All background process should be called from here
 void backgroundProcess()
 {
 	menuButtons();
@@ -2032,8 +2034,7 @@ void backgroundProcess()
 /*=========================================================
 	Main loop
 ===========================================================*/
-
-// Calls pageControl with a value of 1 to set view page as the home page
+// Program main loop
 void loop()
 {
 	// GUI

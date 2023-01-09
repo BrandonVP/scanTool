@@ -42,10 +42,12 @@ bool drawExtraFN()
         drawRoundBtn(310, 190, 475, 240, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 8:
-        drawRoundBtn(140, 245, 305, 295, F("Dongle F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(140, 245, 305, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        //drawRoundBtn(140, 245, 305, 295, F("F"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 9:
-        drawRoundBtn(310, 245, 475, 295, F("Dongle G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
+        drawRoundBtn(310, 245, 475, 295, F(""), menuBackground, menuBtnBorder, menuBtnText, CENTER);
+        //drawRoundBtn(310, 245, 475, 295, F("G"), menuBtnColor, menuBtnBorder, menuBtnText, CENTER);
         break;
     case 10:
         drawSquareBtn(150, 300, 479, 319, VERSION, themeBackground, themeBackground, menuBtnColor, CENTER);
