@@ -556,22 +556,23 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
 // Used to receive CAN Bus messages in the user requested configuration
 bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 {
+	incCAN0.id = 0; // Fixes bug when switching from extended back to standard ids
 	if (config == CAN0 && Can0.get_rx_buff(incCAN0))
 	{
-		/**/
+		/*
 		static uint32_t testTimer1 = 0;
-		//static uint32_t testTimer2 = 0;
-
-		//uint32_t v = millis() - testTimer2;
-		
 		if (millis() - testTimer1 > 2000)
 		{
 			SerialUSB.println(Can0.available());
-			//SerialUSB.println(millis() - testTimer2);
 			testTimer1 = millis();
 		}
-		//testTimer2 = millis();
-
+		*/
+		/*
+		SerialUSB.print("id: ");
+		SerialUSB.println(id, HEX);
+		SerialUSB.print("incCAN0.id: ");
+		SerialUSB.println(incCAN0.id, HEX);
+		*/
 		id = incCAN0.id;
 		len = incCAN0.length;
 		memcpy((void*)msg, (const void*)incCAN0.data.bytes, incCAN0.length);

@@ -23,7 +23,7 @@
 #ifdef _KEYINPUT_C
 
 char keyboardInput[9];
-uint8_t keypadInput[4] = { 0, 0, 0, 0 };
+uint8_t keypadInput[5] = { 0, 0, 0, 0, 0 };
 
 void resetKeypad();
 void drawKeypad();
