@@ -556,7 +556,6 @@ int CANBus::PIDStreamGauge(uint16_t sendID, uint8_t PID)
 // Used to receive CAN Bus messages in the user requested configuration
 bool CANBus::LCDOutCAN(buff& msg, uint8_t& len, uint32_t& id, uint8_t config)
 {
-	incCAN0.id = 0; // Fixes bug when switching from extended back to standard ids
 	if (config == CAN0 && Can0.get_rx_buff(incCAN0))
 	{
 		/*

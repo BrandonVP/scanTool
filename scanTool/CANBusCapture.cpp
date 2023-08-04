@@ -556,16 +556,16 @@ void readInCANMsg(uint8_t channel)
 		if (g_var16[POS0] != 60)
 		{
 			myGLCD.setColor(VGA_WHITE);
-			myGLCD.fillRect(140, (g_var16[POS0] - 15), 144, (g_var16[POS0] - 5));
+			myGLCD.fillRect(134, (g_var16[POS0] - 15), 138, (g_var16[POS0] - 5));
 			myGLCD.setColor(VGA_BLACK);
-			myGLCD.fillRect(140, (g_var16[POS0]), 144, (g_var16[POS0] + 10));
+			myGLCD.fillRect(134, (g_var16[POS0]), 138, (g_var16[POS0] + 10));
 		}
 		else
 		{
 			myGLCD.setColor(VGA_WHITE);
-			myGLCD.fillRect(140, 300, 144, 310);
+			myGLCD.fillRect(134, 300, 138, 310);
 			myGLCD.setColor(VGA_BLACK);
-			myGLCD.fillRect(140, (g_var16[POS0]), 144, (g_var16[POS0] + 10));
+			myGLCD.fillRect(134, (g_var16[POS0]), 138, (g_var16[POS0] + 10));
 		}
 
 		// LCD slows down printing this large char
@@ -577,42 +577,42 @@ void readInCANMsg(uint8_t channel)
 		char temp1[3];
 		char temp2[2];
 
-		sprintf(temp1, "%03X", rxId);
-		myGLCD.print(temp1, 151, g_var16[POS0]);
+		sprintf(temp1, "%7X", rxId);
+		myGLCD.print(temp1, 141, g_var16[POS0]);
 
-		myGLCD.printNumI(len, 216, g_var16[POS0]);
+		myGLCD.printNumI(len, 206, g_var16[POS0]);
 
 		//hex2String(rxBuf[0], temp2);
 		sprintf(temp2, "%02X", rxBuf[0]);
-		myGLCD.print(temp2, 236, g_var16[POS0]);
+		myGLCD.print(temp2, 226, g_var16[POS0]);
 
 		//hex2String(rxBuf[1], temp2);
 		sprintf(temp2, "%02X", rxBuf[1]);
-		myGLCD.print(temp2, 266, g_var16[POS0]);
+		myGLCD.print(temp2, 256, g_var16[POS0]);
 
 		//hex2String(rxBuf[2], temp2);
 		sprintf(temp2, "%02X", rxBuf[2]);
-		myGLCD.print(temp2, 296, g_var16[POS0]);
+		myGLCD.print(temp2, 286, g_var16[POS0]);
 
 		hex2String(rxBuf[3], temp2);
 		sprintf(temp2, "%02X", rxBuf[3]);
-		myGLCD.print(temp2, 326, g_var16[POS0]);
+		myGLCD.print(temp2, 316, g_var16[POS0]);
 
 		//hex2String(rxBuf[4], temp2);
 		sprintf(temp2, "%02X", rxBuf[4]);
-		myGLCD.print(temp2, 356, g_var16[POS0]);
+		myGLCD.print(temp2, 346, g_var16[POS0]);
 
 		//hex2String(rxBuf[5], temp2);
 		sprintf(temp2, "%02X", rxBuf[5]);
-		myGLCD.print(temp2, 386, g_var16[POS0]);
+		myGLCD.print(temp2, 376, g_var16[POS0]);
 
 		//hex2String(rxBuf[6], temp2);
 		sprintf(temp2, "%02X", rxBuf[6]);
-		myGLCD.print(temp2, 416, g_var16[POS0]);
+		myGLCD.print(temp2, 406, g_var16[POS0]);
 
 		//hex2String(rxBuf[7], temp2);
 		sprintf(temp2, "%02X", rxBuf[7]);
-		myGLCD.print(temp2, 446, g_var16[POS0]);
+		myGLCD.print(temp2, 436, g_var16[POS0]);
 
 		if (g_var16[POS0] < 300)
 		{
